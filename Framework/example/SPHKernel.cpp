@@ -8,10 +8,10 @@ SPHKernel::~SPHKernel()
 {
 }
 
-double SPHKernel::CubicSplineKernel(float& fDistance, float& fSmoothingLength)
+double SPHKernel::CubicSplineKernel(const Eigen::Vector3d& x, double fSmoothingLength)
 {
 	double dAlpha = 3.0 / (2.0 * M_PI * fSmoothingLength * fSmoothingLength * fSmoothingLength);
-	double relDist = fDistance / fSmoothingLength;
+	double relDist = x.norm() / fSmoothingLength;
 
 	if (relDist < 1)
 	{
@@ -57,4 +57,20 @@ double SPHKernel::QuadraticSmoothingFunctionKernel(const Eigen::Vector3d& x, dou
 	assert(R <= 2.0 && "QuadraticSmoothingFunctionKernel: W(x, h) is not defined for R > 2");
 
 	return alpha_d * ((3.0 / 16.0) * pow(R, 2.0) - (3.0 / 4.0) * R + (3.0 / 4.0));
+}
+
+Eigen::Vector3d SPHKernel::ComputeCentralDifferences(double (SPHKernel::* const KernelFunc)(const Eigen::Vector3d& x, double h),const Eigen::Vector3d& x, double fSmoothingLength)
+{
+	double epsilon = 0.000001;
+	Eigen::Vector3d vCentralDif;
+	vCentralDif[0] = (this->*(KernelFunc))(x + epsilon * Eigen::Vector3d(1.0, 0.0, 0.0), fSmoothingLength)
+					- (this->*(KernelFunc))(x - epsilon * Eigen::Vector3d(1.0, 0.0, 0.0), fSmoothingLength);
+
+	vCentralDif[1] = (this->*(KernelFunc))(x + epsilon * Eigen::Vector3d(0.0, 1.0, 0.0), fSmoothingLength)
+		- (this->*(KernelFunc))(x - epsilon * Eigen::Vector3d(0.0, 1.0, 0.0), fSmoothingLength);
+
+	vCentralDif[2] = (this->*(KernelFunc))(x + epsilon * Eigen::Vector3d(0.0, 0.0, 1.0), fSmoothingLength)
+		- (this->*(KernelFunc))(x - epsilon * Eigen::Vector3d(0.0, 0.0, 1.0), fSmoothingLength);
+
+	return (1 / 2 * epsilon) * vCentralDif;
 }
