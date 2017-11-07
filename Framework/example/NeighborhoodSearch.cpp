@@ -38,11 +38,11 @@ void NeighborhoodSearch::Run()
 	BruteForceApproach();
 	end_BruteForce = std::chrono::system_clock::now();
 
-	OutputNeigbhourIndices();
+	//OutputNeigbhourIndices();
 
-	OutputNumberNeighbours();
+	//OutputNumberNeighbours();
 
-	//OutputTimeElapsed();
+	OutputTimeElapsed();
 }
 
 void NeighborhoodSearch::CompactNSearchApproach()

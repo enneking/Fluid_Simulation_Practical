@@ -21,7 +21,7 @@ public:
 	void OutputTimeElapsed();
 
 private:
-	const int m_iNumberOfParticles = 100;
+	const int m_iNumberOfParticles = 2000;
 
 	std::vector<SPHDiscretization> m_vSphDiscretizations;
 	std::vector<Eigen::Vector3d>* m_pPosVec;
