@@ -29,6 +29,8 @@ add_executable(example
 	Slot.h
 	Slot.inl
 	z_sort_table.h
+	SPHKernel.cpp
+	SPHKernel.h
 )
 
 include_directories(
