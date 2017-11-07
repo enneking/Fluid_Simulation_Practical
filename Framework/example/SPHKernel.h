@@ -13,7 +13,9 @@ public:
 
 	Eigen::Vector3d ComputeCentralDifferences( double (SPHKernel::* const KernelFunc)(const Eigen::Vector3d& x, double h), const Eigen::Vector3d& x, double fSmoothingLength);
 
-
+    Eigen::Vector3d CubicSplineKernelGradient(const Eigen::Vector3d& x, double fSmoothingLength);
+    Eigen::Vector3d QuinticSplineKernelGradient(const Eigen::Vector3d& x, double h);
+    Eigen::Vector3d QuadraticSmoothingFunctionKernelGradient(const Eigen::Vector3d& x, double h);
 private:
 };
 
