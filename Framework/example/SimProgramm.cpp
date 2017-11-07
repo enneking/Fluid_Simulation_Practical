@@ -34,10 +34,8 @@ void SimProgramm::Run(int argc, char* argv[])
     printf("quintic spline kernel gradient absolute error: %f\n", errorQuintic);
     printf("quadratic smoothing function kernel gradient absolute error: %f\n", errorQuadraticSmoothingFunction);
 
-
-
-    return;
-
+    printf("\n--------------------------------------------------------------\n");
+    
 	SimSystem::GetInstance()->Init(argc, argv);
 	
 	m_oNeighborhoodSearch.Run();
