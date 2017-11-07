@@ -8,10 +8,10 @@ SPHKernel::~SPHKernel()
 {
 }
 
-double SPHKernel::CubicSplineKernel(float& fDistance, float& fSmoothingLength)
+double SPHKernel::CubicSplineKernel(const Eigen::Vector3d& x, double fSmoothingLength)
 {
 	double dAlpha = 3.0 / (2.0 * M_PI * fSmoothingLength * fSmoothingLength * fSmoothingLength);
-	double relDist = fDistance / fSmoothingLength;
+	double relDist = x.norm() / fSmoothingLength;
 
 	if (relDist < 1)
 	{
