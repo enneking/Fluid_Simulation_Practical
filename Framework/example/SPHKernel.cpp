@@ -61,7 +61,7 @@ double SPHKernel::QuadraticSmoothingFunctionKernel(const Eigen::Vector3d& x, dou
 
 Eigen::Vector3d SPHKernel::ComputeCentralDifferences(double (SPHKernel::* const KernelFunc)(const Eigen::Vector3d& x, double h),const Eigen::Vector3d& x, double fSmoothingLength)
 {
-	double epsilon = 0.000001;
+	const double epsilon = 0.000001;
 	Eigen::Vector3d vCentralDif;
 	vCentralDif[0] = (this->*(KernelFunc))(x + epsilon * Eigen::Vector3d(1.0, 0.0, 0.0), fSmoothingLength)
 					- (this->*(KernelFunc))(x - epsilon * Eigen::Vector3d(1.0, 0.0, 0.0), fSmoothingLength);
