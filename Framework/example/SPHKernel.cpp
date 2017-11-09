@@ -72,7 +72,7 @@ Eigen::Vector3d SPHKernel::ComputeCentralDifferences(double (SPHKernel::* const 
 	vCentralDif[2] = (this->*(KernelFunc))(x + epsilon * Eigen::Vector3d(0.0, 0.0, 1.0), fSmoothingLength)
 		- (this->*(KernelFunc))(x - epsilon * Eigen::Vector3d(0.0, 0.0, 1.0), fSmoothingLength);
 
-	return (1 / 2 * epsilon) * vCentralDif;
+	return (1 / (2 * epsilon)) * vCentralDif;
 }
 
 
@@ -84,13 +84,13 @@ Eigen::Vector3d SPHKernel::CubicSplineKernelGradient(const Eigen::Vector3d& x, d
     double derivative = 0.0;
     if (relDist < 1)
     {
-        derivative = 0.5 * dAlpha * (3.0 * relDist - 4.0);
+		derivative = -2.0 * relDist + (3.0 / 2.0) * relDist * relDist;
     }
     else if (relDist < 2)
     {
-        derivative = -0.5 * pow((2.0 - relDist), 2.0);
+        derivative = -0.5 * (2.0 - relDist) * (2.0 - relDist);
     }
-    return derivative * (x / (x.norm() * fSmoothingLength));
+    return derivative * dAlpha * (x / (x.norm() * fSmoothingLength));
 }
 
 Eigen::Vector3d SPHKernel::QuinticSplineKernelGradient(const Eigen::Vector3d& x, double h)
@@ -135,14 +135,20 @@ void SPHKernel::Run() {
 	printf("QuadraticSmoothingFunctionKernel(x, h) = %f\n", QuadraticSmoothingFunctionKernel(x, h));
 
 	const double errorCubic =
-		Eigen::Vector3d(CubicSplineKernelGradient(x, h) - ComputeCentralDifferences(&SPHKernel::CubicSplineKernel, x, h)).norm();
+		(CubicSplineKernelGradient(x, h) - ComputeCentralDifferences(&SPHKernel::CubicSplineKernel, x, h)).norm();
 	const double errorQuintic =
-		Eigen::Vector3d(QuinticSplineKernelGradient(x, h) - ComputeCentralDifferences(&SPHKernel::QuinticSplineKernel, x, h)).norm();
+		(QuinticSplineKernelGradient(x, h) - ComputeCentralDifferences(&SPHKernel::QuinticSplineKernel, x, h)).norm();
 	const double errorQuadraticSmoothingFunction =
-		Eigen::Vector3d(QuadraticSmoothingFunctionKernelGradient(x, h) - ComputeCentralDifferences(&SPHKernel::QuadraticSmoothingFunctionKernel, x, h)).norm();
+		(QuadraticSmoothingFunctionKernelGradient(x, h) - ComputeCentralDifferences(&SPHKernel::QuadraticSmoothingFunctionKernel, x, h)).norm();
+
+	const double length = CubicSplineKernelGradient(x, h).norm();
 
 	printf("cubic spline kernel gradient absolute error: %f\n", errorCubic);
 	printf("quintic spline kernel gradient absolute error: %f\n", errorQuintic);
 	printf("quadratic smoothing function kernel gradient absolute error: %f\n", errorQuadraticSmoothingFunction);
+
+	printf("cubic spline kernel gradient relative error: %f\n", (errorCubic / CubicSplineKernelGradient(x, h).norm()));
+	printf("quintic spline kernel gradient relative error: %f\n", errorQuintic / QuinticSplineKernelGradient(x, h).norm());
+	printf("quadratic smoothing function kernel gradient relative error: %f\n", errorQuadraticSmoothingFunction / QuadraticSmoothingFunctionKernelGradient(x, h).norm());
 
 }
