@@ -125,3 +125,24 @@ Eigen::Vector3d SPHKernel::QuadraticSmoothingFunctionKernelGradient(const Eigen:
     const double derivative = (3.0 / 8.0) * alpha_d * (R - 2.0);
     return derivative * (x / (x.norm() * h));
 }
+
+void SPHKernel::Run() {
+	const Eigen::Vector3d x = Eigen::Vector3d(0.0, 0.0, 0.0) - Eigen::Vector3d(0.5, 0.5, 0.5);
+	const double h = 1.0;
+
+	printf("CubicSplineKernel(x, h) = %f\n", CubicSplineKernel(x, h));
+	printf("QuinticSplineKernel(x, h) = %f\n", QuinticSplineKernel(x, h));
+	printf("QuadraticSmoothingFunctionKernel(x, h) = %f\n", QuadraticSmoothingFunctionKernel(x, h));
+
+	const double errorCubic =
+		Eigen::Vector3d(CubicSplineKernelGradient(x, h) - ComputeCentralDifferences(&SPHKernel::CubicSplineKernel, x, h)).norm();
+	const double errorQuintic =
+		Eigen::Vector3d(QuinticSplineKernelGradient(x, h) - ComputeCentralDifferences(&SPHKernel::QuinticSplineKernel, x, h)).norm();
+	const double errorQuadraticSmoothingFunction =
+		Eigen::Vector3d(QuadraticSmoothingFunctionKernelGradient(x, h) - ComputeCentralDifferences(&SPHKernel::QuadraticSmoothingFunctionKernel, x, h)).norm();
+
+	printf("cubic spline kernel gradient absolute error: %f\n", errorCubic);
+	printf("quintic spline kernel gradient absolute error: %f\n", errorQuintic);
+	printf("quadratic smoothing function kernel gradient absolute error: %f\n", errorQuadraticSmoothingFunction);
+
+}

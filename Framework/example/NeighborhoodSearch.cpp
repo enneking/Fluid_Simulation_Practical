@@ -13,6 +13,11 @@ NeighborhoodSearch::~NeighborhoodSearch()
 
 void NeighborhoodSearch::Run()
 {
+	std::cout << "Enter number of Particles: ";
+	std::cin >> m_iNumberOfParticles;
+
+	std::cout << "Init...." << std::endl;
+
 	m_vBFNumberNeighbors.reserve(m_iNumberOfParticles);
 	m_vBFNeighbouringIndices.reserve(m_iNumberOfParticles);
 	m_vBFNumberNeighbors.resize(m_iNumberOfParticles);
@@ -29,6 +34,7 @@ void NeighborhoodSearch::Run()
 	}
 	m_pPosVec = SimSystem::GetInstance()->GetParticleManager()->GetParticlePositions();
 	
+	std::cout << "Start Test...." << std::endl;
 
 	begin_CompactNSearch = std::chrono::system_clock::now();
 	CompactNSearchApproach();
@@ -38,10 +44,12 @@ void NeighborhoodSearch::Run()
 	BruteForceApproach();
 	end_BruteForce = std::chrono::system_clock::now();
 
+	std::cout << "Test Finished...." << std::endl;
+	
 	//OutputNeigbhourIndices();
 
 	//OutputNumberNeighbours();
-
+	
 	OutputTimeElapsed();
 }
 
