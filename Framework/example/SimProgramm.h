@@ -1,5 +1,6 @@
 #pragma once
 #include "SimSystem.h"
+#include "SPHKernel.h"
 #include "NeighborhoodSearch.h"
 
 class SimProgramm
@@ -12,6 +13,7 @@ public:
 
 
 private:
-	NeighborhoodSearch m_oNeighborhoodSearch;
+	std::unique_ptr<NeighborhoodSearch> m_pNeighborhoodSearch;
+	std::unique_ptr<SPHKernel> m_pSPHKernel;
 };
 
