@@ -36,5 +36,4 @@ void SPHManager::CalculateGravitation()
 	//{
 	//	m_oParticleManager.GetParticleContainer()->data()[i].m_vVelocity[1] += m_fGravityForce;
 	//}
-	
 }
