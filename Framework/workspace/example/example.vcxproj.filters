@@ -1,0 +1,78 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\example\main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\example\CompactNSearch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\example\NeighborhoodSearch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\example\ParticleManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\example\SimProgramm.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\example\SimSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\example\SimViz.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\example\SPHKernel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\example\CompactNSearch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\example\Field.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\example\Field.inl">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\example\NeighborhoodSearch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\example\ParticleManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\example\SimProgramm.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\example\SimSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\example\SimViz.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\example\Slot.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\example\Slot.inl">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\example\z_sort_table.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\example\SPHKernel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\example\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{03DEC920-5DE5-396E-BB32-F45824902F75}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{191E8B5C-A779-3993-BDDF-1FDD0655CFEE}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

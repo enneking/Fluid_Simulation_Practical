@@ -1,5 +1,8 @@
 #include "SimSystem.h"
 
+#include "imgui.h"
+#include "imgui_impl_glfw_gl3.h"
+
 SimSystem* SimSystem::s_oSimSystem = NULL;
 
 SimSystem::SimSystem()
@@ -56,10 +59,16 @@ void SimSystem::Run()
 		{
 			accumulator -= m_dt;
 
+            ImGui_ImplGlfwGL3_NewFrame();
+
+            ImGui::ShowTestWindow();
+            
 			m_oCamera.Update(m_oWindow);
 			m_oSPHManager.Update(m_dt);
-		}
 
+            ImGui::Render();
+		}
+           
 		//draw code goes here
 		glClearColor(255.0f, 255.0f, 255.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -67,10 +76,16 @@ void SimSystem::Run()
 		//render our game objects
 		m_oSPHManager.GetParticleManager()->DrawParticles();
 
+        // render UI
+        auto imguiDrawData = ImGui::GetDrawData();
+        ImGui_ImplGlfwGL3_RenderDrawLists(imguiDrawData);
+
 		glfwSwapBuffers(m_oWindow);
 		glfwPollEvents();
 
 	}
+
+    ImGui_ImplGlfwGL3_Shutdown();
 	glfwDestroyWindow(m_oWindow);
 	glfwTerminate();
 }
@@ -91,6 +106,12 @@ void SimSystem::Init(int argc, char* argv[])
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	m_oWindow = glfwCreateWindow(m_oCamera.m_iWidth, m_oCamera.m_iHeight, "Flip", NULL, NULL);
+
+    if (!ImGui_ImplGlfwGL3_Init(m_oWindow, true)) {
+        assert(false);
+    }
+
+
 
 	//errorcheck
 	if (!m_oWindow)

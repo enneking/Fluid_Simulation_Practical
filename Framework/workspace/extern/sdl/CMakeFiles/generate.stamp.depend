@@ -1,0 +1,25 @@
+# CMake generation dependency list for this directory.
+D:/Dev/Projects/_uni/Fluid_Simulation_Practical/Framework/extern/sdl/CMakeLists.txt
+D:/Software/CMake/share/cmake-3.4/Modules/CheckFunctionExists.cmake
+D:/Software/CMake/share/cmake-3.4/Modules/CheckLibraryExists.cmake
+D:/Software/CMake/share/cmake-3.4/Modules/CheckIncludeFiles.cmake
+D:/Software/CMake/share/cmake-3.4/Modules/CheckIncludeFile.cmake
+D:/Software/CMake/share/cmake-3.4/Modules/CheckSymbolExists.cmake
+D:/Software/CMake/share/cmake-3.4/Modules/CheckCSourceRuns.cmake
+D:/Software/CMake/share/cmake-3.4/Modules/CheckCCompilerFlag.cmake
+D:/Software/CMake/share/cmake-3.4/Modules/CheckCSourceCompiles.cmake
+D:/Software/CMake/share/cmake-3.4/Modules/CMakeCheckCompilerFlagCommonPatterns.cmake
+D:/Software/CMake/share/cmake-3.4/Modules/CheckTypeSize.cmake
+D:/Software/CMake/share/cmake-3.4/Modules/CheckIncludeFile.cmake
+D:/Software/CMake/share/cmake-3.4/Modules/CheckIncludeFileCXX.cmake
+D:/Software/CMake/share/cmake-3.4/Modules/CheckStructHasMember.cmake
+D:/Software/CMake/share/cmake-3.4/Modules/CheckCSourceCompiles.cmake
+D:/Software/CMake/share/cmake-3.4/Modules/CheckCXXSourceCompiles.cmake
+D:/Software/CMake/share/cmake-3.4/Modules/CMakeDependentOption.cmake
+D:/Software/CMake/share/cmake-3.4/Modules/FindPkgConfig.cmake
+D:/Software/CMake/share/cmake-3.4/Modules/FindPackageHandleStandardArgs.cmake
+D:/Software/CMake/share/cmake-3.4/Modules/FindPackageMessage.cmake
+D:/Software/CMake/share/cmake-3.4/Modules/CMakeParseArguments.cmake
+D:/Dev/Projects/_uni/Fluid_Simulation_Practical/Framework/extern/sdl/cmake/macros.cmake
+D:/Dev/Projects/_uni/Fluid_Simulation_Practical/Framework/extern/sdl/cmake/sdlchecks.cmake
+D:/Dev/Projects/_uni/Fluid_Simulation_Practical/Framework/extern/sdl/include/SDL/SDL_config.h.cmake

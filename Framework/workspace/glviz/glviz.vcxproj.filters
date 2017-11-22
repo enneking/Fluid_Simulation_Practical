@@ -1,0 +1,60 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\glviz\src\glviz.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\glviz\src\camera.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\glviz\src\shader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\glviz\src\trackball.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\glviz\src\program.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\glviz\src\buffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\glviz\src\utility.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\glviz\src\glviz.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\glviz\src\camera.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\glviz\src\shader.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\glviz\src\trackball.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\glviz\src\program.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\glviz\src\buffer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\glviz\src\utility.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\glviz\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{03DEC920-5DE5-396E-BB32-F45824902F75}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{191E8B5C-A779-3993-BDDF-1FDD0655CFEE}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

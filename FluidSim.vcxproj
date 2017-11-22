@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -22,7 +22,7 @@
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{386C0C5F-84FD-4AFB-9ED6-38F94425384F}</ProjectGuid>
     <RootNamespace>FluidSim</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.14393.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -88,11 +88,11 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>D:\Documents\computer science\studies\current studies\Fluid Simulation in Computer Graphics\FluidSim\FluidSim\extern\glm;D:\Documents\computer science\studies\current studies\Fluid Simulation in Computer Graphics\FluidSim\FluidSim\extern\glfw-3.2.1.bin.WIN64\include;D:\Documents\computer science\studies\current studies\Fluid Simulation in Computer Graphics\FluidSim\FluidSim\extern\Eigen 3.3.4;D:\Documents\computer science\studies\current studies\Fluid Simulation in Computer Graphics\FluidSim\FluidSim\extern\glew-2.0.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>extern\Eigen 3.3.4;extern\glm;extern\glfw-3.2.1.bin.WIN64\include;extern\glew-2.0.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>D:\Documents\computer science\studies\current studies\Fluid Simulation in Computer Graphics\FluidSim\FluidSim\extern\glfw-3.2.1.bin.WIN64\lib-vc2015;D:\Documents\computer science\studies\current studies\Fluid Simulation in Computer Graphics\FluidSim\FluidSim\extern\glew-2.0.0\lib\Release\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>extern\glfw-3.2.1.bin.WIN64\lib-vc2015;extern\glew-2.0.0\lib\Release\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>opengl32.lib;glu32.lib;glew32.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -119,19 +119,23 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>D:\Documents\computer science\studies\current studies\Fluid Simulation in Computer Graphics\FluidSim\FluidSim\extern\glm;D:\Documents\computer science\studies\current studies\Fluid Simulation in Computer Graphics\FluidSim\FluidSim\extern\glfw-3.2.1.bin.WIN64\include;D:\Documents\computer science\studies\current studies\Fluid Simulation in Computer Graphics\FluidSim\FluidSim\extern\Eigen 3.3.4;D:\Documents\computer science\studies\current studies\Fluid Simulation in Computer Graphics\FluidSim\FluidSim\extern\glew-2.0.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>extern\Eigen 3.3.4;extern\glm;extern\glfw-3.2.1.bin.WIN64\include;extern\glew-2.0.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>D:\Documents\computer science\studies\current studies\Fluid Simulation in Computer Graphics\FluidSim\FluidSim\extern\glfw-3.2.1.bin.WIN64\lib-vc2015;D:\Documents\computer science\studies\current studies\Fluid Simulation in Computer Graphics\FluidSim\FluidSim\extern\glew-2.0.0\lib\Release\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>extern\glfw-3.2.1.bin.WIN64\lib-vc2015;extern\glew-2.0.0\lib\Release\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>opengl32.lib;glu32.lib;glew32.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="CompactNSearch.cpp" />
     <ClCompile Include="FileReader.cpp" />
+    <ClCompile Include="imgui.cpp" />
+    <ClCompile Include="imgui_demo.cpp" />
+    <ClCompile Include="imgui_draw.cpp" />
+    <ClCompile Include="imgui_impl_glfw_gl3.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="NeighborhoodSearch.cpp" />
     <ClCompile Include="ParticleManager.cpp" />
@@ -146,6 +150,10 @@
     <ClInclude Include="CompactNSearch.h" />
     <ClInclude Include="Field.h" />
     <ClInclude Include="FileReader.h" />
+    <ClInclude Include="imconfig.h" />
+    <ClInclude Include="imgui.h" />
+    <ClInclude Include="imgui_impl_glfw_gl3.h" />
+    <ClInclude Include="imgui_internal.h" />
     <ClInclude Include="NeighborhoodSearch.h" />
     <ClInclude Include="ParticleManager.h" />
     <ClInclude Include="ShaderManager.h" />

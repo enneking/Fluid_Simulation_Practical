@@ -1,0 +1,66 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\workspace\glviz\mesh3_fs_glsl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\workspace\glviz\mesh3_gs_glsl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\workspace\glviz\mesh3_vs_glsl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\workspace\glviz\sphere_fs_glsl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\workspace\glviz\sphere_vs_glsl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\glviz\CMakeLists.txt" />
+    <CustomBuild Include="D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\workspace\CMakeFiles\9c9382a5e1a48fa03b040a1375da7fd2\mesh3_fs_glsl.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\workspace\CMakeFiles\9c9382a5e1a48fa03b040a1375da7fd2\mesh3_gs_glsl.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\workspace\CMakeFiles\9c9382a5e1a48fa03b040a1375da7fd2\mesh3_vs_glsl.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\workspace\CMakeFiles\9c9382a5e1a48fa03b040a1375da7fd2\sphere_fs_glsl.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\workspace\CMakeFiles\9c9382a5e1a48fa03b040a1375da7fd2\sphere_vs_glsl.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\glviz\src\shader\mesh3_fs.glsl">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\glviz\src\shader\mesh3_gs.glsl">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\glviz\src\shader\mesh3_vs.glsl">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\glviz\src\shader\sphere_fs.glsl">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\glviz\src\shader\sphere_vs.glsl">
+      <Filter>Shader Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{03DEC920-5DE5-396E-BB32-F45824902F75}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{4CE9D897-C728-32EC-99CE-46F85FBCD47A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader Files">
+      <UniqueIdentifier>{4D2CA6E3-1110-31E0-8781-2686763C953C}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

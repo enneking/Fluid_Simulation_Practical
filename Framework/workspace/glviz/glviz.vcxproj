@@ -1,0 +1,305 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="MinSizeRel|x64">
+      <Configuration>MinSizeRel</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="RelWithDebInfo|x64">
+      <Configuration>RelWithDebInfo</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGUID>{6EF1F94F-0787-3C66-B816-DA2584205F9B}</ProjectGUID>
+    <WindowsTargetPlatformVersion>10.0.14393.0</WindowsTargetPlatformVersion>
+    <Keyword>Win32Proj</Keyword>
+    <Platform>x64</Platform>
+    <ProjectName>glviz</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v141</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v141</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v141</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v141</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\workspace\bin\Debug\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">glviz.dir\Debug\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">glviz</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.lib</TargetExt>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\workspace\bin\Release\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">glviz.dir\Release\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">glviz</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.lib</TargetExt>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\workspace\bin\MinSizeRel\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">glviz.dir\MinSizeRel\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">glviz</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">.lib</TargetExt>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\workspace\bin\RelWithDebInfo\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">glviz.dir\RelWithDebInfo\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">glviz</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">.lib</TargetExt>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\glviz\include;D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\extern\eigen\include;D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\extern\anttweakbar\include;D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\extern\sdl\include;D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\extern\glew\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>Debug/</AssemblerListingLocation>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <CompileAs>CompileAsCpp</CompileAs>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
+      <Optimization>Disabled</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;TW_NO_LIB_PRAGMA;TW_STATIC;GLEW_STATIC;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;CMAKE_INTDIR="Debug";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;TW_NO_LIB_PRAGMA;TW_STATIC;GLEW_STATIC;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;CMAKE_INTDIR=\"Debug\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\glviz\include;D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\extern\eigen\include;D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\extern\anttweakbar\include;D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\extern\sdl\include;D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\extern\glew\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\glviz\include;D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\extern\eigen\include;D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\extern\anttweakbar\include;D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\extern\sdl\include;D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\extern\glew\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Lib>
+      <AdditionalOptions> /machine:x64 %(AdditionalOptions)</AdditionalOptions>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\glviz\include;D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\extern\eigen\include;D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\extern\anttweakbar\include;D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\extern\sdl\include;D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\extern\glew\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>Release/</AssemblerListingLocation>
+      <CompileAs>CompileAsCpp</CompileAs>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;TW_NO_LIB_PRAGMA;TW_STATIC;GLEW_STATIC;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;CMAKE_INTDIR="Release";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;TW_NO_LIB_PRAGMA;TW_STATIC;GLEW_STATIC;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;CMAKE_INTDIR=\"Release\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\glviz\include;D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\extern\eigen\include;D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\extern\anttweakbar\include;D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\extern\sdl\include;D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\extern\glew\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\glviz\include;D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\extern\eigen\include;D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\extern\anttweakbar\include;D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\extern\sdl\include;D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\extern\glew\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Lib>
+      <AdditionalOptions> /machine:x64 %(AdditionalOptions)</AdditionalOptions>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\glviz\include;D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\extern\eigen\include;D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\extern\anttweakbar\include;D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\extern\sdl\include;D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\extern\glew\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>MinSizeRel/</AssemblerListingLocation>
+      <CompileAs>CompileAsCpp</CompileAs>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <Optimization>MinSpace</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;TW_NO_LIB_PRAGMA;TW_STATIC;GLEW_STATIC;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;CMAKE_INTDIR="MinSizeRel";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;TW_NO_LIB_PRAGMA;TW_STATIC;GLEW_STATIC;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;CMAKE_INTDIR=\"MinSizeRel\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\glviz\include;D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\extern\eigen\include;D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\extern\anttweakbar\include;D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\extern\sdl\include;D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\extern\glew\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\glviz\include;D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\extern\eigen\include;D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\extern\anttweakbar\include;D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\extern\sdl\include;D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\extern\glew\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Lib>
+      <AdditionalOptions> /machine:x64 %(AdditionalOptions)</AdditionalOptions>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\glviz\include;D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\extern\eigen\include;D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\extern\anttweakbar\include;D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\extern\sdl\include;D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\extern\glew\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>RelWithDebInfo/</AssemblerListingLocation>
+      <CompileAs>CompileAsCpp</CompileAs>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;TW_NO_LIB_PRAGMA;TW_STATIC;GLEW_STATIC;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;CMAKE_INTDIR="RelWithDebInfo";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;TW_NO_LIB_PRAGMA;TW_STATIC;GLEW_STATIC;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;CMAKE_INTDIR=\"RelWithDebInfo\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\glviz\include;D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\extern\eigen\include;D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\extern\anttweakbar\include;D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\extern\sdl\include;D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\extern\glew\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\glviz\include;D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\extern\eigen\include;D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\extern\anttweakbar\include;D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\extern\sdl\include;D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\extern\glew\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Lib>
+      <AdditionalOptions> /machine:x64 %(AdditionalOptions)</AdditionalOptions>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <CustomBuild Include="D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\glviz\CMakeLists.txt">
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Building Custom Rule D:/Dev/Projects/_uni/Fluid_Simulation_Practical/Framework/glviz/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">setlocal
+D:\Software\CMake\bin\cmake.exe -HD:/Dev/Projects/_uni/Fluid_Simulation_Practical/Framework -BD:/Dev/Projects/_uni/Fluid_Simulation_Practical/Framework/workspace --check-stamp-file D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\workspace\glviz\CMakeFiles\generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">D:/Dev/Projects/_uni/Fluid_Simulation_Practical/Framework/glviz/CMakeLists.txt;D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\glviz\CMakeLists.txt;D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\cmake\Modules\shader_wrap_cpp.cmake;D:\Software\CMake\share\cmake-3.4\Modules\FindOpenGL.cmake;D:\Software\CMake\share\cmake-3.4\Modules\FindPackageHandleStandardArgs.cmake;D:\Software\CMake\share\cmake-3.4\Modules\FindPackageMessage.cmake;D:\Software\CMake\share\cmake-3.4\Modules\CMakeParseArguments.cmake;D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\glviz\CMakeLists.txt;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\workspace\glviz\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Building Custom Rule D:/Dev/Projects/_uni/Fluid_Simulation_Practical/Framework/glviz/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">setlocal
+D:\Software\CMake\bin\cmake.exe -HD:/Dev/Projects/_uni/Fluid_Simulation_Practical/Framework -BD:/Dev/Projects/_uni/Fluid_Simulation_Practical/Framework/workspace --check-stamp-file D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\workspace\glviz\CMakeFiles\generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">D:/Dev/Projects/_uni/Fluid_Simulation_Practical/Framework/glviz/CMakeLists.txt;D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\glviz\CMakeLists.txt;D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\cmake\Modules\shader_wrap_cpp.cmake;D:\Software\CMake\share\cmake-3.4\Modules\FindOpenGL.cmake;D:\Software\CMake\share\cmake-3.4\Modules\FindPackageHandleStandardArgs.cmake;D:\Software\CMake\share\cmake-3.4\Modules\FindPackageMessage.cmake;D:\Software\CMake\share\cmake-3.4\Modules\CMakeParseArguments.cmake;D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\glviz\CMakeLists.txt;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\workspace\glviz\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">Building Custom Rule D:/Dev/Projects/_uni/Fluid_Simulation_Practical/Framework/glviz/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">setlocal
+D:\Software\CMake\bin\cmake.exe -HD:/Dev/Projects/_uni/Fluid_Simulation_Practical/Framework -BD:/Dev/Projects/_uni/Fluid_Simulation_Practical/Framework/workspace --check-stamp-file D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\workspace\glviz\CMakeFiles\generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">D:/Dev/Projects/_uni/Fluid_Simulation_Practical/Framework/glviz/CMakeLists.txt;D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\glviz\CMakeLists.txt;D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\cmake\Modules\shader_wrap_cpp.cmake;D:\Software\CMake\share\cmake-3.4\Modules\FindOpenGL.cmake;D:\Software\CMake\share\cmake-3.4\Modules\FindPackageHandleStandardArgs.cmake;D:\Software\CMake\share\cmake-3.4\Modules\FindPackageMessage.cmake;D:\Software\CMake\share\cmake-3.4\Modules\CMakeParseArguments.cmake;D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\glviz\CMakeLists.txt;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\workspace\glviz\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">Building Custom Rule D:/Dev/Projects/_uni/Fluid_Simulation_Practical/Framework/glviz/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">setlocal
+D:\Software\CMake\bin\cmake.exe -HD:/Dev/Projects/_uni/Fluid_Simulation_Practical/Framework -BD:/Dev/Projects/_uni/Fluid_Simulation_Practical/Framework/workspace --check-stamp-file D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\workspace\glviz\CMakeFiles\generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">D:/Dev/Projects/_uni/Fluid_Simulation_Practical/Framework/glviz/CMakeLists.txt;D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\glviz\CMakeLists.txt;D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\cmake\Modules\shader_wrap_cpp.cmake;D:\Software\CMake\share\cmake-3.4\Modules\FindOpenGL.cmake;D:\Software\CMake\share\cmake-3.4\Modules\FindPackageHandleStandardArgs.cmake;D:\Software\CMake\share\cmake-3.4\Modules\FindPackageMessage.cmake;D:\Software\CMake\share\cmake-3.4\Modules\CMakeParseArguments.cmake;D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\glviz\CMakeLists.txt;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\workspace\glviz\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">false</LinkObjects>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\glviz\src\glviz.hpp" />
+    <ClInclude Include="D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\glviz\src\camera.hpp" />
+    <ClInclude Include="D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\glviz\src\shader.hpp" />
+    <ClInclude Include="D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\glviz\src\trackball.hpp" />
+    <ClInclude Include="D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\glviz\src\program.hpp" />
+    <ClInclude Include="D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\glviz\src\buffer.hpp" />
+    <ClInclude Include="D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\glviz\src\utility.hpp" />
+    <ClCompile Include="D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\glviz\src\glviz.cpp" />
+    <ClCompile Include="D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\glviz\src\camera.cpp" />
+    <ClCompile Include="D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\glviz\src\shader.cpp" />
+    <ClCompile Include="D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\glviz\src\trackball.cpp" />
+    <ClCompile Include="D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\glviz\src\program.cpp" />
+    <ClCompile Include="D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\glviz\src\buffer.cpp" />
+    <ClCompile Include="D:\Dev\Projects\_uni\Fluid_Simulation_Practical\Framework\glviz\src\utility.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="D:/Dev/Projects/_uni/Fluid_Simulation_Practical/Framework/workspace/ZERO_CHECK.vcxproj">
+      <Project>1EF9EA36-FE5B-34A7-893D-E159358142A4</Project>
+    </ProjectReference>
+    <ProjectReference Include="D:/Dev/Projects/_uni/Fluid_Simulation_Practical/Framework/workspace/extern/sdl/SDL2-static.vcxproj">
+      <Project>369422E3-2F8B-3708-BC0A-8873A580155F</Project>
+    </ProjectReference>
+    <ProjectReference Include="D:/Dev/Projects/_uni/Fluid_Simulation_Practical/Framework/workspace/extern/sdl/SDL2main.vcxproj">
+      <Project>B801BC74-0A1A-333D-B3B4-D5D7FFA72E28</Project>
+    </ProjectReference>
+    <ProjectReference Include="D:/Dev/Projects/_uni/Fluid_Simulation_Practical/Framework/workspace/extern/anttweakbar/anttweakbar.vcxproj">
+      <Project>74A33304-D973-3C5E-BD5C-638EA5814F36</Project>
+    </ProjectReference>
+    <ProjectReference Include="D:/Dev/Projects/_uni/Fluid_Simulation_Practical/Framework/workspace/extern/glew/glew.vcxproj">
+      <Project>99AF5233-1F57-3016-A292-267ECC53752D</Project>
+    </ProjectReference>
+    <ProjectReference Include="D:/Dev/Projects/_uni/Fluid_Simulation_Practical/Framework/workspace/glviz/shader.vcxproj">
+      <Project>C52891B3-AABF-3CC7-AC8D-9D74EFB49030</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

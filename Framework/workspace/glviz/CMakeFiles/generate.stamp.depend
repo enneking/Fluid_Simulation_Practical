@@ -1,0 +1,7 @@
+# CMake generation dependency list for this directory.
+D:/Dev/Projects/_uni/Fluid_Simulation_Practical/Framework/glviz/CMakeLists.txt
+D:/Dev/Projects/_uni/Fluid_Simulation_Practical/Framework/cmake/Modules/shader_wrap_cpp.cmake
+D:/Software/CMake/share/cmake-3.4/Modules/FindOpenGL.cmake
+D:/Software/CMake/share/cmake-3.4/Modules/FindPackageHandleStandardArgs.cmake
+D:/Software/CMake/share/cmake-3.4/Modules/FindPackageMessage.cmake
+D:/Software/CMake/share/cmake-3.4/Modules/CMakeParseArguments.cmake
