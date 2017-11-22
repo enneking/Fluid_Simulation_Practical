@@ -99,7 +99,7 @@ void NeighborhoodSearch::OutputNeigbhourIndices()
 	for (int i = 0; i < m_iNumberOfParticles; i++)
 	{
 		std::cout << i  << "CompactNSearch: ";
-		for (int j = 0; j < m_vSphDiscretizations[m_iDiscretizationId].n_neighbors(i); j++)
+		for (unsigned int j = 0; j < m_vSphDiscretizations[m_iDiscretizationId].n_neighbors(i); j++)
 		{
 			std::cout << m_vSphDiscretizations[m_iDiscretizationId].neighbor(i, j).index << " | ";
 		}

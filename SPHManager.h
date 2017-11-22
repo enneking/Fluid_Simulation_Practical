@@ -1,6 +1,7 @@
 #pragma once
 #include <Eigen\Core>
 #include "ParticleManager.h"
+#include "CompactNSearch.h"
 #include "SPHKernel.h"
 
 class SPHManager
@@ -16,11 +17,27 @@ public:
 	ParticleManager* GetParticleManager();
 
 private:
-	void CalculateGravitation();
+	void ApplyForces(double dt);
+	void ComputeDensityAndPressure();
+
+private:
+	double m_fGravityForce = -9.81;
+	double m_dStiffness = 0.1;
+
+	double m_dRestDensity = 1000;
+	std::vector<double> m_vDensity;
+	std::vector<double> m_vPressure;
 
 
-	double m_fGravityForce = -0.00981;
 	ParticleManager m_oParticleManager;
-    SPHKernel   m_pSPHKernel;
+	std::unique_ptr<CompactNSearch> m_oCompactNSearch;
+	unsigned int m_iDiscretizationId;
+	std::vector<SPHDiscretization> m_vSphDiscretizations;
+	
+	SPHKernel   m_pSPHKernel;
 };
+
+
+    
+
 
