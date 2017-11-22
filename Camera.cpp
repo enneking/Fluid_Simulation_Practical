@@ -77,7 +77,7 @@ void Camera::Update(GLFWwindow *window)
 
 void Camera::setPerspective()
 {
-	float phiHalfInRadians = 0.5f * m_fFoV * (M_PI / 180.0f);
+	float phiHalfInRadians = 0.5f * m_fFoV * ((float)M_PI / 180.0f);
 	float t = m_fNear * tan(phiHalfInRadians);
 	float b = -t;
 	float left = b * m_fAspect;
