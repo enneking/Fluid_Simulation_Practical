@@ -23,9 +23,9 @@ SimSystem* SimSystem::GetInstance()
 
 //=================== GETTER FUNCTIONS ==============================
 
-ParticleManager* SimSystem::GetParticleManager()
+SPHManager* SimSystem::GetSPHManager()
 {
-	return &m_oParticleManager;
+	return &m_oSPHManager;
 }
 
 //===================== SYSTEM CORE ======================================
@@ -33,7 +33,7 @@ ParticleManager* SimSystem::GetParticleManager()
 
 void SimSystem::Run()
 {
-	m_oParticleManager.InitBuffers();
+	m_oSPHManager.Init();
 
 	std::chrono::system_clock::time_point CurrentTime = std::chrono::system_clock::now();
 	std::chrono::system_clock::time_point NewTime;
@@ -56,7 +56,8 @@ void SimSystem::Run()
 		{
 			accumulator -= m_dt;
 
-			//m_ParticleManager.updateParticles(dt);
+			m_oCamera.Update(m_oWindow);
+			m_oSPHManager.Update(m_dt);
 		}
 
 		//draw code goes here
@@ -64,7 +65,7 @@ void SimSystem::Run()
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		//render our game objects
-		m_oParticleManager.DrawParticles();
+		m_oSPHManager.GetParticleManager()->DrawParticles();
 
 		glfwSwapBuffers(m_oWindow);
 		glfwPollEvents();
@@ -89,8 +90,7 @@ void SimSystem::Init(int argc, char* argv[])
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-
-	m_oWindow = glfwCreateWindow(m_iWidth, m_iHeight, "Flip", NULL, NULL);
+	m_oWindow = glfwCreateWindow(m_oCamera.m_iWidth, m_oCamera.m_iHeight, "Flip", NULL, NULL);
 
 	//errorcheck
 	if (!m_oWindow)
@@ -112,6 +112,8 @@ void SimSystem::Init(int argc, char* argv[])
 		exit(EXIT_FAILURE);
 	}
 
-	m_oParticleManager.Init();
+	m_oCamera.Init();
+	m_oSPHManager.GetParticleManager()->Init(&m_oCamera);
+
 }
 

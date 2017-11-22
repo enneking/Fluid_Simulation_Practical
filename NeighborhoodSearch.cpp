@@ -23,16 +23,16 @@ void NeighborhoodSearch::Run()
 	m_vBFNumberNeighbors.resize(m_iNumberOfParticles);
 	m_vBFNeighbouringIndices.resize(m_iNumberOfParticles);
 
-	SimSystem::GetInstance()->GetParticleManager()->GetParticlePositions()->reserve(m_iNumberOfParticles);
+	SimSystem::GetInstance()->GetSPHManager()->GetParticleManager()->GetParticlePositions()->reserve(m_iNumberOfParticles);
 
 	std::random_device oRandomDevice;
 	std::mt19937 Gen(oRandomDevice());
 	std::uniform_real_distribution<double> Dis(-30.0, 30.0);
 	for (int i = 0; i < m_iNumberOfParticles; i++)
 	{
-		SimSystem::GetInstance()->GetParticleManager()->AddParticle(Eigen::Vector3d(Dis(Gen), Dis(Gen), Dis(Gen)));
+		SimSystem::GetInstance()->GetSPHManager()->GetParticleManager()->AddParticle(Eigen::Vector3d(Dis(Gen), Dis(Gen), Dis(Gen)));
 	}
-	m_pPosVec = SimSystem::GetInstance()->GetParticleManager()->GetParticlePositions();
+	m_pPosVec = SimSystem::GetInstance()->GetSPHManager()->GetParticleManager()->GetParticlePositions();
 	
 	std::cout << "Start Test...." << std::endl;
 

@@ -1,5 +1,11 @@
 #pragma once
-#include "SimSystem.h"
+#include <GL\glew.h>
+#include <GLFW\glfw3.h>
+
+#include <glm/glm.hpp>
+#include <glm/ext.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
 
 
 #define M_PI 3.1415926535897932384626433832795
@@ -10,18 +16,36 @@ public:
 	Camera();
 	~Camera();
 
-	void Update();
-	void setPerspective(float fovY, float aspect, float near, float far);
-	void lookAt();
-	void Rotate();
+	void Init();
 
+	void Update(GLFWwindow *window);
+	void setPerspective();
+	void RotateUp(float angle);
+	void RotateRight(float angle);
+	void RotateFront(float angle);
+
+	int m_iWidth = 1920;
+	int m_iHeight = 1080;
+
+	glm::mat4 m_mProjectionMatrix;
+	glm::mat4 m_mViewMatrix;
 private:
-	Eigen::Matrix3f m_mProjectionMatrix;
-	Eigen::Matrix3f m_mViewMatrix;
 
-	Eigen::Vector3f m_vTarget;
-	Eigen::Vector3f m_vPosition;
-	Eigen::Vector3f m_vUp;
 
-	float m_fCameraSpeed;
+	glm::vec3 m_vTarget = glm::vec3(0.0f, 0.0f, 0.0f);
+	glm::vec3 m_vPosition = glm::vec3(0.0f, 0.0f, 5.0f);
+	glm::vec3 m_vFront = glm::vec3(0.0f, 0.0f, -1.0f);
+	glm::vec3 m_vRight = glm::vec3(1.0f, 0.0f, 0.0f);
+	glm::vec3 m_vUp = glm::vec3(0.0f, 1.0f, 0.0f);
+
+
+
+	float m_fAspect;
+	float m_fNear = 0.1f;
+	float m_fFar = 100.f;
+	float m_fFoV = 70.0f;
+
+
+
+	float m_fCameraSpeed = 0.1f;
 };

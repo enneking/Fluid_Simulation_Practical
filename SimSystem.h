@@ -1,10 +1,8 @@
 #pragma once
-#include "ParticleManager.h"
 #include <memory>
 #include <chrono>
-#include <GL\glew.h>
-#include <GLFW\glfw3.h>
 #include "Camera.h"
+#include "SPHManager.h"
 
 
 class SimSystem
@@ -15,20 +13,23 @@ public:
 	void Init(int argc, char* argv[]);
 	void Run();
 
-	ParticleManager* GetParticleManager();
+	SPHManager* GetSPHManager();
+
 
 
 private:	
 	SimSystem::SimSystem();
 	SimSystem::~SimSystem();
 
+	SPHManager m_oSPHManager;
+
 	GLFWwindow* m_oWindow;
-	ParticleManager m_oParticleManager;
+	Camera m_oCamera;
+
 	static SimSystem* s_oSimSystem;
 
 	const double m_dt = 1.0 / 60.0;
-	int m_iWidth = 1920;
-	int m_iHeight = 1080;
+
 };
 
 static void error_callback(int error, const char* description)

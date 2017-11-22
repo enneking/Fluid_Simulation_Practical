@@ -22,7 +22,7 @@ void SimProgramm::Run(int argc, char* argv[])
 
 void SimProgramm::InitScene()
 {
-	SimSystem::GetInstance()->GetParticleManager()->GetParticlePositions()->reserve(1000);
+	SimSystem::GetInstance()->GetSPHManager()->GetParticleManager()->GetParticlePositions()->reserve(1000);
 
 	//std::random_device oRandomDevice;
 	//std::mt19937 Gen(oRandomDevice());
@@ -31,8 +31,17 @@ void SimProgramm::InitScene()
 	//{
 	//	SimSystem::GetInstance()->GetParticleManager()->AddParticle(Eigen::Vector3d(Dis(Gen), Dis(Gen), Dis(Gen)));
 	//}
-	SimSystem::GetInstance()->GetParticleManager()->AddParticle(Eigen::Vector3d(0.0, 0.0, 0.0f));
-	SimSystem::GetInstance()->GetParticleManager()->AddParticle(Eigen::Vector3d(0.5, 0.0, 0.0f));
-	SimSystem::GetInstance()->GetParticleManager()->AddParticle(Eigen::Vector3d(0.0, 0.5, 0.0f));
+
+	for (int i = 0; i < 20; i++)
+	{
+		for (int j = 0; j < 20; j++)
+		{	
+			for (int k = 0; k < 20; k++)
+			{
+				SimSystem::GetInstance()->GetSPHManager()->GetParticleManager()->AddParticle(Eigen::Vector3d( (i-10) * 0.1f, (j-10) * 0.1f, (k-10) * 0.1f));
+			}
+		}
+	}
+
 
 }
