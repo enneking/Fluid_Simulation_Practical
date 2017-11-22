@@ -16,6 +16,6 @@ public:
 
 private:
 	std::unique_ptr<NeighborhoodSearch> m_pNeighborhoodSearch;
-	std::unique_ptr<SPHKernel> m_pSPHKernel;
+	
 };
 

@@ -2,6 +2,8 @@
 #include <Eigen\Core>
 #include <Eigen\Geometry>
 
+#include "imgui.h"
+
 Camera::Camera()
 {
 }

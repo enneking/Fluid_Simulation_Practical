@@ -23,6 +23,8 @@ void SPHManager::Init()
 
 void SPHManager::Update(double dt)
 {
+    m_pSPHKernel.Run();
+
 	CalculateGravitation();
 
 	m_oParticleManager.MoveParticles(dt);
@@ -30,9 +32,9 @@ void SPHManager::Update(double dt)
 
 void SPHManager::CalculateGravitation()
 {
-	for (int i = 0; i < m_oParticleManager.GetParticleContainer()->size(); i++)
-	{
-		m_oParticleManager.GetParticleContainer()->data()[i].m_vVelocity[1] += m_fGravityForce;
-	}
+	//for (int i = 0; i < m_oParticleManager.GetParticleContainer()->size(); i++)
+	//{
+	//	m_oParticleManager.GetParticleContainer()->data()[i].m_vVelocity[1] += m_fGravityForce;
+	//}
 	
 }

@@ -1,5 +1,11 @@
 #include "SPHKernel.h"
 
+#include "imgui.h"
+#include <glm/glm.hpp>
+
+#define _USE_MATH_DEFINES
+#include <math.h>
+
 SPHKernel::SPHKernel()
 {
 }
@@ -10,21 +16,23 @@ SPHKernel::~SPHKernel()
 
 double SPHKernel::CubicSplineKernel(const Eigen::Vector3d& x, double fSmoothingLength)
 {
-	double dAlpha = 3.0 / (2.0 * M_PI * fSmoothingLength * fSmoothingLength * fSmoothingLength);
+	double dAlpha = 3.0 / (2.0 * M_PI * pow(fSmoothingLength, 3.0));
 	double relDist = x.norm() / fSmoothingLength;
 
+    double mul = 0.0;
 	if (relDist < 1)
 	{
-		return (2.0 / 3.0) - relDist * relDist + 0.5 * (relDist * relDist * relDist);
+		mul = (2.0 / 3.0) - pow(relDist, 2.0) + 0.5 * pow(relDist, 3.0);
 	}
 	else if(relDist < 2)
 	{
-		return (1.0 / 6.0) * (2.0 - relDist) * (2.0 - relDist) * (2.0 - relDist);
+		mul = (1.0 / 6.0) * pow((2.0 - relDist) , 3.0);
 	}
 	else
 	{
-		return 0.0;
+		mul = 0.0;
 	}
+    return mul * dAlpha;
 }
 
 double SPHKernel::QuinticSplineKernel(const Eigen::Vector3d& x, double h)
@@ -49,12 +57,12 @@ double SPHKernel::QuinticSplineKernel(const Eigen::Vector3d& x, double h)
 	return alpha_d * mul;
 }
 
-double SPHKernel::QuadraticSmoothingFunctionKernel(const Eigen::Vector3d& x, double h)
+double SPHKernel::QuadricSmoothingFunctionKernel(const Eigen::Vector3d& x, double h)
 {
 	const double R = x.norm() / h;
 	const double alpha_d = 5.0 / (4.0 * M_PI * pow(h, 3.0));
 
-	assert(R <= 2.0 && "QuadraticSmoothingFunctionKernel: W(x, h) is not defined for R > 2");
+	//assert(R <= 2.0 && "QuadricSmoothingFunctionKernel: W(x, h) is not defined for R > 2");
 
 	return alpha_d * ((3.0 / 16.0) * pow(R, 2.0) - (3.0 / 4.0) * R + (3.0 / 4.0));
 }
@@ -78,17 +86,17 @@ Eigen::Vector3d SPHKernel::ComputeCentralDifferences(double (SPHKernel::* const 
 
 Eigen::Vector3d SPHKernel::CubicSplineKernelGradient(const Eigen::Vector3d& x, double fSmoothingLength)
 {
-    double dAlpha = 3.0 / (2.0 * M_PI * fSmoothingLength * fSmoothingLength * fSmoothingLength);
+    double dAlpha = 3.0 / (2.0 * M_PI * pow(fSmoothingLength, 3.0));
     double relDist = x.norm() / fSmoothingLength;
 
     double derivative = 0.0;
     if (relDist < 1)
     {
-		derivative = -2.0 * relDist + (3.0 / 2.0) * relDist * relDist;
+		derivative = 2.0 * relDist + (3.0 / 2.0) * pow(relDist, 2.0);
     }
     else if (relDist < 2)
     {
-        derivative = -0.5 * (2.0 - relDist) * (2.0 - relDist);
+        derivative = -0.5 * pow((2.0 - relDist), 2.0);
     }
     return derivative * dAlpha * (x / (x.norm() * fSmoothingLength));
 }
@@ -115,40 +123,136 @@ Eigen::Vector3d SPHKernel::QuinticSplineKernelGradient(const Eigen::Vector3d& x,
     return derivative * (x / (x.norm() * h));
 }
 
-Eigen::Vector3d SPHKernel::QuadraticSmoothingFunctionKernelGradient(const Eigen::Vector3d& x, double h)
+Eigen::Vector3d SPHKernel::QuadricSmoothingFunctionKernelGradient(const Eigen::Vector3d& x, double h)
 {
     const double R = x.norm() / h;
     const double alpha_d = 5.0 / (4.0 * M_PI * pow(h, 3.0));
 
-    assert(R <= 2.0 && "QuadraticSmoothingFunctionKernel: W(x, h) is not defined for R > 2");
+    //assert(R <= 2.0 && "QuadricSmoothingFunctionKernel: W(x, h) is not defined for R > 2");
 
     const double derivative = (3.0 / 8.0) * alpha_d * (R - 2.0);
     return derivative * (x / (x.norm() * h));
 }
 
 void SPHKernel::Run() {
-	const Eigen::Vector3d x = Eigen::Vector3d(0.0, 0.0, 0.0) - Eigen::Vector3d(0.5, 0.5, 0.5);
-	const double h = 1.0;
 
-	printf("CubicSplineKernel(x, h) = %f\n", CubicSplineKernel(x, h));
-	printf("QuinticSplineKernel(x, h) = %f\n", QuinticSplineKernel(x, h));
-	printf("QuadraticSmoothingFunctionKernel(x, h) = %f\n", QuadraticSmoothingFunctionKernel(x, h));
+    static glm::vec3 x0(0.0f, 0.0f, 0.0f);
+    static float h_ = 1.0;
 
-	const double errorCubic =
-		(CubicSplineKernelGradient(x, h) - ComputeCentralDifferences(&SPHKernel::CubicSplineKernel, x, h)).norm();
-	const double errorQuintic =
-		(QuinticSplineKernelGradient(x, h) - ComputeCentralDifferences(&SPHKernel::QuinticSplineKernel, x, h)).norm();
-	const double errorQuadraticSmoothingFunction =
-		(QuadraticSmoothingFunctionKernelGradient(x, h) - ComputeCentralDifferences(&SPHKernel::QuadraticSmoothingFunctionKernel, x, h)).norm();
 
-	const double length = CubicSplineKernelGradient(x, h).norm();
+    if (ImGui::Begin("SPHKernel Tests")) {
+	    
+        ImGui::DragFloat("h", &h_, 0.001f, 0.0f, 100.0f);
+        const double h = (double)h_;
 
-	printf("cubic spline kernel gradient absolute error: %f\n", errorCubic);
-	printf("quintic spline kernel gradient absolute error: %f\n", errorQuintic);
-	printf("quadratic smoothing function kernel gradient absolute error: %f\n", errorQuadraticSmoothingFunction);
+        ImGui::BeginChild("plots");
 
-	printf("cubic spline kernel gradient relative error: %f\n", (errorCubic / CubicSplineKernelGradient(x, h).norm()));
-	printf("quintic spline kernel gradient relative error: %f\n", errorQuintic / QuinticSplineKernelGradient(x, h).norm());
-	printf("quadratic smoothing function kernel gradient relative error: %f\n", errorQuadraticSmoothingFunction / QuadraticSmoothingFunctionKernelGradient(x, h).norm());
+        static const int NUM_SAMPLES = 20;
+        glm::vec3 x_range[NUM_SAMPLES];
+        for (int i = 0; i < NUM_SAMPLES; ++i) {
+            auto coords = glm::vec2(1.0f, 1.0f);
+            coords = glm::normalize(coords) * (((float)i - (NUM_SAMPLES / 2.0f)) / NUM_SAMPLES);
+            x_range[i] = glm::vec3(coords, 0.0f);
+        }
 
+        float dist[NUM_SAMPLES];
+        for (auto i = 0; i < NUM_SAMPLES; ++i) {
+            dist[i] = glm::distance(x_range[i], x0);
+        }
+
+        {   // cubic b spline plot
+            double weights[NUM_SAMPLES];
+            for (int i = 0; i < NUM_SAMPLES; ++i) {
+                const Eigen::Vector3d x(double(x_range[i].x - x0.x), double(x_range[i].y - x0.y), double(x_range[i].z - x0.z));
+                weights[i] = CubicSplineKernel(x, h);
+               
+            }
+
+            auto penPos = ImGui::GetCursorPos();
+            ImGui::PlotHistogram("Cubic B Spline", [](void* data, int idx) -> float {
+                auto w = (double*)data;
+                return (float)w[idx];
+            }, weights, NUM_SAMPLES, 0, nullptr, 0.0f, 20.0f, ImVec2(0, 200));
+
+            /*ImGui::SetCursorPos(penPos);
+           
+            ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
+            ImGui::PushStyleColor(ImGuiCol_PlotHistogram, ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
+            ImGui::PlotHistogram("Cubic B Spline distances", dist, NUM_SAMPLES, 0, nullptr, FLT_MIN, 1.0f, ImVec2(0, 100));
+            ImGui::PopStyleColor();
+            ImGui::PopStyleColor();*/
+
+        }
+
+        {   // quintic kernel plot
+            double weights[NUM_SAMPLES];
+            for (int i = 0; i < NUM_SAMPLES; ++i) {
+                const Eigen::Vector3d x(double(x_range[i].x - x0.x), double(x_range[i].y - x0.y), double(x_range[i].z - x0.z));
+                weights[i] = QuinticSplineKernel(x, h);
+   
+            }
+            auto penPos = ImGui::GetCursorPos();
+            ImGui::PlotHistogram("Quintic Spline", [](void* data, int idx) -> float {
+                auto w = (double*)data;
+                return (float)w[idx];
+            }, weights, NUM_SAMPLES, 0, nullptr, 0.0f, 20.0f, ImVec2(0, 200));
+        }
+
+        {   // quadric 
+            double weights[NUM_SAMPLES];
+            for (int i = 0; i < NUM_SAMPLES; ++i) {
+                const Eigen::Vector3d x(double(x_range[i].x - x0.x), double(x_range[i].y - x0.y), double(x_range[i].z - x0.z));
+                weights[i] = QuadricSmoothingFunctionKernel(x, h);
+            }
+
+            ImGui::PlotHistogram("Quadric Smoothing Function", [](void* data, int idx) -> float {
+                auto w = (double*)data;
+                return (float)w[idx];
+            }, weights, NUM_SAMPLES, 0, nullptr, 0.0f, 20.0f, ImVec2(0, 200));
+        }
+
+        {   // cubic b spline derivative plot
+            double error[NUM_SAMPLES];
+            for (int i = 0; i < NUM_SAMPLES; ++i) {
+                const Eigen::Vector3d x(double(x_range[i].x - x0.x), double(x_range[i].y - x0.y), double(x_range[i].z - x0.z));
+                error[i] = (CubicSplineKernelGradient(x, h) - ComputeCentralDifferences(&SPHKernel::CubicSplineKernel, x, h)).norm();
+            }
+
+            auto penPos = ImGui::GetCursorPos();
+            ImGui::PlotHistogram("Cubic B Spline Derivative Error", [](void* data, int idx) -> float {
+                auto w = (double*)data;
+                return (float)w[idx];
+            }, error, NUM_SAMPLES, 0, nullptr, FLT_MIN, FLT_MAX, ImVec2(0, 200));
+        }
+
+        {   // cubic b spline derivative plot
+            double error[NUM_SAMPLES];
+            for (int i = 0; i < NUM_SAMPLES; ++i) {
+                const Eigen::Vector3d x(double(x_range[i].x - x0.x), double(x_range[i].y - x0.y), double(x_range[i].z - x0.z));
+                error[i] = (QuinticSplineKernelGradient(x, h) - ComputeCentralDifferences(&SPHKernel::QuinticSplineKernel, x, h)).norm();
+            }
+
+            auto penPos = ImGui::GetCursorPos();
+            ImGui::PlotHistogram("Quintic Spline Derivative Error", [](void* data, int idx) -> float {
+                auto w = (double*)data;
+                return (float)w[idx];
+            }, error, NUM_SAMPLES, 0, nullptr, FLT_MIN, FLT_MAX, ImVec2(0, 200));
+        }
+            
+        {   // quadric derivative plot
+            double error[NUM_SAMPLES];
+            for (int i = 0; i < NUM_SAMPLES; ++i) {
+                const Eigen::Vector3d x(double(x_range[i].x - x0.x), double(x_range[i].y - x0.y), double(x_range[i].z - x0.z));
+                error[i] = (QuadricSmoothingFunctionKernelGradient(x, h) - ComputeCentralDifferences(&SPHKernel::QuadricSmoothingFunctionKernel, x, h)).norm();
+            }
+
+            auto penPos = ImGui::GetCursorPos();
+            ImGui::PlotHistogram("Quadric Smoothing Function Derivative Error", [](void* data, int idx) -> float {
+                auto w = (double*)data;
+                return (float)w[idx];
+            }, error, NUM_SAMPLES, 0, nullptr, FLT_MIN, FLT_MAX, ImVec2(0, 200));
+        }
+
+        ImGui::EndChild();
+    } ImGui::End();
 }

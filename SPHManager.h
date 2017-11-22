@@ -1,6 +1,7 @@
 #pragma once
 #include <Eigen\Core>
 #include "ParticleManager.h"
+#include "SPHKernel.h"
 
 class SPHManager
 {
@@ -17,8 +18,9 @@ public:
 private:
 	void CalculateGravitation();
 
-private:
+
 	double m_fGravityForce = -0.00981;
 	ParticleManager m_oParticleManager;
+    SPHKernel   m_pSPHKernel;
 };
 

@@ -91,9 +91,9 @@ void ParticleManager::DrawParticles(  )
 
 void ParticleManager::MoveParticles(double dt)
 {
-	for (int i = 0; i < m_vParticleContainer.size(); i++)
+	//for (int i = 0; i < m_vParticleContainer.size(); i++)
 	{
-		m_vParticlePositions[i] += m_vParticleContainer[i].m_vVelocity * dt;
+	//	m_vParticlePositions[i] += m_vParticleContainer[i].m_vVelocity * dt;
 	}
 	
 }

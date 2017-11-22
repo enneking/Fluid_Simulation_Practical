@@ -61,7 +61,7 @@ void SimSystem::Run()
 
             ImGui_ImplGlfwGL3_NewFrame();
 
-            ImGui::ShowTestWindow();
+            //ImGui::ShowTestWindow();
             
 			m_oCamera.Update(m_oWindow);
 			m_oSPHManager.Update(m_dt);
@@ -111,7 +111,7 @@ void SimSystem::Init(int argc, char* argv[])
         assert(false);
     }
 
-
+    ImGui::StyleColorsDark();
 
 	//errorcheck
 	if (!m_oWindow)

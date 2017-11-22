@@ -33,5 +33,5 @@ private:
 	GLuint m_vs=0, m_fs=0, m_prog=0; ///< the vertex and fragment shader and the program
 	const std::string m_fileNameFs, m_fileNameVs; ///< strings that contain the name of the vertex and fragment shader files
 
-
+    
 };
