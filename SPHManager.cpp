@@ -41,6 +41,7 @@ void SPHManager::Update(double dt)
 
 void SPHManager::ApplyForces(double dt)
 {
+
 	for (unsigned int i = 0; i < m_oParticleManager.GetParticleContainer()->size(); i++)
 	{
 		Eigen::Vector3d acceleration(0, 0, 0);
@@ -70,4 +71,5 @@ void SPHManager::ComputeDensityAndPressure()
 			}
 		}
 	}
+
 }
