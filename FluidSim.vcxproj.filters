@@ -123,5 +123,6 @@
     <None Include="Slot.inl">
       <Filter>Header Files</Filter>
     </None>
+    <None Include="BoxShader.frag" />
   </ItemGroup>
 </Project>

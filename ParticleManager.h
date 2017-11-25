@@ -46,8 +46,8 @@ public:
 	std::vector<Eigen::Vector3d>* GetBoundaryPositions();
 
 	int m_iBoundariesPerFaceInOneDirection = 10;
-	Eigen::Vector3d BoxUpperLeftBack = Eigen::Vector3d(-1.0f, 1.0f, -1.0f);
-	Eigen::Vector3d BoxLowerRightFront = Eigen::Vector3d(1.0f, -1.0f, 1.0f);
+	Eigen::Vector3d m_vBoxLeftLowerBack = Eigen::Vector3d(-1.1f, -1.1f, -1.1f);
+	Eigen::Vector3d m_vBoxRightUpperFront = Eigen::Vector3d(1.1f, 1.1f, 1.1f);
 
 
 
@@ -57,10 +57,9 @@ private:
 	std::vector<Eigen::Vector3d> m_vParticlePositions;
 
 	std::vector<Eigen::Vector3d> m_vBoundaryPositions;
-	std::vector<Eigen::Vector3d> m_vBoundaryNormals;
 
 	GLuint m_iVertexBufferObject, m_iVertexArrayObject, m_iProgramID, m_iVaoLine, m_iVaoBox;
-	ShaderManager m_oShaderManager{ "ParticleShader.frag", "ParticleShader.vert" };
+	ShaderManager m_oShaderManager;
 
 	Camera* m_pCamera;
 
