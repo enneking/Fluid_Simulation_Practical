@@ -31,7 +31,7 @@ void SPHManager::Init()
 
 void SPHManager::Update(double dt)
 {
-	//m_pSPHKernel.Run();
+	m_pSPHKernel.Run();
 	ComputeDensityAndPressure();
 
 	//ApplyForces(dt);

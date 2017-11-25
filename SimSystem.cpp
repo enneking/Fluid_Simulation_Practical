@@ -105,7 +105,7 @@ void SimSystem::Init(int argc, char* argv[])
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	m_oWindow = glfwCreateWindow(m_oCamera.m_iWidth, m_oCamera.m_iHeight, "Flip", NULL, NULL);
+	m_oWindow = glfwCreateWindow(m_oCamera.m_iWidth, m_oCamera.m_iHeight, "Fluid Sim", NULL, NULL);
 
     if (!ImGui_ImplGlfwGL3_Init(m_oWindow, true)) {
         assert(false);
