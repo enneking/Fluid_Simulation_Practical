@@ -27,13 +27,11 @@ void ParticleManager::Init(Camera* pCamera)
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glGenVertexArrays(1, &m_iVertexArrayObject);
 	glGenBuffers(1, &m_iVertexBufferObject);
-
 	glGenVertexArrays(1, &m_iVaoBox);
-
 	glGenVertexArrays(1, &m_iVaoLine);
+	
 
 	SetUpBoundaryBox();
-
 }
 
 void ParticleManager::SetUpBoundaryBox()
@@ -112,10 +110,8 @@ void ParticleManager::InitBuffers()
 
 	glBufferData(GL_ARRAY_BUFFER, sizeof(Eigen::Vector3d) * m_vParticlePositions.size(), 0, GL_STATIC_DRAW);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Eigen::Vector3d) * m_vParticlePositions.size(), &m_vParticlePositions[0]);
-
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, 0, (void*)0);
-	glDisableVertexAttribArray(0);
 
 
 	//LINE!!!!
@@ -129,10 +125,8 @@ void ParticleManager::InitBuffers()
 	glBindBuffer(GL_ARRAY_BUFFER, iVboLine);
 
 	glBufferData(GL_ARRAY_BUFFER, sizeof(line), line, GL_STATIC_DRAW);
-
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, 0, (void*)0);
-	glDisableVertexAttribArray(0);
 }
 
 void ParticleManager::AddParticle(Eigen::Vector3d fInitialPos, Eigen::Vector3d fInitialVelocity)
@@ -187,18 +181,17 @@ void ParticleManager::DrawParticles()
 
 	//Particles
 	glBindVertexArray(m_iVertexArrayObject);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Eigen::Vector3d) * m_vParticlePositions.size(), &m_vParticlePositions[0]);
 
+	glBindBuffer(GL_ARRAY_BUFFER, m_iVertexBufferObject);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Eigen::Vector3d) * m_vParticlePositions.size(), &m_vParticlePositions[0]);
 	glEnableVertexAttribArray(0);
 	glDrawArrays(GL_POINTS, 0, (GLsizei)m_vParticlePositions.size());
-	glDisableVertexAttribArray(0);
+
 
 	//line
 //	glBindVertexArray(m_iVaoLine);
-	//glEnableVertexAttribArray(0);
-//	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
 //	glDrawArrays(GL_LINES, 0, 6);
-	//glDisableVertexAttribArray(0);
 
 	//Box
  	glUseProgram(m_oShaderManager.getProg(1));
@@ -206,15 +199,8 @@ void ParticleManager::DrawParticles()
 	glUniformMatrix4fv(ViewProjectionID, 1, GL_FALSE, &ViewProjectionMatrix[0][0]);
 
 	glBindVertexArray(m_iVaoBox);
-
-	for (int i = 0; i < 36; i++)
-	{
-		std::cout << m_vBoundaryIndices[i] << std::endl;
-	}
-
 	glEnableVertexAttribArray(0);
 	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, (void*)0);
-	glDisableVertexAttribArray(0);
 
 
 }

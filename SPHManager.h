@@ -23,6 +23,7 @@ private:
 private:
 	double m_fGravityForce = -9.81;
 	double m_dStiffness = 0.1;
+	double m_iSimSpeed = 0.1;
 
 	double m_dRestDensity = 1000;
 	std::vector<double> m_vDensity;
