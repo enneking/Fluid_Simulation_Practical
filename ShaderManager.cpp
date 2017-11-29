@@ -10,50 +10,53 @@
 /*
  * initialize the shader programs
  */
-void ShaderManager::initializeShader( ){
+void ShaderManager::initializeShader(const std::string sfileNameFs, const std::string sfileNameVs){
+	
+	GLuint iVS = 0, iFS = 0;
+	m_vProgContainer.emplace_back();
 
 	//create shader and program
-	m_vs = glCreateShader( GL_VERTEX_SHADER );
-	m_fs = glCreateShader( GL_FRAGMENT_SHADER );
-	m_prog = glCreateProgram();
+	iVS = glCreateShader( GL_VERTEX_SHADER );
+	iFS = glCreateShader( GL_FRAGMENT_SHADER );
+	m_vProgContainer.back() = glCreateProgram();
 
 
 	//read content from files
-	const std::string fileContent_vs = FileReader::getFileContent( m_fileNameVs );
-	const std::string fileContent_fs = FileReader::getFileContent( m_fileNameFs );
+	const std::string fileContent_vs = FileReader::getFileContent( sfileNameVs );
+	const std::string fileContent_fs = FileReader::getFileContent( sfileNameFs );
 
 
 	//compile vertex shader
-	printf("Compiling vertex shader... : %s\n", m_fileNameVs.c_str());
+	printf("Compiling vertex shader... : %s\n", sfileNameVs.c_str());
 	const GLchar *vscr = fileContent_vs.c_str();
-	glShaderSource(m_vs, 1, &vscr, NULL);
-	glCompileShader( m_vs );
-	FileReader::printGLSLCompileLog( m_vs );
+	glShaderSource(iVS, 1, &vscr, NULL);
+	glCompileShader(iVS);
+	FileReader::printGLSLCompileLog(iVS);
 
 
 	//compile fragment shader
-	printf("Compiling fragment shader... : %s\n", m_fileNameFs.c_str());
+	printf("Compiling fragment shader... : %s\n", sfileNameFs.c_str());
 	const GLchar  *fscr = fileContent_fs.c_str();
-	glShaderSource(m_fs, 1, &fscr, NULL);
-	glCompileShader( m_fs );
-	FileReader::printGLSLCompileLog( m_fs );
+	glShaderSource(iFS, 1, &fscr, NULL);
+	glCompileShader(iFS);
+	FileReader::printGLSLCompileLog(iFS);
 
 	// link program
-	glBindAttribLocation( m_prog, 0, "aPosition" );
-	glBindAttribLocation( m_prog, 1, "aNormal" );
-	glBindAttribLocation( m_prog, 2, "aColor" );
+	glBindAttribLocation(m_vProgContainer.back(), 0, "aPosition" );
+	glBindAttribLocation(m_vProgContainer.back(), 1, "aNormal" );
+	glBindAttribLocation(m_vProgContainer.back(), 2, "aColor" );
 	fprintf(stdout, "Linking program... \n");
-	glAttachShader( m_prog, m_vs );
-	glAttachShader( m_prog, m_fs );
-	glLinkProgram( m_prog );
-	FileReader::printGLSLLinkLog( m_prog );
+	glAttachShader(m_vProgContainer.back(), iVS);
+	glAttachShader(m_vProgContainer.back(), iFS);
+	glLinkProgram(m_vProgContainer.back());
+	FileReader::printGLSLLinkLog(m_vProgContainer.back());
 
 	fprintf(stdout, "initialization finished! \n");
 
 }
 
-ShaderManager::ShaderManager( const std::string fileNameFragmentShader, const std::string fileNameVertexShader)
-: m_fileNameFs( fileNameFragmentShader), m_fileNameVs( fileNameVertexShader){
+ShaderManager::ShaderManager()
+{
 }
 
 

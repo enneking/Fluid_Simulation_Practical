@@ -43,11 +43,11 @@ public:
 
 	std::vector<Particle>* GetParticleContainer();
 	std::vector<Eigen::Vector3d>* GetParticlePositions();
-	std::vector<Eigen::Vector3d>* GetBoundaryPositions();
+	Eigen::Vector3d* GetBoundaryPositions();
 
-	int m_iBoundariesPerFaceInOneDirection;
-	Eigen::Vector3d BoxUpperLeftBack;
-	Eigen::Vector3d BoxLowerRightFront;
+	int m_iBoundariesPerFaceInOneDirection = 10;
+	Eigen::Vector3d m_vBoxLeftLowerBack = Eigen::Vector3d(-1.1f, -1.1f, -1.1f);
+	Eigen::Vector3d m_vBoxRightUpperFront = Eigen::Vector3d(1.1f, 1.1f, 1.1f);
 
 
 
@@ -56,10 +56,11 @@ private:
 	std::vector<Particle> m_vParticleContainer;
 	std::vector<Eigen::Vector3d> m_vParticlePositions;
 
-	std::vector<Eigen::Vector3d> m_vBoundaryPositions;
+	Eigen::Vector3d m_vBoundaryPositions[8];
+	GLushort m_vBoundaryIndices[36];
 
-	GLuint m_iVertexBufferObject, m_iVertexArrayObject, m_iProgramID, m_iVaoLine;
-	ShaderManager m_oShaderManager{ "ParticleShader.frag", "ParticleShader.vert" };
+	GLuint m_iVertexBufferObject, m_iVertexArrayObject, m_iProgramID, m_iVaoLine, m_iVaoBox;
+	ShaderManager m_oShaderManager;
 
 	Camera* m_pCamera;
 
