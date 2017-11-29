@@ -84,9 +84,9 @@ Eigen::Vector3d SPHKernel::ComputeCentralDifferences(double (SPHKernel::* const 
 }
 
 
-Eigen::Vector3d SPHKernel::CubicSplineKernelGradient(const Eigen::Vector3d& x, double fSmoothingLength)
+Eigen::Vector3d SPHKernel::CubicSplineKernelGradient(const Eigen::Vector3d& pos, double fSmoothingLength)
 {
-    double dAlpha = 3.0 / (2.0 * M_PI * pow(fSmoothingLength, 3.0));
+    /*double dAlpha = 3.0 / (2.0 * M_PI * pow(fSmoothingLength, 3.0));
     double relDist = x.norm() / fSmoothingLength;
 
     double derivative = 0.0;
@@ -98,7 +98,34 @@ Eigen::Vector3d SPHKernel::CubicSplineKernelGradient(const Eigen::Vector3d& x, d
     {
         derivative = -0.5 * pow((2.0 - relDist), 2.0);
     }
-    return derivative * dAlpha * (x / (x.norm() * fSmoothingLength));
+    return derivative * dAlpha * (x / (x.norm() * fSmoothingLength));*/
+    
+    // @TODO check wtf is wrong here
+    
+    using namespace Eigen;
+    double x, y, z;
+    double h = fSmoothingLength;
+    double r = pos.norm();
+    double R = r / h;
+    double dAlpha = 3.0 / (2.0 * M_PI * pow(fSmoothingLength, 3.0));
+
+
+    if ((0. <= R) && (R < 1.)) {
+        x = (pos.x() * (3.0*r - 4.0*h)) / (2 * h*h*h);
+        y = (pos.y() * (3.0*r - 4.0*h)) / (2 * h*h*h);
+        z = (pos.z() * (3.0*r - 4.0*h)) / (2 * h*h*h);
+    }
+    else if ((1. <= R) && (R < 2.)) {
+        x = -(pos.x() * (pow(r - 2.0*h, 2))) / (2.0*h*h*h*r);
+        y = -(pos.y() * (pow(r - 2.0*h, 2))) / (2.0*h*h*h*r);
+        z = -(pos.z() * (pow(r - 2.0*h, 2))) / (2.0*h*h*h*r);
+    }
+    else {
+        x = 0.0;
+        y = 0.0;
+        z = 0.0;
+    }
+    return dAlpha*Vector3d(x, y, z);
 }
 
 Eigen::Vector3d SPHKernel::QuinticSplineKernelGradient(const Eigen::Vector3d& x, double h)
@@ -147,7 +174,7 @@ void SPHKernel::Run() {
 
         ImGui::BeginChild("plots");
 
-        static const int NUM_SAMPLES = 20;
+        static const int NUM_SAMPLES = 200;
         glm::vec3 x_range[NUM_SAMPLES];
         for (int i = 0; i < NUM_SAMPLES; ++i) {
             auto coords = glm::vec2(1.0f, 1.0f);
