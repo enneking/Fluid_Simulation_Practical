@@ -18,17 +18,20 @@ public:
 
 private:
 	void ApplyForces(double dt);
+	void BoundaryForces();
 	void ComputeDensityAndPressure();
 
 private:
 	double m_fGravityForce = -9.81;
-	double m_dStiffness = 0.1;
+	double m_dStiffness = 0.01;
 	double m_iSimSpeed = 0.1;
 
 	double m_dRestDensity = 1000;
+	double m_dRadius = 0.1;
 	std::vector<double> m_vDensity;
 	std::vector<double> m_vPressure;
-
+	std::vector<Eigen::Vector3d> m_vBoundaryForce;
+	double m_dSmoothingLenght = 100.0;
 
 	ParticleManager m_oParticleManager;
 	std::unique_ptr<CompactNSearch> m_oCompactNSearch;

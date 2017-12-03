@@ -175,8 +175,7 @@ void ParticleManager::DrawParticles()
 	glUseProgram(m_oShaderManager.getProg(0));
 
 	glm::mat4 ViewProjectionMatrix = m_pCamera->m_mProjectionMatrix * m_pCamera->m_mViewMatrix;
-	GLuint ViewProjectionID = glGetUniformLocation(m_oShaderManager.getProg(0), "ViewProjection");
-	glUniformMatrix4fv(ViewProjectionID, 1, GL_FALSE, &ViewProjectionMatrix[0][0]);
+	glUniformMatrix4fv(glGetUniformLocation(m_oShaderManager.getProg(0), "ViewProjection"), 1, GL_FALSE, &ViewProjectionMatrix[0][0]);
 
 
 	//Particles
@@ -195,8 +194,7 @@ void ParticleManager::DrawParticles()
 
 	//Box
  	glUseProgram(m_oShaderManager.getProg(1));
-	ViewProjectionID = glGetUniformLocation(m_oShaderManager.getProg(1), "ViewProjection");
-	glUniformMatrix4fv(ViewProjectionID, 1, GL_FALSE, &ViewProjectionMatrix[0][0]);
+	glUniformMatrix4fv(glGetUniformLocation(m_oShaderManager.getProg(1), "ViewProjection"), 1, GL_FALSE, &ViewProjectionMatrix[0][0]);
 
 	glBindVertexArray(m_iVaoBox);
 	glEnableVertexAttribArray(0);
