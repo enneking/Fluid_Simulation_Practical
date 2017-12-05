@@ -21,35 +21,35 @@ void Camera::Init()
 
 void Camera::Update(GLFWwindow *window)
 {
-	if (glfwGetKey(window, 'W') == GLFW_PRESS)
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 	{
 		m_vPosition += m_fCameraSpeed * m_vFront;
 	}
-	if (glfwGetKey(window, 'S') == GLFW_PRESS)
+	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
 	{
 		m_vPosition -= m_fCameraSpeed * m_vFront;
 	}
-	if (glfwGetKey(window, 'A') == GLFW_PRESS)
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
 	{
 		m_vPosition -= m_fCameraSpeed * m_vRight;
 	}
-	if (glfwGetKey(window, 'D') == GLFW_PRESS)
+	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 	{
 		m_vPosition += m_fCameraSpeed * m_vRight;
 	}
-	if (glfwGetKey(window, 'R') == GLFW_PRESS)
+	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
 	{
 		m_vPosition += m_fCameraSpeed * m_vUp;
 	}
-	if (glfwGetKey(window, 'F') == GLFW_PRESS)
+	if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
 	{
 		m_vPosition -= m_fCameraSpeed * m_vUp;
 	}
-	if (glfwGetKey(window, 'Q') == GLFW_PRESS)
+	if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
 	{
 		RotateUp(0.7f);
 	}
-	if (glfwGetKey(window, 'E') == GLFW_PRESS)
+	if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
 	{
 		RotateUp(-0.7f);
 	}
@@ -61,11 +61,11 @@ void Camera::Update(GLFWwindow *window)
 	{
 		RotateRight(-0.7f);
 	}
-	if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
 	{
 		RotateFront(-0.7f);
 	}
-	if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
 	{
 		RotateFront(0.7f);
 	}

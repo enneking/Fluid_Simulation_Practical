@@ -18,7 +18,12 @@ ParticleManager* SPHManager::GetParticleManager()
 
 void SPHManager::Init()
 {
-
+    
+    for (size_t i = 0; i < 1024; ++i) {
+        auto posX = (i / 1024.0) * 4.0 - 2;
+        m_oParticleManager.AddParticle(Eigen::Vector3d(posX, 0.0, 0.0));
+    }
+    
 
 	m_oParticleManager.InitBuffers();
 	m_vDensity.resize(m_oParticleManager.GetParticleContainer()->size());
@@ -41,9 +46,11 @@ void SPHManager::Update(double dt)
 	
 
 	ComputeDensityAndPressure();
-	//BoundaryForces();
-
-	ApplyForces(dt);
+	
+    if (m_bSimulate) {
+        BoundaryForces();
+        ApplyForces(dt);
+    }
 
 	m_oParticleManager.MoveParticles(dt);
 
@@ -57,8 +64,10 @@ void SPHManager::Update(double dt)
             auto densityPlotData = static_cast<DensityPlotData*>(data);
             auto density = densityPlotData->self->GetDensityWithIndex(idx);
             return (float)density;
-        }, &densityPlotData, m_oParticleManager.GetParticleContainer()->size(), 0 /*m_oParticleManager.GetParticleContainer()->size() - 1024*/, nullptr, 0.0f, FLT_MAX, ImVec2(0, 200));
+        }, &densityPlotData, 1024, m_oParticleManager.GetParticleContainer()->size() - 1024, nullptr, 0.0f, FLT_MAX, ImVec2(0, 200));
     
+        ImGui::Checkbox("Simulate", &m_bSimulate);
+
         if (ImGui::TreeNode("Settings")) {
 
             float gravity = (float)m_fGravityForce;
@@ -97,7 +106,7 @@ void SPHManager::Update(double dt)
 void SPHManager::ApplyForces(double dt)
 {
 
-	for (unsigned int i = 0; i < m_oParticleManager.GetParticleContainer()->size(); i++)
+	for (unsigned int i = 0; i < m_oParticleManager.GetParticleContainer()->size() - 1024; i++)
 	{
 		Eigen::Vector3d acceleration(0, 0, 0);
 		for (unsigned int j = 0; j < m_vSphDiscretizations[m_iDiscretizationId].n_neighbors(i); j++)
@@ -117,13 +126,13 @@ void SPHManager::ComputeDensityAndPressure()
 	m_oCompactNSearch->neighborhood_search();
 	m_vSphDiscretizations = m_oCompactNSearch->discretizations();
 
-	for (int i = 0; i < m_oParticleManager.GetParticleContainer()->size(); i++)
+	for (int i = 0; i < m_oParticleManager.GetParticleContainer()->size() - 1024; i++)
 	{
 		for (unsigned int j = 0; j < m_vSphDiscretizations[m_iDiscretizationId].n_neighbors(i); j++)
 		{
-            m_vDensity[i] += m_oParticleManager.GetParticleMass();// * m_pSPHKernel.QuadricSmoothingFunctionKernel((*m_oParticleManager.GetParticlePositions())[i] 
-				//- (*m_oParticleManager.GetParticlePositions())[m_vSphDiscretizations[m_iDiscretizationId].neighbor(i, j).index], m_dSmoothingLength);
-			
+            m_vDensity[i] += m_oParticleManager.GetParticleMass() * m_pSPHKernel.QuadricSmoothingFunctionKernel((*m_oParticleManager.GetParticlePositions())[i] 
+				- (*m_oParticleManager.GetParticlePositions())[m_vSphDiscretizations[m_iDiscretizationId].neighbor(i, j).index], m_dSmoothingLength);
+		
 		}
 		m_vPressure[i] = m_dStiffness * (m_vDensity[i] - m_dRestDensity);
         if (m_vPressure[i] < 0)
@@ -141,7 +150,7 @@ void SPHManager::BoundaryForces()
 	int bSize = m_oParticleManager.m_iBoundariesPerFaceInOneDirection * m_oParticleManager.m_iBoundariesPerFaceInOneDirection * 6;
 	double dGamma;
 	double q;
-	for (int i = 0; i < x->size(); i++)
+	for (int i = 0; i < x->size() - 1024; i++)
 	{
 		for (int k = 0; k < b->size(); k++)
 		{

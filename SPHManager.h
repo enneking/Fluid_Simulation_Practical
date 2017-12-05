@@ -29,6 +29,9 @@ private:
     
 
 private:
+
+    bool m_bSimulate = false;
+
 	double m_fGravityForce = 0.0;
 	double m_dStiffness = 1000.0;
 	double m_iSimSpeed = 0.01;
