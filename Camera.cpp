@@ -41,7 +41,7 @@ void Camera::Update(GLFWwindow *window)
 	{
 		m_vPosition += m_fCameraSpeed * m_vUp;
 	}
-	if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+	if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS)
 	{
 		m_vPosition -= m_fCameraSpeed * m_vUp;
 	}

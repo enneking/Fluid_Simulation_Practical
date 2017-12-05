@@ -45,6 +45,10 @@ void SimSystem::Run()
 
 	double accumulator = m_dt;
 
+    bool stepSim = false;
+    bool multiStep = false;
+    size_t numSteps = 0;
+
 	while (glfwGetKey(m_oWindow, GLFW_KEY_ESCAPE) != GLFW_PRESS)
 	{
 		NewTime = std::chrono::system_clock::now();
@@ -61,11 +65,27 @@ void SimSystem::Run()
 
             ImGui_ImplGlfwGL3_NewFrame();
 
+            ImGui::Checkbox("Run", &multiStep);
+            ImGui::SameLine();
+            if (ImGui::Button("Step")) {
+                stepSim = true;
+                
+            }
+            ImGui::SameLine();
+            ImGui::Text("Num steps: %llu", numSteps);
+
             //ImGui::ShowTestWindow();
             
 			m_oCamera.Update(m_oWindow);
-			m_oSPHManager.Update(m_dt);
 
+            m_oSPHManager.GUI();
+
+
+            if (stepSim || multiStep) {
+                m_oSPHManager.Update(m_dt);
+                numSteps++;
+                stepSim = false;
+            }
           
             ImGui::Render();
 		}

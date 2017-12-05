@@ -38,18 +38,37 @@ void ParticleManager::SetUpBoundaryBox()
 {
 	int n = m_iBoundariesPerFaceInOneDirection;
 
+    // actual walls
+    auto boxWidth = m_vBoxLeftLowerBack.x() - m_vBoxRightUpperFront.x();
+    auto boxHeight = m_vBoxRightUpperFront.y() - m_vBoxLeftLowerBack.y();
+
+    for (auto i = 0; i < n; i++) {  // front
+        for (auto j = 0; j < n; j++) {
+            m_vBoundaryPositions.push_back({ m_vBoxLeftLowerBack.x() + (boxWidth / (n - 1)) * i,  m_vBoxLeftLowerBack.x() + (boxHeight / (n - 1)) * j, m_vBoxRightUpperFront.z() });   // front
+            m_vBoundaryPositions.push_back({ m_vBoxLeftLowerBack.x() + (boxWidth / (n - 1)) * i,  m_vBoxLeftLowerBack.x() + (boxHeight / (n - 1)) * j, m_vBoxLeftLowerBack.z() });     // back
+            m_vBoundaryPositions.push_back({ m_vBoxRightUpperFront.x(), m_vBoxLeftLowerBack.y() + (boxHeight / (n - 1)) * i,  m_vBoxLeftLowerBack.z() + (boxWidth / (n - 1)) * j });   // right
+            m_vBoundaryPositions.push_back({ m_vBoxLeftLowerBack.x(), m_vBoxLeftLowerBack.y() + (boxHeight / (n - 1)) * i,  m_vBoxLeftLowerBack.z() + (boxWidth / (n - 1)) * j });   // left
+            m_vBoundaryPositions.push_back({ m_vBoxLeftLowerBack.x() + (boxWidth / (n - 1)) * i,  m_vBoxLeftLowerBack.y(), m_vBoxLeftLowerBack.z() + (boxWidth / (n - 1)) * j});   // bottom
+
+        }
+    }
+   
+
+
 	//walls
-	m_vBoundaryPositions[0] = Eigen::Vector3d(m_vBoxLeftLowerBack[0], m_vBoxRightUpperFront[1], m_vBoxRightUpperFront[2]);
-	m_vBoundaryPositions[1] = Eigen::Vector3d(m_vBoxLeftLowerBack[0], m_vBoxLeftLowerBack[1], m_vBoxRightUpperFront[2]);
+    Eigen::Vector3d boxCorners[8];
 
-	m_vBoundaryPositions[2] = Eigen::Vector3d(m_vBoxRightUpperFront[0], m_vBoxRightUpperFront[1], m_vBoxRightUpperFront[2]);
-	m_vBoundaryPositions[3] = Eigen::Vector3d(m_vBoxRightUpperFront[0], m_vBoxLeftLowerBack[1], m_vBoxRightUpperFront[2]);
+	boxCorners[0] = Eigen::Vector3d(m_vBoxLeftLowerBack[0], m_vBoxRightUpperFront[1], m_vBoxRightUpperFront[2]);
+	boxCorners[1] = Eigen::Vector3d(m_vBoxLeftLowerBack[0], m_vBoxLeftLowerBack[1], m_vBoxRightUpperFront[2]);
 
-	m_vBoundaryPositions[4] = Eigen::Vector3d(m_vBoxRightUpperFront[0], m_vBoxRightUpperFront[1], m_vBoxLeftLowerBack[2]);
-	m_vBoundaryPositions[5] = Eigen::Vector3d(m_vBoxRightUpperFront[0], m_vBoxLeftLowerBack[1], m_vBoxLeftLowerBack[2]);
+	boxCorners[2] = Eigen::Vector3d(m_vBoxRightUpperFront[0], m_vBoxRightUpperFront[1], m_vBoxRightUpperFront[2]);
+	boxCorners[3] = Eigen::Vector3d(m_vBoxRightUpperFront[0], m_vBoxLeftLowerBack[1], m_vBoxRightUpperFront[2]);
 
-	m_vBoundaryPositions[6] = Eigen::Vector3d(m_vBoxLeftLowerBack[0], m_vBoxRightUpperFront[1], m_vBoxLeftLowerBack[2]);
-	m_vBoundaryPositions[7] = Eigen::Vector3d(m_vBoxLeftLowerBack[0], m_vBoxLeftLowerBack[1], m_vBoxLeftLowerBack[2]);
+	boxCorners[4] = Eigen::Vector3d(m_vBoxRightUpperFront[0], m_vBoxRightUpperFront[1], m_vBoxLeftLowerBack[2]);
+	boxCorners[5] = Eigen::Vector3d(m_vBoxRightUpperFront[0], m_vBoxLeftLowerBack[1], m_vBoxLeftLowerBack[2]);
+
+	boxCorners[6] = Eigen::Vector3d(m_vBoxLeftLowerBack[0], m_vBoxRightUpperFront[1], m_vBoxLeftLowerBack[2]);
+	boxCorners[7] = Eigen::Vector3d(m_vBoxLeftLowerBack[0], m_vBoxLeftLowerBack[1], m_vBoxLeftLowerBack[2]);
 
 	//walls
 	for (int i = 0; i < 6; i++)
@@ -89,8 +108,8 @@ void ParticleManager::SetUpBoundaryBox()
 	glGenBuffers(1, &iVboBox);
 	glBindBuffer(GL_ARRAY_BUFFER, iVboBox);
 
-	glBufferData(GL_ARRAY_BUFFER, sizeof(m_vBoundaryPositions), 0, GL_STATIC_DRAW);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(m_vBoundaryPositions), m_vBoundaryPositions);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(boxCorners), 0, GL_STATIC_DRAW);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(boxCorners), boxCorners);
 
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, 0, (void*)0);
@@ -108,25 +127,12 @@ void ParticleManager::InitBuffers()
 	glBindVertexArray(m_iVertexArrayObject);
 	glBindBuffer(GL_ARRAY_BUFFER, m_iVertexBufferObject);
 
-	glBufferData(GL_ARRAY_BUFFER, sizeof(Eigen::Vector3d) * m_vParticlePositions.size(), 0, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(Eigen::Vector3d) * m_vParticlePositions.size(), 0, GL_DYNAMIC_DRAW);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Eigen::Vector3d) * m_vParticlePositions.size(), &m_vParticlePositions[0]);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, 0, (void*)0);
 
 
-	//LINE!!!!
-	double line[6] = {
-		2.0, 0.0, 0.0,
-		-2.0, 0.0, 0.0
-	};
-	GLuint iVboLine;
-	glBindVertexArray(m_iVaoLine);
-	glGenBuffers(1, &iVboLine);
-	glBindBuffer(GL_ARRAY_BUFFER, iVboLine);
-
-	glBufferData(GL_ARRAY_BUFFER, sizeof(line), line, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, 0, (void*)0);
 }
 
 ParticleManager::Particle* ParticleManager::AddParticle(Eigen::Vector3d fInitialPos, Eigen::Vector3d fInitialVelocity)
@@ -157,7 +163,7 @@ std::vector<Eigen::Vector3d>* ParticleManager::GetParticlePositions()
 
 Eigen::Vector3d* ParticleManager::GetBoundaryPositions()
 {
-	return m_vBoundaryPositions;
+	return m_vBoundaryPositions.data();
 }
 
 float ParticleManager::GetParticleMass()
@@ -187,10 +193,6 @@ void ParticleManager::DrawParticles()
 	glEnableVertexAttribArray(0);
 	glDrawArrays(GL_POINTS, 0, (GLsizei)m_vParticlePositions.size());
 
-
-	//line
-	glBindVertexArray(m_iVaoLine);
-	glDrawArrays(GL_LINES, 0, 6);
 
 	//Box
  	glUseProgram(m_oShaderManager.getProg(1));

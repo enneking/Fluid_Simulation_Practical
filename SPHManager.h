@@ -21,6 +21,8 @@ public:
         return m_vDensity[idx];
     }
 
+    void GUI();
+
 private:
 	void ApplyForces(double dt);
 	void BoundaryForces();
@@ -30,12 +32,11 @@ private:
 
 private:
 
-    bool m_bSimulate = false;
 
 	double m_fGravityForce = 0.0;
 	double m_dStiffness = 1000.0;
 	double m_iSimSpeed = 0.01;
-	double SpeedOfSoundPow = 88.5 * 88.5;
+	const double SPEED_OF_SOUND_POW = 88.5 * 88.5;
 	bool m_bRun = true;
 
 	double m_dRestDensity = 1000;
@@ -45,7 +46,7 @@ private:
 	std::vector<double> m_vDensity;
 	std::vector<double> m_vPressure;
 	std::vector<Eigen::Vector3d> m_vBoundaryForce;
-	double m_dSmoothingLength = 1.0;
+	double m_dSmoothingLength = .1;
 
 	ParticleManager m_oParticleManager;
 	std::unique_ptr<CompactNSearch> m_oCompactNSearch;

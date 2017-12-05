@@ -56,7 +56,7 @@ private:
 	std::vector<Particle> m_vParticleContainer;
 	std::vector<Eigen::Vector3d> m_vParticlePositions;
 
-	Eigen::Vector3d m_vBoundaryPositions[8];
+	std::vector<Eigen::Vector3d> m_vBoundaryPositions;
 	GLushort m_vBoundaryIndices[36];
 
 	GLuint m_iVertexBufferObject, m_iVertexArrayObject, m_iProgramID, m_iVaoLine, m_iVaoBox;

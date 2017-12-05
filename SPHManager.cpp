@@ -46,13 +46,19 @@ void SPHManager::Update(double dt)
 	
 
 	ComputeDensityAndPressure();
-	
-    if (m_bSimulate) {
-        BoundaryForces();
-        ApplyForces(dt);
-    }
+
+
+    BoundaryForces();
+    ApplyForces(dt);
+
+
 
 	m_oParticleManager.MoveParticles(dt);
+
+}
+
+void SPHManager::GUI()
+{
 
 
     if (ImGui::Begin("SPHManager")) {
@@ -65,8 +71,7 @@ void SPHManager::Update(double dt)
             auto density = densityPlotData->self->GetDensityWithIndex(idx);
             return (float)density;
         }, &densityPlotData, 1024, m_oParticleManager.GetParticleContainer()->size() - 1024, nullptr, 0.0f, FLT_MAX, ImVec2(0, 200));
-    
-        ImGui::Checkbox("Simulate", &m_bSimulate);
+
 
         if (ImGui::TreeNode("Settings")) {
 
@@ -99,9 +104,10 @@ void SPHManager::Update(double dt)
             ImGui::TreePop();
 
         }
-        
+
     } ImGui::End();
 }
+
 
 void SPHManager::ApplyForces(double dt)
 {
@@ -112,9 +118,10 @@ void SPHManager::ApplyForces(double dt)
 		for (unsigned int j = 0; j < m_vSphDiscretizations[m_iDiscretizationId].n_neighbors(i); j++)
 		{
 			int index = m_vSphDiscretizations[m_iDiscretizationId].neighbor(i, j).index;
-			acceleration -= m_oParticleManager.GetParticleMass() * ((m_vPressure[i] / (m_vDensity[i] * m_vDensity[i])) + (m_vPressure[index] / (m_vDensity[index] * m_vDensity[index])))
+			acceleration += m_oParticleManager.GetParticleMass() * ((m_vPressure[i] / (m_vDensity[i] * m_vDensity[i])) + (m_vPressure[index] / (m_vDensity[index] * m_vDensity[index])))
 				* m_pSPHKernel.QuadricSmoothingFunctionKernelGradient((*m_oParticleManager.GetParticlePositions())[i] - (*m_oParticleManager.GetParticlePositions())[index], m_dSmoothingLength);
 		}
+        acceleration *= -1.0;
 		acceleration += m_vBoundaryForce[i];
 		acceleration[1] += m_fGravityForce;
 		m_oParticleManager.GetParticleContainer()->data()[i].m_vVelocity += dt * (acceleration) * m_iSimSpeed;
@@ -134,11 +141,7 @@ void SPHManager::ComputeDensityAndPressure()
 				- (*m_oParticleManager.GetParticlePositions())[m_vSphDiscretizations[m_iDiscretizationId].neighbor(i, j).index], m_dSmoothingLength);
 		
 		}
-		m_vPressure[i] = m_dStiffness * (m_vDensity[i] - m_dRestDensity);
-        if (m_vPressure[i] < 0)
-        {
-            m_vPressure[i] = 0;
-        }
+		m_vPressure[i] = glm::max(m_dStiffness * (m_vDensity[i] - m_dRestDensity), 0.0);
 	}
 
 }
@@ -150,18 +153,24 @@ void SPHManager::BoundaryForces()
 	int bSize = m_oParticleManager.m_iBoundariesPerFaceInOneDirection * m_oParticleManager.m_iBoundariesPerFaceInOneDirection * 6;
 	double dGamma;
 	double q;
+
+    auto what = b->size();
+
 	for (int i = 0; i < x->size() - 1024; i++)
 	{
-		for (int k = 0; k < b->size(); k++)
+        m_vBoundaryForce[i] = Eigen::Vector3d(0.0, 0.0, 0.0);
+		for (int k = 0; k < bSize; k++)
 		{
-			q = (1 / m_dSmoothingLength) * (b[k] - (*x)[i]).norm();
+			auto distance = ((*x)[i] - b[k]).norm();
+            auto diff = (*x)[i] - b[k];
+			q = distance / m_dSmoothingLength;
 			if (0.0 < q && q < 2.0 / 3.0)
 			{
 				dGamma = 2.0 / 3.0;
 			}
 			else if (2.0 / 3.0 < q && q < 1)
 			{
-				dGamma = 2.0 * q - 3.0 * q * q / 2.0;
+				dGamma = 2.0 * q - (3.0 / 2.0) * q * q;
 			}
 			else if (1 < q && q < 2)
 			{
@@ -172,9 +181,9 @@ void SPHManager::BoundaryForces()
 				dGamma = 0;
 			}
 
-			dGamma *= m_dStiffness / (b[k] - (*x)[i]).norm();
+			dGamma *= 0.02 * SPEED_OF_SOUND_POW / distance;
 
-			m_vBoundaryForce[i] = 0.5f * dGamma * ((*x)[i] - b[k]) / (((*x)[i] - b[k]).norm());
+			m_vBoundaryForce[i] += 0.9f * dGamma * ((*x)[i] - b[k]) / distance;
 		}
 	}
 	
