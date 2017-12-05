@@ -18,12 +18,12 @@ ParticleManager* SPHManager::GetParticleManager()
 
 void SPHManager::Init()
 {
-    
+    /*
     for (size_t i = 0; i < 1024; ++i) {
         auto posX = (i / 1024.0) * 4.0 - 2;
         m_oParticleManager.AddParticle(Eigen::Vector3d(posX, 0.0, 0.0));
     }
-    
+    */
 
 	m_oParticleManager.InitBuffers();
 	m_vDensity.resize(m_oParticleManager.GetParticleContainer()->size());
@@ -48,7 +48,7 @@ void SPHManager::Update(double dt)
 	ComputeDensityAndPressure();
 
 
-    BoundaryForces();
+    //BoundaryForces();
     ApplyForces(dt);
 
 
@@ -70,7 +70,7 @@ void SPHManager::GUI()
             auto densityPlotData = static_cast<DensityPlotData*>(data);
             auto density = densityPlotData->self->GetDensityWithIndex(idx);
             return (float)density;
-        }, &densityPlotData, 1024, m_oParticleManager.GetParticleContainer()->size() - 1024, nullptr, 0.0f, FLT_MAX, ImVec2(0, 200));
+        }, &densityPlotData, m_oParticleManager.GetParticleContainer()->size(), /*m_oParticleManager.GetParticleContainer()->size() - 1024*/0, nullptr, 0.0f, FLT_MAX, ImVec2(0, 200));
 
 
         if (ImGui::TreeNode("Settings")) {
@@ -112,7 +112,7 @@ void SPHManager::GUI()
 void SPHManager::ApplyForces(double dt)
 {
 
-	for (unsigned int i = 0; i < m_oParticleManager.GetParticleContainer()->size() - 1024; i++)
+	for (unsigned int i = 0; i < m_oParticleManager.GetParticleContainer()->size(); i++)
 	{
 		Eigen::Vector3d acceleration(0, 0, 0);
 		for (unsigned int j = 0; j < m_vSphDiscretizations[m_iDiscretizationId].n_neighbors(i); j++)
@@ -133,7 +133,7 @@ void SPHManager::ComputeDensityAndPressure()
 	m_oCompactNSearch->neighborhood_search();
 	m_vSphDiscretizations = m_oCompactNSearch->discretizations();
 
-	for (int i = 0; i < m_oParticleManager.GetParticleContainer()->size() - 1024; i++)
+	for (int i = 0; i < m_oParticleManager.GetParticleContainer()->size(); i++)
 	{
 		for (unsigned int j = 0; j < m_vSphDiscretizations[m_iDiscretizationId].n_neighbors(i); j++)
 		{
@@ -156,7 +156,7 @@ void SPHManager::BoundaryForces()
 
     auto what = b->size();
 
-	for (int i = 0; i < x->size() - 1024; i++)
+	for (int i = 0; i < x->size(); i++)
 	{
         m_vBoundaryForce[i] = Eigen::Vector3d(0.0, 0.0, 0.0);
 		for (int k = 0; k < bSize; k++)

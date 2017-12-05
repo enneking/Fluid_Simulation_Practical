@@ -53,8 +53,6 @@ void ParticleManager::SetUpBoundaryBox()
         }
     }
    
-
-
 	//walls
     Eigen::Vector3d boxCorners[8];
 
