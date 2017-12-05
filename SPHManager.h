@@ -29,13 +29,16 @@ private:
     
 
 private:
-	double m_fGravityForce = 0;//-9.81;
-	double m_dStiffness = 1000000;
+	double m_fGravityForce = 0.0;
+	double m_dStiffness = 1000.0;
 	double m_iSimSpeed = 0.01;
+	double SpeedOfSoundPow = 88.5 * 88.5;
 	bool m_bRun = true;
 
 	double m_dRestDensity = 1000;
+
 	double m_dRadius = .1;
+
 	std::vector<double> m_vDensity;
 	std::vector<double> m_vPressure;
 	std::vector<Eigen::Vector3d> m_vBoundaryForce;

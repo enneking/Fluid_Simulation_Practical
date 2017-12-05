@@ -32,6 +32,7 @@ void SimProgramm::InitScene()
 	//	SimSystem::GetInstance()->GetParticleManager()->AddParticle(Eigen::Vector3d(Dis(Gen), Dis(Gen), Dis(Gen)));
 	//}
 
+
     static constexpr size_t boxWidth = 10;
 
 	for (int i = 0; i < boxWidth; i++)
