@@ -46,7 +46,6 @@ void SimSystem::Run()
 
 	while (glfwGetKey(m_oWindow, GLFW_KEY_ESCAPE) != GLFW_PRESS)
 	{
-
 		NewTime = std::chrono::system_clock::now();
 		LagTime = std::chrono::duration_cast<std::chrono::duration<double>>(NewTime - CurrentTime);
 		if (LagTime.count() > 0.25)

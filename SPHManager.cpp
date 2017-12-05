@@ -1,5 +1,5 @@
 #include "SPHManager.h"
-
+#include "imgui.h"
 
 
 SPHManager::SPHManager()
@@ -18,6 +18,8 @@ ParticleManager* SPHManager::GetParticleManager()
 
 void SPHManager::Init()
 {
+
+
 	m_oParticleManager.InitBuffers();
 	m_vDensity.resize(m_oParticleManager.GetParticleContainer()->size());
 	m_vPressure.resize(m_oParticleManager.GetParticleContainer()->size());
@@ -32,9 +34,14 @@ void SPHManager::Init()
 
 void SPHManager::Update(double dt)
 {
-	m_pSPHKernel.Run();
+	if (m_bRun == false)
+	{
+		return;
+	}
+	
+
 	ComputeDensityAndPressure();
-	BoundaryForces();
+	//BoundaryForces();
 
 	ApplyForces(dt);
 
@@ -49,8 +56,9 @@ void SPHManager::ApplyForces(double dt)
 		Eigen::Vector3d acceleration(0, 0, 0);
 		for (unsigned int j = 0; j < m_vSphDiscretizations[m_iDiscretizationId].n_neighbors(i); j++)
 		{
-			acceleration -= m_oParticleManager.GetParticleMass() * ((m_vPressure[i] / (m_vDensity[i] * m_vDensity[i])) + (m_vPressure[j] / (m_vDensity[j] * m_vDensity[j])))
-				* m_pSPHKernel.QuadricSmoothingFunctionKernelGradient((*m_oParticleManager.GetParticlePositions())[i] - (*m_oParticleManager.GetParticlePositions())[j], m_dSmoothingLenght);
+			int index = m_vSphDiscretizations[m_iDiscretizationId].neighbor(i, j).index;
+			acceleration -= m_oParticleManager.GetParticleMass() * ((m_vPressure[i] / (m_vDensity[i] * m_vDensity[i])) + (m_vPressure[index] / (m_vDensity[index] * m_vDensity[index])))
+				* m_pSPHKernel.QuadricSmoothingFunctionKernelGradient((*m_oParticleManager.GetParticlePositions())[i] - (*m_oParticleManager.GetParticlePositions())[index], m_dSmoothingLenght);
 		}
 		acceleration += m_vBoundaryForce[i];
 		acceleration[1] += m_fGravityForce;
@@ -67,7 +75,8 @@ void SPHManager::ComputeDensityAndPressure()
 	{
 		for (unsigned int j = 0; j < m_vSphDiscretizations[m_iDiscretizationId].n_neighbors(i); j++)
 		{
-			m_vDensity[i] = m_oParticleManager.GetParticleMass() * m_pSPHKernel.QuadricSmoothingFunctionKernel((*m_oParticleManager.GetParticlePositions())[i] - (*m_oParticleManager.GetParticlePositions())[j], m_dSmoothingLenght);
+			m_vDensity[i] = m_oParticleManager.GetParticleMass() * m_pSPHKernel.QuadricSmoothingFunctionKernel((*m_oParticleManager.GetParticlePositions())[i] 
+				- (*m_oParticleManager.GetParticlePositions())[m_vSphDiscretizations[m_iDiscretizationId].neighbor(i, j).index], m_dSmoothingLenght);
 			m_vPressure[i] = m_dStiffness * (m_vDensity[i] - m_dRestDensity);
 			if (m_vPressure[i] < 0)
 			{
