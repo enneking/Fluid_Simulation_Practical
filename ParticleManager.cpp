@@ -114,19 +114,6 @@ void ParticleManager::InitBuffers()
 	glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, 0, (void*)0);
 
 
-	//LINE!!!!
-	double line[6] = {
-		2.0, 0.0, 0.0,
-		-2.0, 0.0, 0.0
-	};
-	GLuint iVboLine;
-	glBindVertexArray(m_iVaoLine);
-	glGenBuffers(1, &iVboLine);
-	glBindBuffer(GL_ARRAY_BUFFER, iVboLine);
-
-	glBufferData(GL_ARRAY_BUFFER, sizeof(line), line, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, 0, (void*)0);
 }
 
 ParticleManager::Particle* ParticleManager::AddParticle(Eigen::Vector3d fInitialPos, Eigen::Vector3d fInitialVelocity)
@@ -187,10 +174,6 @@ void ParticleManager::DrawParticles()
 	glEnableVertexAttribArray(0);
 	glDrawArrays(GL_POINTS, 0, (GLsizei)m_vParticlePositions.size());
 
-
-	//line
-	glBindVertexArray(m_iVaoLine);
-	glDrawArrays(GL_LINES, 0, 6);
 
 	//Box
  	glUseProgram(m_oShaderManager.getProg(1));
