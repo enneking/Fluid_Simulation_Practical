@@ -45,7 +45,7 @@ public:
 	std::vector<Eigen::Vector3d>* GetParticlePositions();
 	Eigen::Vector3d* GetBoundaryPositions();
 
-	int m_iBoundariesPerFaceInOneDirection = 10;
+	int m_iBoundariesPerFaceInOneDirection = 15;
 	Eigen::Vector3d m_vBoxLeftLowerBack = Eigen::Vector3d(-1.1f, -1.1f, -1.1f);
 	Eigen::Vector3d m_vBoxRightUpperFront = Eigen::Vector3d(1.1f, 1.1f, 1.1f);
 

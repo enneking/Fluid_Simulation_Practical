@@ -43,7 +43,7 @@ void SPHManager::Update(double dt)
 	{
 		return;
 	}
-	
+	dt *= m_iSimSpeed;
 
 	ComputeDensityAndPressure();
 
@@ -147,7 +147,7 @@ void SPHManager::ApplyForces(double dt)
         acceleration *= -1.0;
 		acceleration += (1.0 / m_oParticleManager.GetParticleMass()) * m_vBoundaryForce[i];
 		acceleration[1] += m_fGravityForce;
-		m_oParticleManager.GetParticleContainer()->data()[i].m_vVelocity += dt * (acceleration) * m_iSimSpeed;
+		m_oParticleManager.GetParticleContainer()->data()[i].m_vVelocity += dt * (acceleration);
 	}
 }
 
@@ -177,7 +177,7 @@ void SPHManager::BoundaryForces()
 	double dGamma;
 	double q;
 
-    auto mk = 200000.0;
+    auto mk = 1000.0;
 
 
 	for (int i = 0; i < x->size(); i++)
@@ -187,7 +187,7 @@ void SPHManager::BoundaryForces()
 		{
             auto diff = (*x)[i] - b[k];
 			auto distance = diff.norm();
-			q = distance / m_dSmoothingLength;
+			q = distance / 0.09;
 			if (0.0 < q && q < 2.0 / 3.0)
 			{
 				dGamma = 2.0 / 3.0;
@@ -209,7 +209,7 @@ void SPHManager::BoundaryForces()
                 printf("Fuuu\n");
             }
 
-			dGamma *= 0.02 * SPEED_OF_SOUND_POW / distance;
+			dGamma *= 0.5 * SPEED_OF_SOUND_POW / distance;
 			m_vBoundaryForce[i] += (mk / (m_oParticleManager.GetParticleMass() + mk)) * dGamma * diff / distance;
 		}
 
