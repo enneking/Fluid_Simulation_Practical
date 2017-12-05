@@ -25,6 +25,7 @@ public:
 
 private:
 	void ApplyForces(double dt);
+    void ApplyViscosity();
 	void BoundaryForces();
 	void ComputeDensityAndPressure();
 

@@ -47,19 +47,37 @@ void SPHManager::Update(double dt)
 
 	ComputeDensityAndPressure();
 
-
-    //BoundaryForces();
+    BoundaryForces();
     ApplyForces(dt);
 
-
+    //ApplyViscosity();
 
 	m_oParticleManager.MoveParticles(dt);
 
 }
 
+
+void SPHManager::ApplyViscosity()
+{
+    constexpr double epsilon = 0.05;
+    auto particles = m_oParticleManager.GetParticleContainer()->data();
+    for (auto pidx = 0; pidx < m_oParticleManager.GetParticleContainer()->size(); ++pidx) {
+        auto& p = particles[pidx];
+        auto vPrime = p.m_vVelocity;
+        for (unsigned int didx = 0; didx < m_vSphDiscretizations[m_iDiscretizationId].n_neighbors(pidx); didx++)
+        {
+            int j = m_vSphDiscretizations[m_iDiscretizationId].neighbor(pidx, didx).index;
+            vPrime += (m_oParticleManager.GetParticleMass() / m_vDensity[j]) * (particles[j].m_vVelocity - p.m_vVelocity) * m_pSPHKernel.QuadricSmoothingFunctionKernel((*m_oParticleManager.GetParticlePositions())[pidx] - (*m_oParticleManager.GetParticlePositions())[j], m_dSmoothingLength);
+        }
+        vPrime *= epsilon;
+        p.m_vVelocity = vPrime;
+    }
+}
+
+
+
 void SPHManager::GUI()
 {
-
 
     if (ImGui::Begin("SPHManager")) {
         struct DensityPlotData
@@ -72,6 +90,11 @@ void SPHManager::GUI()
             return (float)density;
         }, &densityPlotData, m_oParticleManager.GetParticleContainer()->size(), /*m_oParticleManager.GetParticleContainer()->size() - 1024*/0, nullptr, 0.0f, FLT_MAX, ImVec2(0, 200));
 
+
+        ImGui::PlotHistogram("Boundary Forces", [](void* data, int idx) -> float {
+            Eigen::Vector3d* forces = static_cast<Eigen::Vector3d*>(data);
+            return (float)forces[idx].norm();
+        }, m_vBoundaryForce.data(), m_vBoundaryForce.size());
 
         if (ImGui::TreeNode("Settings")) {
 
@@ -89,7 +112,7 @@ void SPHManager::GUI()
             ImGui::DragFloat("Rest Density", &restDens, 0.01f);
             ImGui::DragFloat("Mass", &mass, 0.01f);
             ImGui::DragFloat("Kernel Radius", &radius, 0.01);
-            ImGui::DragFloat("Smoothing Length", &smoothingLength, 0.01f);
+            ImGui::DragFloat("Smoothing Length", &smoothingLength, 0.01f, 0.1f, 1.0f);
 
             m_fGravityForce = (double)gravity;
             m_dStiffness = (double)stiffness;
@@ -122,7 +145,7 @@ void SPHManager::ApplyForces(double dt)
 				* m_pSPHKernel.QuadricSmoothingFunctionKernelGradient((*m_oParticleManager.GetParticlePositions())[i] - (*m_oParticleManager.GetParticlePositions())[index], m_dSmoothingLength);
 		}
         acceleration *= -1.0;
-		acceleration += m_vBoundaryForce[i];
+		acceleration += (1.0 / m_oParticleManager.GetParticleMass()) * m_vBoundaryForce[i];
 		acceleration[1] += m_fGravityForce;
 		m_oParticleManager.GetParticleContainer()->data()[i].m_vVelocity += dt * (acceleration) * m_iSimSpeed;
 	}
@@ -154,15 +177,16 @@ void SPHManager::BoundaryForces()
 	double dGamma;
 	double q;
 
-    auto what = b->size();
+    auto mk = 200000.0;
+
 
 	for (int i = 0; i < x->size(); i++)
 	{
         m_vBoundaryForce[i] = Eigen::Vector3d(0.0, 0.0, 0.0);
 		for (int k = 0; k < bSize; k++)
 		{
-			auto distance = ((*x)[i] - b[k]).norm();
             auto diff = (*x)[i] - b[k];
+			auto distance = diff.norm();
 			q = distance / m_dSmoothingLength;
 			if (0.0 < q && q < 2.0 / 3.0)
 			{
@@ -181,10 +205,15 @@ void SPHManager::BoundaryForces()
 				dGamma = 0;
 			}
 
-			dGamma *= 0.02 * SPEED_OF_SOUND_POW / distance;
+            if (distance < DBL_EPSILON) {
+                printf("Fuuu\n");
+            }
 
-			m_vBoundaryForce[i] += 0.9f * dGamma * ((*x)[i] - b[k]) / distance;
+			dGamma *= 0.02 * SPEED_OF_SOUND_POW / distance;
+			m_vBoundaryForce[i] += (mk / (m_oParticleManager.GetParticleMass() + mk)) * dGamma * diff / distance;
 		}
+
+        //m_vBoundaryForce[i] = Eigen::Vector3d(0.0f, 1.0f, 0.0f);
 	}
 	
 }

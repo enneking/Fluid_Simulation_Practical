@@ -59,7 +59,7 @@ private:
 	std::vector<Eigen::Vector3d> m_vBoundaryPositions;
 	GLushort m_vBoundaryIndices[36];
 
-	GLuint m_iVertexBufferObject, m_iVertexArrayObject, m_iProgramID, m_iVaoLine, m_iVaoBox;
+	GLuint m_iVertexBufferObject, m_iVertexArrayObject, m_iProgramID, m_iVaoLine, m_iVaoBox, Vao;
 	ShaderManager m_oShaderManager;
 
 	Camera* m_pCamera;

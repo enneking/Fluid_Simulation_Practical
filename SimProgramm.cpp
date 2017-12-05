@@ -33,7 +33,7 @@ void SimProgramm::InitScene()
 	//}
 
 
-    static constexpr size_t boxWidth = 10;
+    static constexpr int boxWidth = 5;
 
 	for (int i = 0; i < boxWidth; i++)
 	{
@@ -41,7 +41,7 @@ void SimProgramm::InitScene()
 		{	
 			for (int k = 0; k < boxWidth; k++)
 			{
-				SimSystem::GetInstance()->GetSPHManager()->GetParticleManager()->AddParticle(Eigen::Vector3d( (i- boxWidth / 2) * 0.1f, (j-boxWidth / 2) * 0.1f, (k-boxWidth / 2) * 0.1f));
+				SimSystem::GetInstance()->GetSPHManager()->GetParticleManager()->AddParticle(Eigen::Vector3d( (i-(boxWidth / 2)) * 0.1f, (j-(boxWidth / 2)) * 0.1f, (k-(boxWidth / 2)) * 0.1f));
 			}
 		}
 	}
