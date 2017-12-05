@@ -41,7 +41,7 @@ void SPHManager::Update(double dt)
 	
 
 	ComputeDensityAndPressure();
-	//BoundaryForces();
+	BoundaryForces();
 
 	ApplyForces(dt);
 
@@ -94,18 +94,20 @@ void SPHManager::BoundaryForces()
 	int bSize = m_oParticleManager.m_iBoundariesPerFaceInOneDirection * m_oParticleManager.m_iBoundariesPerFaceInOneDirection * 6;
 	double dGamma;
 	double q;
+	double distance;
 	for (int i = 0; i < x->size(); i++)
 	{
-		for (int k = 0; k < b->size(); k++)
+		for (int k = 0; k < bSize; k++)
 		{
-			q = (1 / m_dSmoothingLenght) * (b[k] - (*x)[i]).norm();
+			distance = ((*x)[i] - b[k]).norm();
+			q = distance / m_dSmoothingLenght ;
 			if (0.0 < q && q < 2.0 / 3.0)
 			{
 				dGamma = 2.0 / 3.0;
 			}
 			else if (2.0 / 3.0 < q && q < 1)
 			{
-				dGamma = 2.0 * q - 3.0 * q * q / 2.0;
+				dGamma = 2.0 * q - 0.5 * 3.0 * q * q;
 			}
 			else if (1 < q && q < 2)
 			{
@@ -116,9 +118,9 @@ void SPHManager::BoundaryForces()
 				dGamma = 0;
 			}
 
-			dGamma *= m_dStiffness / (b[k] - (*x)[i]).norm();
+			dGamma *= -0.02 * SpeedOfSoundPow / distance;
 
-			m_vBoundaryForce[i] = 0.5f * dGamma * ((*x)[i] - b[k]) / (((*x)[i] - b[k]).norm());
+			m_vBoundaryForce[i] = 1 * dGamma * ((*x)[i] - b[k]) / distance;
 		}
 	}
 	
