@@ -32,13 +32,15 @@ void SimProgramm::InitScene()
 	//	SimSystem::GetInstance()->GetParticleManager()->AddParticle(Eigen::Vector3d(Dis(Gen), Dis(Gen), Dis(Gen)));
 	//}
 
-	for (int i = 0; i < 21; i++)
+    static constexpr size_t boxWidth = 10;
+
+	for (int i = 0; i < boxWidth; i++)
 	{
-		for (int j = 0; j < 21; j++)
+		for (int j = 0; j < boxWidth; j++)
 		{	
-			for (int k = 0; k < 21; k++)
+			for (int k = 0; k < boxWidth; k++)
 			{
-				SimSystem::GetInstance()->GetSPHManager()->GetParticleManager()->AddParticle(Eigen::Vector3d( (i-10) * 0.1f, (j-10) * 0.1f, (k-10) * 0.1f));
+				SimSystem::GetInstance()->GetSPHManager()->GetParticleManager()->AddParticle(Eigen::Vector3d( (i- boxWidth / 2) * 0.1f, (j-boxWidth / 2) * 0.1f, (k-boxWidth / 2) * 0.1f));
 			}
 		}
 	}

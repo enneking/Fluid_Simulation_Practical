@@ -36,6 +36,7 @@ SPHManager* SimSystem::GetSPHManager()
 
 void SimSystem::Run()
 {
+
 	m_oSPHManager.Init();
 
 	std::chrono::system_clock::time_point CurrentTime = std::chrono::system_clock::now();
@@ -65,6 +66,7 @@ void SimSystem::Run()
 			m_oCamera.Update(m_oWindow);
 			m_oSPHManager.Update(m_dt);
 
+          
             ImGui::Render();
 		}
            

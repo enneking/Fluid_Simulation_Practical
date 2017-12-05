@@ -32,7 +32,7 @@ public:
 
 	void SetUpBoundaryBox();
 
-	void AddParticle(Eigen::Vector3d fInitialPos = Eigen::Vector3d::Zero(), Eigen::Vector3d fInitialVelocity = Eigen::Vector3d::Zero());
+	Particle* AddParticle(Eigen::Vector3d fInitialPos = Eigen::Vector3d::Zero(), Eigen::Vector3d fInitialVelocity = Eigen::Vector3d::Zero());
 
 	void DrawParticles();
 
@@ -52,7 +52,7 @@ public:
 
 
 private:
-	float m_fParticleMass;
+	double m_fParticleMass = 20.0;
 	std::vector<Particle> m_vParticleContainer;
 	std::vector<Eigen::Vector3d> m_vParticlePositions;
 

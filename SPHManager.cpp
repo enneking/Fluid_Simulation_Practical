@@ -46,6 +46,52 @@ void SPHManager::Update(double dt)
 	ApplyForces(dt);
 
 	m_oParticleManager.MoveParticles(dt);
+
+
+    if (ImGui::Begin("SPHManager")) {
+        struct DensityPlotData
+        {
+            SPHManager* self = nullptr;
+        } densityPlotData = { this };
+        ImGui::PlotHistogram("Density Samples", [](void* data, int idx) -> float {
+            auto densityPlotData = static_cast<DensityPlotData*>(data);
+            auto density = densityPlotData->self->GetDensityWithIndex(idx);
+            return (float)density;
+        }, &densityPlotData, m_oParticleManager.GetParticleContainer()->size(), 0 /*m_oParticleManager.GetParticleContainer()->size() - 1024*/, nullptr, 0.0f, FLT_MAX, ImVec2(0, 200));
+    
+        if (ImGui::TreeNode("Settings")) {
+
+            float gravity = (float)m_fGravityForce;
+            float stiffness = (float)m_dStiffness;
+            float simSpeed = (float)m_iSimSpeed;
+            float restDens = (float)m_dRestDensity;
+            float mass = (float)m_oParticleManager.GetParticleMass();
+            float radius = (float)m_dRadius;
+            float smoothingLength = (float)m_dSmoothingLength;
+
+            ImGui::DragFloat("Gravity", &gravity, 0.01f, -10.0f, 10.0f);
+            ImGui::DragFloat("Stiffness", &stiffness, 1.0f);
+            ImGui::DragFloat("Simulation Speed", &simSpeed, 0.01f, 0.0f, 2.0f);
+            ImGui::DragFloat("Rest Density", &restDens, 0.01f);
+            ImGui::DragFloat("Mass", &mass, 0.01f);
+            ImGui::DragFloat("Kernel Radius", &radius, 0.01);
+            ImGui::DragFloat("Smoothing Length", &smoothingLength, 0.01f);
+
+            m_fGravityForce = (double)gravity;
+            m_dStiffness = (double)stiffness;
+            m_iSimSpeed = (double)simSpeed;
+            m_dRestDensity = (double)restDens;
+            m_oParticleManager.SetParticleMass((double)mass);
+            m_dSmoothingLength = smoothingLength;
+
+            m_dRadius = (double)radius;
+            m_oCompactNSearch->set_radius(m_dRadius);
+
+            ImGui::TreePop();
+
+        }
+        
+    } ImGui::End();
 }
 
 void SPHManager::ApplyForces(double dt)
@@ -58,7 +104,7 @@ void SPHManager::ApplyForces(double dt)
 		{
 			int index = m_vSphDiscretizations[m_iDiscretizationId].neighbor(i, j).index;
 			acceleration -= m_oParticleManager.GetParticleMass() * ((m_vPressure[i] / (m_vDensity[i] * m_vDensity[i])) + (m_vPressure[index] / (m_vDensity[index] * m_vDensity[index])))
-				* m_pSPHKernel.QuadricSmoothingFunctionKernelGradient((*m_oParticleManager.GetParticlePositions())[i] - (*m_oParticleManager.GetParticlePositions())[index], m_dSmoothingLenght);
+				* m_pSPHKernel.QuadricSmoothingFunctionKernelGradient((*m_oParticleManager.GetParticlePositions())[i] - (*m_oParticleManager.GetParticlePositions())[index], m_dSmoothingLength);
 		}
 		acceleration += m_vBoundaryForce[i];
 		acceleration[1] += m_fGravityForce;
@@ -75,14 +121,15 @@ void SPHManager::ComputeDensityAndPressure()
 	{
 		for (unsigned int j = 0; j < m_vSphDiscretizations[m_iDiscretizationId].n_neighbors(i); j++)
 		{
-			m_vDensity[i] = m_oParticleManager.GetParticleMass() * m_pSPHKernel.QuadricSmoothingFunctionKernel((*m_oParticleManager.GetParticlePositions())[i] 
-				- (*m_oParticleManager.GetParticlePositions())[m_vSphDiscretizations[m_iDiscretizationId].neighbor(i, j).index], m_dSmoothingLenght);
-			m_vPressure[i] = m_dStiffness * (m_vDensity[i] - m_dRestDensity);
-			if (m_vPressure[i] < 0)
-			{
-				m_vPressure[i] = 0;
-			}
+            m_vDensity[i] += m_oParticleManager.GetParticleMass();// * m_pSPHKernel.QuadricSmoothingFunctionKernel((*m_oParticleManager.GetParticlePositions())[i] 
+				//- (*m_oParticleManager.GetParticlePositions())[m_vSphDiscretizations[m_iDiscretizationId].neighbor(i, j).index], m_dSmoothingLength);
+			
 		}
+		m_vPressure[i] = m_dStiffness * (m_vDensity[i] - m_dRestDensity);
+        if (m_vPressure[i] < 0)
+        {
+            m_vPressure[i] = 0;
+        }
 	}
 
 }
@@ -98,7 +145,7 @@ void SPHManager::BoundaryForces()
 	{
 		for (int k = 0; k < b->size(); k++)
 		{
-			q = (1 / m_dSmoothingLenght) * (b[k] - (*x)[i]).norm();
+			q = (1 / m_dSmoothingLength) * (b[k] - (*x)[i]).norm();
 			if (0.0 < q && q < 2.0 / 3.0)
 			{
 				dGamma = 2.0 / 3.0;
