@@ -33,7 +33,7 @@ void SimProgramm::InitScene()
 	//}
 
 
-    static constexpr int boxWidth = 5;
+    static constexpr int boxWidth = 10;
 
 	for (int i = 0; i < boxWidth; i++)
 	{

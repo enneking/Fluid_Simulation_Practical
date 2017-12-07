@@ -44,6 +44,7 @@ public:
 	std::vector<Particle>* GetParticleContainer();
 	std::vector<Eigen::Vector3d>* GetParticlePositions();
 	Eigen::Vector3d* GetBoundaryPositions();
+	int GetBoundarieParticleCount();
 
 	int m_iBoundariesPerFaceInOneDirection = 15;
 	Eigen::Vector3d m_vBoxLeftLowerBack = Eigen::Vector3d(-1.1f, -1.1f, -1.1f);
@@ -56,8 +57,9 @@ private:
 	std::vector<Particle> m_vParticleContainer;
 	std::vector<Eigen::Vector3d> m_vParticlePositions;
 
-	std::vector<Eigen::Vector3d> m_vBoundaryPositions;
 	GLushort m_vBoundaryIndices[36];
+
+	int m_iBoundaryCount = m_iBoundariesPerFaceInOneDirection * m_iBoundariesPerFaceInOneDirection * 6;	
 
 	GLuint m_iVertexBufferObject, m_iVertexArrayObject, m_iProgramID, m_iVaoLine, m_iVaoBox, Vao;
 	ShaderManager m_oShaderManager;

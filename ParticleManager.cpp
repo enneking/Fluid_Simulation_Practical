@@ -29,9 +29,7 @@ void ParticleManager::Init(Camera* pCamera)
 	glGenBuffers(1, &m_iVertexBufferObject);
 	glGenVertexArrays(1, &m_iVaoBox);
 	glGenVertexArrays(1, &m_iVaoLine);
-	
 
-	SetUpBoundaryBox();
 }
 
 void ParticleManager::SetUpBoundaryBox()
@@ -43,14 +41,16 @@ void ParticleManager::SetUpBoundaryBox()
     auto boxHeight = m_vBoxRightUpperFront.y() - m_vBoxLeftLowerBack.y();
     auto boxDepth = m_vBoxRightUpperFront.z() - m_vBoxLeftLowerBack.z();
 
+	m_vParticlePositions.reserve(GetBoundarieParticleCount()+ m_vParticlePositions.size());
+
     for (auto i = 0; i < n; i++) {  // front
         for (auto j = 0; j < n; j++) {
-            m_vBoundaryPositions.push_back({ m_vBoxLeftLowerBack.x() + (boxWidth / (n - 1)) * i,  m_vBoxLeftLowerBack.x() + (boxHeight / (n - 1)) * j, m_vBoxRightUpperFront.z() });   // front
-            m_vBoundaryPositions.push_back({ m_vBoxLeftLowerBack.x() + (boxWidth / (n - 1)) * i,  m_vBoxLeftLowerBack.x() + (boxHeight / (n - 1)) * j, m_vBoxLeftLowerBack.z() });     // back
-            m_vBoundaryPositions.push_back({ m_vBoxRightUpperFront.x(), m_vBoxLeftLowerBack.y() + (boxHeight / (n - 1)) * i,  m_vBoxLeftLowerBack.z() + (boxDepth / (n - 1)) * j });   // right
-            m_vBoundaryPositions.push_back({ m_vBoxLeftLowerBack.x(), m_vBoxLeftLowerBack.y() + (boxHeight / (n - 1)) * i,  m_vBoxLeftLowerBack.z() + (boxDepth / (n - 1)) * j });   // left
-            m_vBoundaryPositions.push_back({ m_vBoxLeftLowerBack.x() + (boxWidth / (n - 1)) * i,  m_vBoxLeftLowerBack.y(), m_vBoxLeftLowerBack.z() + (boxDepth / (n - 1)) * j });   // bottom
-            m_vBoundaryPositions.push_back({ m_vBoxLeftLowerBack.x() + (boxWidth / (n - 1)) * i,  m_vBoxRightUpperFront.y(), m_vBoxLeftLowerBack.z() + (boxDepth / (n - 1)) * j });   // top
+            m_vParticlePositions.push_back({ m_vBoxLeftLowerBack.x() + (boxWidth / (n - 1)) * i,  m_vBoxLeftLowerBack.x() + (boxHeight / (n - 1)) * j, m_vBoxRightUpperFront.z() });   // front
+			m_vParticlePositions.push_back({ m_vBoxLeftLowerBack.x() + (boxWidth / (n - 1)) * i,  m_vBoxLeftLowerBack.x() + (boxHeight / (n - 1)) * j, m_vBoxLeftLowerBack.z() });     // back
+			m_vParticlePositions.push_back({ m_vBoxRightUpperFront.x(), m_vBoxLeftLowerBack.y() + (boxHeight / (n - 1)) * i,  m_vBoxLeftLowerBack.z() + (boxDepth / (n - 1)) * j });   // right
+			m_vParticlePositions.push_back({ m_vBoxLeftLowerBack.x(), m_vBoxLeftLowerBack.y() + (boxHeight / (n - 1)) * i,  m_vBoxLeftLowerBack.z() + (boxDepth / (n - 1)) * j });   // left
+			m_vParticlePositions.push_back({ m_vBoxLeftLowerBack.x() + (boxWidth / (n - 1)) * i,  m_vBoxLeftLowerBack.y(), m_vBoxLeftLowerBack.z() + (boxDepth / (n - 1)) * j });   // bottom
+			m_vParticlePositions.push_back({ m_vBoxLeftLowerBack.x() + (boxWidth / (n - 1)) * i,  m_vBoxRightUpperFront.y(), m_vBoxLeftLowerBack.z() + (boxDepth / (n - 1)) * j });   // top
         }
     }
    
@@ -118,23 +118,12 @@ void ParticleManager::SetUpBoundaryBox()
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, iElementBuffer);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(m_vBoundaryIndices), m_vBoundaryIndices, GL_STATIC_DRAW);
 
-
-
-    GLuint iVBO;
-    glGenVertexArrays(1, &Vao);
-    glBindVertexArray(Vao);
-    glGenBuffers(1, &iVBO);
-    glBindBuffer(GL_ARRAY_BUFFER, iVBO);
-
-    glBufferData(GL_ARRAY_BUFFER, sizeof(Eigen::Vector3d) * m_vBoundaryPositions.size(), &m_vBoundaryPositions[0], GL_STATIC_DRAW);
-
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, 0, (void*)0);
-    glDisableVertexAttribArray(0);
 }
 
 void ParticleManager::InitBuffers()
 {
+	SetUpBoundaryBox();
+	
 	//Particles
 	glBindVertexArray(m_iVertexArrayObject);
 	glBindBuffer(GL_ARRAY_BUFFER, m_iVertexBufferObject);
@@ -144,7 +133,7 @@ void ParticleManager::InitBuffers()
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, 0, (void*)0);
 
-
+	
 }
 
 ParticleManager::Particle* ParticleManager::AddParticle(Eigen::Vector3d fInitialPos, Eigen::Vector3d fInitialVelocity)
@@ -175,7 +164,7 @@ std::vector<Eigen::Vector3d>* ParticleManager::GetParticlePositions()
 
 Eigen::Vector3d* ParticleManager::GetBoundaryPositions()
 {
-	return m_vBoundaryPositions.data();
+	return &m_vParticlePositions[m_vParticlePositions.size() - GetBoundarieParticleCount()];
 }
 
 float ParticleManager::GetParticleMass()
@@ -205,12 +194,6 @@ void ParticleManager::DrawParticles()
 	glEnableVertexAttribArray(0);
 	glDrawArrays(GL_POINTS, 0, (GLsizei)m_vParticlePositions.size());
 
-
-    //boundary 
-    glBindVertexArray(Vao);
-    glEnableVertexAttribArray(0);
-    glDrawArrays(GL_POINTS, 0, (GLsizei)m_vBoundaryPositions.size());
-
 	//Box
  	glUseProgram(m_oShaderManager.getProg(1));
 	glUniformMatrix4fv(glGetUniformLocation(m_oShaderManager.getProg(1), "ViewProjection"), 1, GL_FALSE, &ViewProjectionMatrix[0][0]);
@@ -228,4 +211,9 @@ void ParticleManager::MoveParticles(double dt)
 	{
 		m_vParticlePositions[i] += m_vParticleContainer[i].m_vVelocity * dt;
 	}
+}
+
+int ParticleManager::GetBoundarieParticleCount()
+{
+	return m_iBoundaryCount;
 }
