@@ -33,7 +33,7 @@ void SPHManager::Init()
 	m_oCompactNSearch = std::make_unique<CompactNSearch>(m_dRadius);
 	m_iDiscretizationId = m_oCompactNSearch->add_discretization(
 		&(*m_oParticleManager.GetParticlePositions())[0],
-		m_oParticleManager.GetParticleContainer()->size(),
+		m_oParticleManager.GetParticlePositions()->size(),
 		false, true);
 }
 
@@ -66,9 +66,13 @@ void SPHManager::ApplyViscosity()
         auto vPrime = p.m_vVelocity;
         for (unsigned int didx = 0; didx < m_vSphDiscretizations[m_iDiscretizationId].n_neighbors(pidx); didx++)
         {
-            int j = m_vSphDiscretizations[m_iDiscretizationId].neighbor(pidx, didx).index;
-            vPrime += (m_oParticleManager.GetParticleMass() / m_vDensity[j]) * (particles[j].m_vVelocity - p.m_vVelocity) * m_pSPHKernel.QuadricSmoothingFunctionKernel((*m_oParticleManager.GetParticlePositions())[pidx] - (*m_oParticleManager.GetParticlePositions())[j], m_dSmoothingLength);
-        }
+			int j = m_vSphDiscretizations[m_iDiscretizationId].neighbor(pidx, didx).index;
+			if (j < m_oParticleManager.GetParticleContainer()->size())
+			{
+				
+				vPrime += (m_oParticleManager.GetParticleMass() / m_vDensity[j]) * (particles[j].m_vVelocity - p.m_vVelocity) * m_pSPHKernel.QuadricSmoothingFunctionKernel((*m_oParticleManager.GetParticlePositions())[pidx] - (*m_oParticleManager.GetParticlePositions())[j], m_dSmoothingLength);
+			}
+		}
         vPrime *= epsilon;
         p.m_vVelocity = vPrime;
     }
@@ -138,11 +142,14 @@ void SPHManager::ApplyForces(double dt)
 	for (unsigned int i = 0; i < m_oParticleManager.GetParticleContainer()->size(); i++)
 	{
 		Eigen::Vector3d acceleration(0, 0, 0);
-		for (unsigned int j = 0; j < m_vSphDiscretizations[m_iDiscretizationId].n_neighbors(i); j++)
+		for (unsigned int j = 0; (j < m_vSphDiscretizations[m_iDiscretizationId].n_neighbors(i)); j++)
 		{
 			int index = m_vSphDiscretizations[m_iDiscretizationId].neighbor(i, j).index;
-			acceleration += m_oParticleManager.GetParticleMass() * ((m_vPressure[i] / (m_vDensity[i] * m_vDensity[i])) + (m_vPressure[index] / (m_vDensity[index] * m_vDensity[index])))
-				* m_pSPHKernel.QuadricSmoothingFunctionKernelGradient((*m_oParticleManager.GetParticlePositions())[i] - (*m_oParticleManager.GetParticlePositions())[index], m_dSmoothingLength);
+			if (index < m_oParticleManager.GetParticleContainer()->size())
+			{	
+				acceleration += m_oParticleManager.GetParticleMass() * ((m_vPressure[i] / (m_vDensity[i] * m_vDensity[i])) + (m_vPressure[index] / (m_vDensity[index] * m_vDensity[index])))
+					* m_pSPHKernel.QuadricSmoothingFunctionKernelGradient((*m_oParticleManager.GetParticlePositions())[i] - (*m_oParticleManager.GetParticlePositions())[index], m_dSmoothingLength);
+			}
 		}
         acceleration *= -1.0;
 		acceleration += (1.0 / m_oParticleManager.GetParticleMass()) * m_vBoundaryForce[i];
@@ -160,8 +167,11 @@ void SPHManager::ComputeDensityAndPressure()
 	{
 		for (unsigned int j = 0; j < m_vSphDiscretizations[m_iDiscretizationId].n_neighbors(i); j++)
 		{
-            m_vDensity[i] += m_oParticleManager.GetParticleMass() * m_pSPHKernel.QuadricSmoothingFunctionKernel((*m_oParticleManager.GetParticlePositions())[i] 
-				- (*m_oParticleManager.GetParticlePositions())[m_vSphDiscretizations[m_iDiscretizationId].neighbor(i, j).index], m_dSmoothingLength);
+			if (m_vSphDiscretizations[m_iDiscretizationId].neighbor(i, j).index < m_oParticleManager.GetParticleContainer()->size())
+			{
+				m_vDensity[i] += m_oParticleManager.GetParticleMass() * m_pSPHKernel.QuadricSmoothingFunctionKernel((*m_oParticleManager.GetParticlePositions())[i]
+					- (*m_oParticleManager.GetParticlePositions())[m_vSphDiscretizations[m_iDiscretizationId].neighbor(i, j).index], m_dSmoothingLength);
+			}
 		
 		}
 		m_vPressure[i] = glm::max(m_dStiffness * (m_vDensity[i] - m_dRestDensity), 0.0);
@@ -172,48 +182,49 @@ void SPHManager::ComputeDensityAndPressure()
 void SPHManager::BoundaryForces()
 {
 	std::vector<Eigen::Vector3d>* x = m_oParticleManager.GetParticlePositions(); //particle positions
-	Eigen::Vector3d* b = m_oParticleManager.GetBoundaryPositions(); //boundary positions
-	int bSize = m_oParticleManager.m_iBoundariesPerFaceInOneDirection * m_oParticleManager.m_iBoundariesPerFaceInOneDirection * 6;
 	double dGamma;
 	double q;
 
     auto mk = 1000.0;
 
 
-	for (int i = 0; i < x->size(); i++)
+	for (int i = 0; i < m_oParticleManager.GetParticleContainer()->size(); i++)
 	{
         m_vBoundaryForce[i] = Eigen::Vector3d(0.0, 0.0, 0.0);
-		for (int k = 0; k < bSize; k++)
+		for (int j = 0; j < m_vSphDiscretizations[m_iDiscretizationId].n_neighbors(i); j++)
 		{
-            auto diff = (*x)[i] - b[k];
-			auto distance = diff.norm();
-			q = distance / 0.09;
-			if (0.0 < q && q < 2.0 / 3.0)
+			int k = m_vSphDiscretizations[m_iDiscretizationId].neighbor(i, j).index;
+			if (k >= m_oParticleManager.GetParticleContainer()->size())
 			{
-				dGamma = 2.0 / 3.0;
-			}
-			else if (2.0 / 3.0 < q && q < 1)
-			{
-				dGamma = 2.0 * q - (3.0 / 2.0) * q * q;
-			}
-			else if (1 < q && q < 2)
-			{
-				dGamma = 0.5 * (2 - q) * (2 - q);
-			}
-			else
-			{
-				dGamma = 0;
-			}
+				auto diff = (*x)[i] - (*x)[k];
+				auto distance = diff.norm();
+				q = distance / 0.09;
+				if (0.0 < q && q < 2.0 / 3.0)
+				{
+					dGamma = 2.0 / 3.0;
+				}
+				else if (2.0 / 3.0 < q && q < 1)
+				{
+					dGamma = 2.0 * q - (3.0 / 2.0) * q * q;
+				}
+				else if (1 < q && q < 2)
+				{
+					dGamma = 0.5 * (2 - q) * (2 - q);
+				}
+				else
+				{
+					dGamma = 0;
+				}
 
-            if (distance < DBL_EPSILON) {
-                printf("Fuuu\n");
-            }
+				if (distance < DBL_EPSILON) {
+					printf("Fuuu\n");
+				}
 
-			dGamma *= 0.5 * SPEED_OF_SOUND_POW / distance;
-			m_vBoundaryForce[i] += (mk / (m_oParticleManager.GetParticleMass() + mk)) * dGamma * diff / distance;
+				dGamma *= 0.5 * SPEED_OF_SOUND_POW / distance;
+				m_vBoundaryForce[i] += (mk / (m_oParticleManager.GetParticleMass() + mk)) * dGamma * diff / distance;
+			}
 		}
 
-        //m_vBoundaryForce[i] = Eigen::Vector3d(0.0f, 1.0f, 0.0f);
 	}
 	
 }
