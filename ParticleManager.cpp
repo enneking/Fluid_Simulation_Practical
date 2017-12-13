@@ -209,7 +209,7 @@ void ParticleManager::DrawParticles()
     //boundary 
     glBindVertexArray(Vao);
     glEnableVertexAttribArray(0);
-    glDrawArrays(GL_POINTS, 0, (GLsizei)m_vBoundaryPositions.size());
+   // glDrawArrays(GL_POINTS, 0, (GLsizei)m_vBoundaryPositions.size());
 
 	//Box
  	glUseProgram(m_oShaderManager.getProg(1));
@@ -228,4 +228,33 @@ void ParticleManager::MoveParticles(double dt)
 	{
 		m_vParticlePositions[i] += m_vParticleContainer[i].m_vVelocity * dt;
 	}
+}
+
+
+
+bool ParticleManager::SerialiseStateToFile(std::ofstream& file)
+{
+    std::vector<char> buf;
+
+    buf.resize(sizeof(Eigen::Vector3d) * m_vParticlePositions.size());
+    memcpy(buf.data(), m_vParticlePositions.data(), buf.size());
+
+    auto res = buf.size() > 0 && file.is_open();
+    if (res)
+    {
+        uint64_t bufSize = (uint64_t)m_vParticlePositions.size();
+        file.write((char*)&bufSize, sizeof(uint64_t));
+        file.write(buf.data(), buf.size());
+    }
+
+    return res;
+}
+
+bool ParticleManager::LoadStateFromFile(std::ifstream& file)
+{
+    uint64_t bufSize = 0;
+    file.read((char*)&bufSize, sizeof(uint64_t));
+    m_vParticlePositions.resize(bufSize);
+    file.read((char*)m_vParticlePositions.data(), bufSize * sizeof(Eigen::Vector3d));
+    return false;
 }

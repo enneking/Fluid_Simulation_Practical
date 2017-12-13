@@ -49,6 +49,9 @@ void SimSystem::Run()
     bool multiStep = false;
     size_t numSteps = 0;
 
+    std::ifstream fileIn;
+    std::ofstream fileOut;
+
 	while (glfwGetKey(m_oWindow, GLFW_KEY_ESCAPE) != GLFW_PRESS)
 	{
 		NewTime = std::chrono::system_clock::now();
@@ -58,12 +61,36 @@ void SimSystem::Run()
 		CurrentTime = NewTime;
 		accumulator += LagTime.count();
 
+        bool playFromFile = false;
 
 		while (accumulator >= m_dt)
 		{
 			accumulator -= m_dt;
 
             ImGui_ImplGlfwGL3_NewFrame();
+
+            static char path[512] = "";
+            ImGui::InputText("File", path, 512);
+            ImGui::SameLine();
+            if (ImGui::Button("Play")) {
+                fileIn.open(path, std::ios::in | std::ios::binary);
+                if (!fileIn.is_open()) {
+                    assert(false);
+                }
+                if (fileOut.is_open()) {
+                    fileOut.close();
+                }
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Record")) {
+                fileOut.open(path, std::ios::out | std::ios::binary | std::ios::trunc);
+                if (!fileOut.is_open()) {
+                    assert(false);
+                }
+                if (fileIn.is_open()) {
+                    fileIn.close();
+                }
+            }
 
             ImGui::Checkbox("Run", &multiStep);
             ImGui::SameLine();
@@ -81,8 +108,11 @@ void SimSystem::Run()
             m_oSPHManager.GUI();
 
 
-            if (stepSim || multiStep) {
+            if ((stepSim || multiStep) && !fileIn.is_open()) {
                 m_oSPHManager.Update(m_dt);
+                if (fileOut.is_open()) {
+                    m_oSPHManager.GetParticleManager()->SerialiseStateToFile(fileOut);
+                }
                 numSteps++;
                 stepSim = false;
             }
@@ -95,6 +125,10 @@ void SimSystem::Run()
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		//render our game objects
+        if (fileIn.is_open()) {
+            m_oSPHManager.GetParticleManager()->LoadStateFromFile(fileIn);
+        }
+
 		m_oSPHManager.GetParticleManager()->DrawParticles();
 
         // render UI

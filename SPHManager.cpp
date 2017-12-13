@@ -50,7 +50,7 @@ void SPHManager::Update(double dt)
     BoundaryForces();
     ApplyForces(dt);
 
-    //ApplyViscosity();
+    ApplyViscosity();
 
 	m_oParticleManager.MoveParticles(dt);
 

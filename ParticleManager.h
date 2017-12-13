@@ -10,6 +10,8 @@
 #include "ShaderManager.h"
 #include "Camera.h"
 
+
+
 class SimSystem;
 
 class ParticleManager
@@ -45,11 +47,12 @@ public:
 	std::vector<Eigen::Vector3d>* GetParticlePositions();
 	Eigen::Vector3d* GetBoundaryPositions();
 
-	int m_iBoundariesPerFaceInOneDirection = 15;
+	int m_iBoundariesPerFaceInOneDirection = 25;
 	Eigen::Vector3d m_vBoxLeftLowerBack = Eigen::Vector3d(-1.1f, -1.1f, -1.1f);
 	Eigen::Vector3d m_vBoxRightUpperFront = Eigen::Vector3d(1.1f, 1.1f, 1.1f);
 
-
+    bool SerialiseStateToFile(std::ofstream& file);
+    bool LoadStateFromFile(std::ifstream& file);
 
 private:
 	double m_fParticleMass = 20.0;
