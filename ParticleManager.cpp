@@ -189,12 +189,19 @@ void ParticleManager::DrawParticles()
 
 
 	//Particles
+
+    glm::vec4 red(1.0f, 0.0f, 0.0f, 1.0f);
+    glm::vec4 blue(0.0f, 0.0f, 1.0f, 1.0f);
+
 	glBindVertexArray(m_iVertexArrayObject);
     glBindBuffer(GL_ARRAY_BUFFER, m_iVertexBufferObject);
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Eigen::Vector3d) * m_vParticlePositions.size(), &m_vParticlePositions[0]);
+    
+    glUniform4fv(glGetUniformLocation(m_oShaderManager.getProg(0), "uColor"), 1, &blue[0]);
+	glDrawArrays(GL_POINTS, 0, (GLsizei)m_vParticleContainer.size());
 
-	glDrawArrays(GL_POINTS, 0, (GLsizei)m_vParticlePositions.size());
-
+    //glUniform4fv(glGetUniformLocation(m_oShaderManager.getProg(0), "uColor"), 1, &red[0]);
+    //glDrawArrays(GL_POINTS, (GLsizei)m_vParticleContainer.size(), (GLsizei)m_vParticlePositions.size() - (GLsizei)m_vParticleContainer.size());
 
     //boundary 
    /* glBindVertexArray(Vao);

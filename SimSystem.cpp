@@ -47,7 +47,8 @@ void SimSystem::Run()
 
     bool stepSim = false;
     bool multiStep = false;
-    size_t numSteps = 0;
+    int numSteps = 0;
+    int numStepsToRecord = 100;
 
     std::ifstream fileIn;
     std::ofstream fileOut;
@@ -70,7 +71,7 @@ void SimSystem::Run()
 		    glfwPollEvents();
             ImGui_ImplGlfwGL3_NewFrame();
 
-            static char path[512] = "foo.bin";
+            static char path[512] = "foo.replay";
             ImGui::InputText("File", path, 512);
             ImGui::SameLine();
             if (ImGui::Button("Play")) {
@@ -97,6 +98,15 @@ void SimSystem::Run()
                 if (fileIn.is_open()) {
                     fileIn.close();
                 }
+            }
+
+            ImGui::InputInt("Num steps to record", &numStepsToRecord);
+            numStepsToRecord = numStepsToRecord < 0 ? 0 : numStepsToRecord;
+            if (numSteps > numStepsToRecord) {
+                if (fileOut.is_open()) {
+                    fileOut.close();
+                }
+                stepSim = multiStep = false;
             }
 
             ImGui::Checkbox("Run", &multiStep);

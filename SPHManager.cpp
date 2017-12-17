@@ -52,7 +52,12 @@ void SPHManager::Update(double dt)
 	ComputeDensityAndPressure();
 
     //BoundaryForces();
-    ImprovedBoundaryForceCalculation();
+    if (settings.useImprovedBoundaryHandling) {
+        ImprovedBoundaryForceCalculation();
+    }
+    else {
+        BoundaryForceCalculation();
+    }
     IntegrationStep(dt);
 
 
@@ -119,6 +124,7 @@ void SPHManager::GUI()
             ImGui::DragFloat("Mass", &mass, 0.01f);
             ImGui::DragFloat("Kernel Radius", &radius, 0.01);
             ImGui::DragFloat("Smoothing Length", &smoothingLength, 0.01f, 0.1f, 1.0f);
+            ImGui::Checkbox("Use improved boundary handling", &settings.useImprovedBoundaryHandling);
 
             settings.gravityForce = (double)gravity;
             settings.stiffness = (double)stiffness;
@@ -168,22 +174,24 @@ void SPHManager::ComputeDensityAndPressure()
 
     if (settings.useImprovedBoundaryHandling) {
         ImprovedDensityCalculation();
-        for (int i = 0; i < m_oParticleManager.GetParticleContainer()->size(); i++)
-        {
-            if (!settings.useImprovedBoundaryHandling) {
-                for (unsigned int j = 0; j < m_vSphDiscretizations[m_iDiscretizationId].n_neighbors(i); j++)
-                {
-                    if (m_vSphDiscretizations[m_iDiscretizationId].neighbor(i, j).index < m_oParticleManager.GetParticleContainer()->size())
-                    {
-                        m_state.density[i] += m_oParticleManager.GetParticleMass() * m_pSPHKernel.QuadricSmoothingFunctionKernel((*m_oParticleManager.GetParticlePositions())[i]
-                            - (*m_oParticleManager.GetParticlePositions())[m_vSphDiscretizations[m_iDiscretizationId].neighbor(i, j).index], settings.smoothingLength);
-                    }
-
-                }
-            }
-            m_state.pressure[i] = glm::max(settings.stiffness * (m_state.density[i] - settings.restDensity), 0.0);
-        }
     }
+    for (int i = 0; i < m_oParticleManager.GetParticleContainer()->size(); i++)
+    {
+        if (!settings.useImprovedBoundaryHandling) {
+            for (unsigned int j = 0; j < m_vSphDiscretizations[m_iDiscretizationId].n_neighbors(i); j++)
+            {
+                if (m_vSphDiscretizations[m_iDiscretizationId].neighbor(i, j).index < m_oParticleManager.GetParticleContainer()->size())
+                {
+                    m_state.density[i] += m_oParticleManager.GetParticleMass() * m_pSPHKernel.QuadricSmoothingFunctionKernel((*m_oParticleManager.GetParticlePositions())[i]
+                        - (*m_oParticleManager.GetParticlePositions())[m_vSphDiscretizations[m_iDiscretizationId].neighbor(i, j).index], settings.smoothingLength);
+                }
+
+            }
+        }
+        m_state.pressure[i] = glm::max(settings.stiffness * (m_state.density[i] - settings.restDensity), 0.0);
+    }
+    
+
 }
 
 
