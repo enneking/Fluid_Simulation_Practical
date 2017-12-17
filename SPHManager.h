@@ -4,6 +4,10 @@
 #include "CompactNSearch.h"
 #include "SPHKernel.h"
 
+#include <thread>
+#include <atomic>
+#include <mutex>
+
 class SPHManager
 {
 public:
@@ -65,6 +69,46 @@ private:
 	unsigned int m_iDiscretizationId;
 	std::vector<SPHDiscretization> m_vSphDiscretizations;
 	
+
+
+    typedef void(*TaskFunc)(void*);
+    struct Task
+    {
+        TaskFunc func = nullptr;
+        void* data = nullptr;
+        Task() = default;
+        Task(TaskFunc f, void* d)
+            :   func(f), data(d) {}
+    };
+    struct {
+        std::vector<std::unique_ptr<std::thread>> threads;
+        std::mutex workMutex;
+        std::vector<Task>  workQueue;
+        std::atomic<uint32_t> workQueueSize = 0;
+        std::atomic<bool> exit = false;
+
+       
+        void PushTask(Task work)
+        {
+            {
+                std::lock_guard<std::mutex> lock(workMutex);
+                workQueue.push_back(work);
+            }
+            workQueueSize++;
+        }
+
+        bool FetchTask(Task* outWork)
+        {
+            {
+                std::lock_guard<std::mutex> lock(workMutex);
+                if (workQueue.empty()) { return false; }
+                *outWork = workQueue.back();
+                workQueue.pop_back();
+            }
+            return true;
+        }
+    } m_threadpool;
+
 	SPHKernel   m_pSPHKernel;
 };
 

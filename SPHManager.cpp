@@ -9,6 +9,10 @@ SPHManager::SPHManager()
 
 SPHManager::~SPHManager()
 {
+    m_threadpool.exit = true;
+    for (auto& thread : m_threadpool.threads) {
+        thread->join();
+    }
 }
 
 ParticleManager* SPHManager::GetParticleManager()
@@ -39,6 +43,22 @@ void SPHManager::Init()
     m_precalc.weights.resize(m_oParticleManager.GetParticleContainer()->size() * m_oParticleManager.GetParticlePositions()->size());
     m_precalc.deltaWeights.resize(m_precalc.weights.size());
     m_precalc.psi.resize(m_oParticleManager.GetBoundarieParticleCount());
+
+
+    for (auto i = 0; i < std::thread::hardware_concurrency(); ++i) {
+        m_threadpool.threads.emplace_back(std::make_unique<std::thread>([this] {
+            
+            do {
+                if (m_threadpool.workQueueSize > 0) {
+                    Task task;
+                    if (m_threadpool.FetchTask(&task)) {
+                        task.func(task.data);
+                        m_threadpool.workQueueSize--;
+                    }
+                }
+            } while (!m_threadpool.exit);
+        }));
+    }
     
 }
 
@@ -146,7 +166,7 @@ void SPHManager::GUI()
 
 void SPHManager::IntegrationStep(double dt)
 {
-
+    
 	for (unsigned int i = 0; i < m_oParticleManager.GetParticleContainer()->size(); i++)
 	{
 		Eigen::Vector3d acceleration(0, 0, 0);
