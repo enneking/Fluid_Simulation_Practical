@@ -29,6 +29,7 @@ void ParticleManager::Init(Camera* pCamera)
 	glGenBuffers(1, &m_iVertexBufferObject);
 	glGenVertexArrays(1, &m_iVaoBox);
 	glGenVertexArrays(1, &m_iVaoLine);
+    glGenVertexArrays(1, &Vao);
 
 }
 
@@ -112,7 +113,7 @@ void ParticleManager::SetUpBoundaryBox()
 
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, 0, (void*)0);
-	glDisableVertexAttribArray(0);
+	//glDisableVertexAttribArray(0);
 
 	glGenBuffers(1, &iElementBuffer);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, iElementBuffer);
@@ -128,11 +129,10 @@ void ParticleManager::InitBuffers()
 	glBindVertexArray(m_iVertexArrayObject);
 	glBindBuffer(GL_ARRAY_BUFFER, m_iVertexBufferObject);
 
-	glBufferData(GL_ARRAY_BUFFER, sizeof(Eigen::Vector3d) * m_vParticlePositions.size(), 0, GL_DYNAMIC_DRAW);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Eigen::Vector3d) * m_vParticlePositions.size(), &m_vParticlePositions[0]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(Eigen::Vector3d) * m_vParticlePositions.size(), &m_vParticlePositions[0], GL_DYNAMIC_DRAW);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, 0, (void*)0);
-
+    //glDisableVertexAttribArray(0);
 	
 }
 
@@ -140,7 +140,7 @@ ParticleManager::Particle* ParticleManager::AddParticle(Eigen::Vector3d fInitial
 {
 	m_vParticleContainer.emplace_back();
 	m_vParticlePositions.push_back(fInitialPos);
-	m_vParticleContainer.back().m_pPosition = &m_vParticlePositions.back();
+	m_vParticleContainer.back().m_pPositionIdx = m_vParticlePositions.size() - 1;
     return &m_vParticleContainer.back();
 }
 
@@ -167,19 +167,21 @@ Eigen::Vector3d* ParticleManager::GetBoundaryPositions()
 	return &m_vParticlePositions[m_vParticlePositions.size() - GetBoundarieParticleCount()];
 }
 
-float ParticleManager::GetParticleMass()
+double ParticleManager::GetParticleMass()
 {
 	return m_fParticleMass;
 }
 
-void ParticleManager::SetParticleMass(float value)
+void ParticleManager::SetParticleMass(double value)
 {
 	m_fParticleMass = value;
 }
 
+
+
 void ParticleManager::DrawParticles()
 {
-
+	
 	glUseProgram(m_oShaderManager.getProg(0));
 
 	glm::mat4 ViewProjectionMatrix = m_pCamera->m_mProjectionMatrix * m_pCamera->m_mViewMatrix;
@@ -188,17 +190,16 @@ void ParticleManager::DrawParticles()
 
 	//Particles
 	glBindVertexArray(m_iVertexArrayObject);
+    glBindBuffer(GL_ARRAY_BUFFER, m_iVertexBufferObject);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Eigen::Vector3d) * m_vParticlePositions.size(), &m_vParticlePositions[0]);
 
-	glBindBuffer(GL_ARRAY_BUFFER, m_iVertexBufferObject);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Eigen::Vector3d) * m_vParticlePositions.size(), &m_vParticlePositions[0]);
-	glEnableVertexAttribArray(0);
 	glDrawArrays(GL_POINTS, 0, (GLsizei)m_vParticlePositions.size());
 
 
     //boundary 
-    glBindVertexArray(Vao);
+   /* glBindVertexArray(Vao);
     glEnableVertexAttribArray(0);
-   // glDrawArrays(GL_POINTS, 0, (GLsizei)m_vBoundaryPositions.size());
+    glDrawArrays(GL_POINTS, 0, (GLsizei)m_vBoundaryPositions.size());*/
 
 
 	//Box
@@ -211,15 +212,6 @@ void ParticleManager::DrawParticles()
 
 
 }
-
-void ParticleManager::MoveParticles(double dt)
-{
-	for (int i = 0; i < m_vParticleContainer.size(); i++)
-	{
-		m_vParticlePositions[i] += m_vParticleContainer[i].m_vVelocity * dt;
-	}
-}
-
 
 
 bool ParticleManager::SerialiseStateToFile(std::ofstream& file)
@@ -242,11 +234,12 @@ bool ParticleManager::SerialiseStateToFile(std::ofstream& file)
 
 bool ParticleManager::LoadStateFromFile(std::ifstream& file)
 {
+    if (file.peek() == EOF) { return false; }
     uint64_t bufSize = 0;
     file.read((char*)&bufSize, sizeof(uint64_t));
     m_vParticlePositions.resize(bufSize);
     file.read((char*)m_vParticlePositions.data(), bufSize * sizeof(Eigen::Vector3d));
-    return false;
+    return true;
 }
 
 int ParticleManager::GetBoundarieParticleCount()

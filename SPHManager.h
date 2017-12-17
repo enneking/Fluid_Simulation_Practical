@@ -18,36 +18,47 @@ public:
 
     inline double GetDensityWithIndex(size_t idx)
     {
-        return m_vDensity[idx];
+        return m_state.density[idx];
     }
 
     void GUI();
 
+
+    struct {
+        double gravityForce = -9.81;
+        double stiffness = 1000.0;
+        double simSpeed = 0.01;
+        double SPEED_OF_SOUND_POW = 88.5 * 15;
+        double restDensity = 1000;
+        double particleRadius = .2;
+        double smoothingLength = 1.;
+
+        bool   useImprovedBoundaryHandling = true;
+    } settings;
+
 private:
-	void ApplyForces(double dt);
+	void IntegrationStep(double dt);
     void ApplyViscosity();
-	void BoundaryForces();
 	void ComputeDensityAndPressure();
 
-    
+    void ImprovedDensityCalculation();
+    void ImprovedBoundaryForceCalculation();
+    void PreCalculations();
+
+	void BoundaryForceCalculation();
 
 private:
+    struct {
+        std::vector<double> weights;
+        std::vector<Eigen::Vector3d> deltaWeights;
+        std::vector<double> psi;
+    } m_precalc;
 
-
-	double m_fGravityForce = -9.81;
-	double m_dStiffness = 1000.0;
-	double m_iSimSpeed = 0.01;
-	const double SPEED_OF_SOUND_POW = 88.5 * 88.5;
-	bool m_bRun = true;
-
-	double m_dRestDensity = 1000;
-
-	double m_dRadius = .2;
-
-	std::vector<double> m_vDensity;
-	std::vector<double> m_vPressure;
-	std::vector<Eigen::Vector3d> m_vBoundaryForce;
-	double m_dSmoothingLength = 1.;
+    struct {
+        std::vector<double> density;
+        std::vector<double> pressure;
+        std::vector<Eigen::Vector3d> boundaryForce;
+    } m_state;
 
 	ParticleManager m_oParticleManager;
 	std::unique_ptr<CompactNSearch> m_oCompactNSearch;

@@ -25,7 +25,7 @@ public:
 		~Particle();
 
 		Eigen::Vector3d m_vVelocity = Eigen::Vector3d(0.0, 0.0, 0.0);
-		Eigen::Vector3d* m_pPosition;
+		size_t m_pPositionIdx;  // use indices instead of pointers because reallocation will not invalidate them 
 	};
 
 	void Init(Camera* pCamera);
@@ -38,17 +38,15 @@ public:
 
 	void DrawParticles();
 
-	float GetParticleMass();
-	void SetParticleMass(float value);
-
-	void MoveParticles(double dt);
+	double GetParticleMass();
+	void SetParticleMass(double value);
 
 	std::vector<Particle>* GetParticleContainer();
 	std::vector<Eigen::Vector3d>* GetParticlePositions();
 	Eigen::Vector3d* GetBoundaryPositions();
 	int GetBoundarieParticleCount();
 
-	int m_iBoundariesPerFaceInOneDirection = 25;
+	int m_iBoundariesPerFaceInOneDirection = 40;
 	Eigen::Vector3d m_vBoxLeftLowerBack = Eigen::Vector3d(-1.1f, -1.1f, -1.1f);
 	Eigen::Vector3d m_vBoxRightUpperFront = Eigen::Vector3d(1.1f, 1.1f, 1.1f);
 

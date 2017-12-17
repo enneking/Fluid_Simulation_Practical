@@ -67,12 +67,16 @@ void SimSystem::Run()
 		{
 			accumulator -= m_dt;
 
+		    glfwPollEvents();
             ImGui_ImplGlfwGL3_NewFrame();
 
-            static char path[512] = "";
+            static char path[512] = "foo.bin";
             ImGui::InputText("File", path, 512);
             ImGui::SameLine();
             if (ImGui::Button("Play")) {
+                if (fileIn.is_open()) {
+                    fileIn.close();
+                }
                 fileIn.open(path, std::ios::in | std::ios::binary);
                 if (!fileIn.is_open()) {
                     assert(false);
@@ -83,6 +87,9 @@ void SimSystem::Run()
             }
             ImGui::SameLine();
             if (ImGui::Button("Record")) {
+                if (fileOut.is_open()) {
+                    fileOut.close();
+                }
                 fileOut.open(path, std::ios::out | std::ios::binary | std::ios::trunc);
                 if (!fileOut.is_open()) {
                     assert(false);
@@ -136,8 +143,6 @@ void SimSystem::Run()
         ImGui_ImplGlfwGL3_RenderDrawLists(imguiDrawData);
 
 		glfwSwapBuffers(m_oWindow);
-		glfwPollEvents();
-
 	}
 
     ImGui_ImplGlfwGL3_Shutdown();
