@@ -42,7 +42,6 @@ public:
 
 private:
 	void IntegrationStep(double dt);
-    void ApplyViscosity();
 	void ComputeDensityAndPressure();
 
     void ImprovedDensityCalculation();

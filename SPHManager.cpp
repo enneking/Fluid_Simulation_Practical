@@ -45,9 +45,8 @@ void SPHManager::Init()
     m_precalc.psi.resize(m_oParticleManager.GetBoundarieParticleCount());
 
 
-    for (auto i = 0; i < std::thread::hardware_concurrency(); ++i) {
+    /*for (auto i = 0; i < std::thread::hardware_concurrency() - 1; ++i) {
         m_threadpool.threads.emplace_back(std::make_unique<std::thread>([this] {
-            
             do {
                 if (m_threadpool.workQueueSize > 0) {
                     Task task;
@@ -58,9 +57,33 @@ void SPHManager::Init()
                 }
             } while (!m_threadpool.exit);
         }));
-    }
+    }*/
     
 }
+
+
+
+void ApplyViscosity(ParticleManager::Particle* particles, Eigen::Vector3d* positions, double* densities, size_t numParticles, double particleMass, SPHKernel* kernel, SPHDiscretization* discretization, double smoothingLength)
+{
+    constexpr double epsilon = 0.05;
+    for (auto pidx = 0; pidx < numParticles; ++pidx) {
+        auto& p = particles[pidx];
+        auto vPrime = p.m_vVelocity;
+        for (unsigned int didx = 0; didx < discretization->n_neighbors(pidx); didx++)
+        {
+            int j = discretization->neighbor(pidx, didx).index;
+            if (j < numParticles)
+            {
+
+                vPrime += (particleMass / densities[j]) * (particles[j].m_vVelocity - p.m_vVelocity) * kernel->QuadricSmoothingFunctionKernel(positions[pidx] - positions[j], smoothingLength);
+            }
+        }
+        vPrime *= epsilon;
+        p.m_vVelocity = vPrime;
+    }
+}
+
+
 
 void SPHManager::Update(double dt)
 {
@@ -79,31 +102,9 @@ void SPHManager::Update(double dt)
         BoundaryForceCalculation();
     }
     IntegrationStep(dt);
-
-
+    ApplyViscosity(m_oParticleManager.GetParticleContainer()->data(), m_oParticleManager.GetParticlePositions()->data(), m_state.density.data(), m_oParticleManager.GetParticleContainer()->size(), m_oParticleManager.GetParticleMass(), &m_pSPHKernel, &m_vSphDiscretizations[m_iDiscretizationId], settings.smoothingLength);
 }
 
-
-void SPHManager::ApplyViscosity()
-{
-    constexpr double epsilon = 0.05;
-    auto particles = m_oParticleManager.GetParticleContainer()->data();
-    for (auto pidx = 0; pidx < m_oParticleManager.GetParticleContainer()->size(); ++pidx) {
-        auto& p = particles[pidx];
-        auto vPrime = p.m_vVelocity;
-        for (unsigned int didx = 0; didx < m_vSphDiscretizations[m_iDiscretizationId].n_neighbors(pidx); didx++)
-        {
-			int j = m_vSphDiscretizations[m_iDiscretizationId].neighbor(pidx, didx).index;
-			if (j < m_oParticleManager.GetParticleContainer()->size())
-			{
-				
-				vPrime += (m_oParticleManager.GetParticleMass() / m_state.density[j]) * (particles[j].m_vVelocity - p.m_vVelocity) * m_pSPHKernel.QuadricSmoothingFunctionKernel((*m_oParticleManager.GetParticlePositions())[pidx] - (*m_oParticleManager.GetParticlePositions())[j], settings.smoothingLength);
-			}
-		}
-        vPrime *= epsilon;
-        p.m_vVelocity = vPrime;
-    }
-}
 
 
 
