@@ -32,7 +32,7 @@ public:
         double gravityForce = -9.81;
         double stiffness = 1000.0;
         double simSpeed = 0.01;
-        double SPEED_OF_SOUND_POW = 88.5 * 15;
+        double SPEED_OF_SOUND_POW = 50.0;
         double restDensity = 1000;
         double particleRadius = .2;
         double smoothingLength = 1.;
@@ -52,8 +52,8 @@ private:
 
 private:
     struct {
-        std::vector<double> weights;
-        std::vector<Eigen::Vector3d> deltaWeights;
+		std::vector<std::vector<double>> weights;
+		std::vector<std::vector<Eigen::Vector3d>> deltaWeights;
         std::vector<double> psi;
     } m_precalc;
 
