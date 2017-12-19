@@ -42,8 +42,6 @@ void ParticleManager::SetUpBoundaryBox()
     auto boxHeight = m_vBoxRightUpperFront.y() - m_vBoxLeftLowerBack.y();
     auto boxDepth = m_vBoxRightUpperFront.z() - m_vBoxLeftLowerBack.z();
 
-	m_vParticlePositions.reserve(GetBoundarieParticleCount()+ m_vParticlePositions.size());
-
     for (auto i = 0; i < n; i++) {  // front
         for (auto j = 0; j < n; j++) {
             m_vParticlePositions.push_back({ m_vBoxLeftLowerBack.x() + (boxWidth / (n - 1)) * i,  m_vBoxLeftLowerBack.x() + (boxHeight / (n - 1)) * j, m_vBoxRightUpperFront.z() });   // front
