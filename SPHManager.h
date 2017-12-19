@@ -40,15 +40,27 @@ public:
         bool   useImprovedBoundaryHandling = true;
     } settings;
 
+    struct WorkGroup
+    {
+        size_t particleOffset = 0;
+        size_t particleCount = 0;
+
+        WorkGroup() = default;
+        WorkGroup(size_t offset, size_t count)
+            :   particleOffset(offset), particleCount(count) {}
+    };
+
 private:
-	void IntegrationStep(double dt);
-	void ComputeDensityAndPressure();
+	void IntegrationStep(WorkGroup workGroup, double dt);
+	void ComputeDensityAndPressure(WorkGroup workGroup);
 
-    void ImprovedDensityCalculation();
-    void ImprovedBoundaryForceCalculation();
-    void PreCalculations();
+    void ImprovedDensityCalculation(WorkGroup workGroup);
+    void ImprovedBoundaryForceCalculation(WorkGroup workGroup);
+    void PreCalculations(WorkGroup workGroup);
 
-	void BoundaryForceCalculation();
+	void BoundaryForceCalculation(WorkGroup workGroup);
+
+    void ApplyViscosity(WorkGroup workGroup);
 
 private:
     struct {
@@ -68,7 +80,6 @@ private:
 	unsigned int m_iDiscretizationId;
 	std::vector<SPHDiscretization> m_vSphDiscretizations;
 	
-
 
     typedef void(*TaskFunc)(void*);
     struct Task

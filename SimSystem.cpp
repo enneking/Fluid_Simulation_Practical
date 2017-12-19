@@ -53,7 +53,7 @@ void SimSystem::Run()
     std::ifstream fileIn;
     std::ofstream fileOut;
 
-	while (glfwGetKey(m_oWindow, GLFW_KEY_ESCAPE) != GLFW_PRESS)
+	while (glfwGetKey(m_oWindow, GLFW_KEY_ESCAPE) != GLFW_PRESS && !glfwWindowShouldClose(m_oWindow))
 	{
 		NewTime = std::chrono::system_clock::now();
 		LagTime = std::chrono::duration_cast<std::chrono::duration<double>>(NewTime - CurrentTime);
@@ -113,7 +113,6 @@ void SimSystem::Run()
             ImGui::SameLine();
             if (ImGui::Button("Step")) {
                 stepSim = true;
-                
             }
             ImGui::SameLine();
             ImGui::Text("Num steps: %llu", numSteps);

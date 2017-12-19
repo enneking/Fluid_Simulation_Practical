@@ -22,16 +22,7 @@ void SimProgramm::Run(int argc, char* argv[])
 
 void SimProgramm::InitScene()
 {
-	SimSystem::GetInstance()->GetSPHManager()->GetParticleManager()->GetParticlePositions()->reserve(1000);
-
-	//std::random_device oRandomDevice;
-	//std::mt19937 Gen(oRandomDevice());
-	//std::uniform_real_distribution<double> Dis(-30.0, 30.0);
-	//for (int i = 0; i < 1000; i++)
-	//{
-	//	SimSystem::GetInstance()->GetParticleManager()->AddParticle(Eigen::Vector3d(Dis(Gen), Dis(Gen), Dis(Gen)));
-	//}
-
+	SimSystem::GetInstance()->GetSPHManager()->GetParticleManager()->GetParticlePositions()->reserve(100000);
 
     static constexpr int boxWidth = 20;
 
