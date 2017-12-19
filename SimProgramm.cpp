@@ -22,7 +22,7 @@ void SimProgramm::Run(int argc, char* argv[])
 
 void SimProgramm::InitScene()
 {
-	SimSystem::GetInstance()->GetSPHManager()->GetParticleManager()->GetParticlePositions()->reserve(1000);
+	
 
 	//std::random_device oRandomDevice;
 	//std::mt19937 Gen(oRandomDevice());
@@ -33,7 +33,9 @@ void SimProgramm::InitScene()
 	//}
 
 
-    static constexpr int boxWidth = 20;
+    static constexpr int boxWidth = 5;
+	ParticleManager *x = SimSystem::GetInstance()->GetSPHManager()->GetParticleManager();
+	x->GetParticlePositions()->reserve(6 * x->m_iBoundariesPerFaceInOneDirection * x->m_iBoundariesPerFaceInOneDirection + boxWidth * boxWidth * boxWidth);
 
 	for (int i = 0; i < boxWidth; i++)
 	{
