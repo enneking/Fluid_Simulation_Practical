@@ -20,7 +20,7 @@ void ParticleManager::Init(Camera* pCamera)
 
 	//glEnable(GL_ARB_separate_shader_objects);
 	glEnable(GL_POINT_SMOOTH);
-	glPointSize(4.0f);
+	glPointSize(10.0f);
 	glEnable(GL_LINE_SMOOTH);
 	glLineWidth(10.0f);
 	glEnable(GL_BLEND); 

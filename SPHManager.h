@@ -56,18 +56,18 @@ private:
 
     void ImprovedDensityCalculation(WorkGroup workGroup);
     void ImprovedBoundaryForceCalculation(WorkGroup workGroup);
-    void PreCalculations(WorkGroup workGroup);
+    //void PreCalculations(WorkGroup workGroup);
 
 	void BoundaryForceCalculation(WorkGroup workGroup);
 
     void ApplyViscosity(WorkGroup workGroup);
 
 private:
-    struct {
+    /*struct {
 		std::vector<std::vector<double>> weights;
 		std::vector<std::vector<Eigen::Vector3d>> deltaWeights;
         std::vector<double> psi;
-    } m_precalc;
+    } m_precalc;*/
 
     struct {
         std::vector<double> density;

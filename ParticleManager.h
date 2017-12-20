@@ -46,9 +46,9 @@ public:
 	Eigen::Vector3d* GetBoundaryPositions();
 	int GetBoundarieParticleCount();
 
-	int m_iBoundariesPerFaceInOneDirection = 70;
-	Eigen::Vector3d m_vBoxLeftLowerBack = Eigen::Vector3d(-1.1f, -1.1f, -1.1f);
-	Eigen::Vector3d m_vBoxRightUpperFront = Eigen::Vector3d(1.1f, 1.1f, 1.1f);
+	int m_iBoundariesPerFaceInOneDirection = 200;
+	Eigen::Vector3d m_vBoxLeftLowerBack = Eigen::Vector3d(-2.1f, -1.1f, -1.1f);
+	Eigen::Vector3d m_vBoxRightUpperFront = Eigen::Vector3d(2.1f, 1.1f, 1.1f);
 
     bool SerialiseStateToFile(std::ofstream& file);
     bool LoadStateFromFile(std::ifstream& file);
