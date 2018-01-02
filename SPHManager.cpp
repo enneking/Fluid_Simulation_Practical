@@ -34,11 +34,32 @@ void SPHManager::Init()
 	m_state.pressure.resize(m_oParticleManager.GetParticleContainer()->size());
 	m_state.boundaryForce.resize(m_oParticleManager.GetParticleContainer()->size());
 
-	m_oCompactNSearch = std::make_unique<CompactNSearch>(settings.particleRadius);
-	m_iDiscretizationId = m_oCompactNSearch->add_discretization(
+	m_oCompactNSearch = std::make_unique<CompactNSearch>(settings.smoothingLength * 2.0);
+	m_fluidDiscretizationId = m_oCompactNSearch->add_discretization(
 		&(*m_oParticleManager.GetParticlePositions())[0],
-		m_oParticleManager.GetParticlePositions()->size(),
-		false, true);
+		m_oParticleManager.GetParticleContainer()->size(),
+		true, true);
+    m_boundaryDiscretizationId = m_oCompactNSearch->add_discretization(
+        m_oParticleManager.GetBoundaryPositions(),
+        m_oParticleManager.GetBoundaryParticleCount(),
+        false, false);
+
+    for (auto i = 0; i < m_oParticleManager.GetParticleContainer()->size(); ++i) {
+        m_oParticleManager.GetParticleContainer()->at(i).m_vVelocity = Eigen::Vector3d(0.0, 0.0, 0.0);
+    }
+
+    // @TODO look into why quintic and quadric smoothing function dont work well
+    m_pSPHKernel = new SPH::CubicSplineKernel(settings.smoothingLength);
+
+    double relError = 0.0;
+    for (int i = 0; i < 10; ++i) {
+        auto x = Eigen::Vector3d(1.0, 0.0, 0.0) * (((double)i + 1.0) / 10.0);
+        auto a = m_pSPHKernel->EvaluateGradient(x);
+        auto b = SPH::Kernel::ComputeCentralDifferences(m_pSPHKernel, x);
+        relError += (a - b).norm() / (a.norm());
+    }
+    relError /= 10.0;
+    printf("Avg. relative Error is %.12f\n", relError);
 
     //m_precalc.weights.resize(m_oParticleManager.GetParticlePositions()->size());
     //m_precalc.deltaWeights.resize(m_precalc.weights.size());
@@ -62,59 +83,202 @@ void SPHManager::Init()
 }
 
 
-
-void SPHManager::ApplyViscosity(WorkGroup workGroup)
-{
-    constexpr double epsilon = 0.05;
-
-    auto particles = m_oParticleManager.GetParticleContainer()->data();
-    auto positions = m_oParticleManager.GetBoundaryPositions();
-    auto discretization = &m_vSphDiscretizations[m_iDiscretizationId];
-    auto kernel = &m_pSPHKernel;
-    auto particleMass = m_oParticleManager.GetParticleMass();
-    auto densities = m_state.density.data();
-    auto smoothingLength = settings.smoothingLength;
-
-
-    for (auto pidx = workGroup.particleOffset; pidx < (workGroup.particleCount + workGroup.particleOffset); ++pidx) {
-        auto& p = particles[pidx];
-        auto vPrime = p.m_vVelocity;
-        for (unsigned int didx = 0; didx < discretization->n_neighbors(pidx); didx++)
-        {
-            int j = discretization->neighbor(pidx, didx).index;
-            if (j < (workGroup.particleCount + workGroup.particleOffset))
-            {
-
-                vPrime += (particleMass / densities[j]) * (particles[j].m_vVelocity - p.m_vVelocity) * kernel->QuadricSmoothingFunctionKernel(positions[pidx] - positions[j], smoothingLength);
-            }
-        }
-        vPrime *= epsilon;
-        p.m_vVelocity = vPrime;
-    }
-}
+//
+//void SPHManager::ApplyViscosity(WorkGroup workGroup)
+//{
+//    constexpr double epsilon = 0.05;
+//
+//    auto particles = m_oParticleManager.GetParticleContainer()->data();
+//    auto positions = m_oParticleManager.GetBoundaryPositions();
+//    auto discretization = &m_vSphDiscretizations[m_fluidDiscretizationId];
+//    auto kernel = m_pSPHKernel;
+//    auto particleMass = m_oParticleManager.GetParticleMass();
+//    auto densities = m_state.density.data();
+//    auto smoothingLength = settings.smoothingLength;
+//
+//
+//    for (auto pidx = workGroup.particleOffset; pidx < (workGroup.particleCount + workGroup.particleOffset); ++pidx) {
+//        auto& p = particles[pidx];
+//        auto vPrime = p.m_vVelocity;
+//        for (unsigned int didx = 0; didx < discretization->n_neighbors(pidx); didx++)
+//        {
+//            int j = discretization->neighbor(pidx, didx).index;
+//            if (j < (workGroup.particleCount + workGroup.particleOffset))
+//            {
+//                vPrime += (particleMass / densities[j]) * (particles[j].m_vVelocity - p.m_vVelocity) * kernel->Evaluate(positions[pidx] - positions[j]);
+//            }
+//        }
+//        vPrime *= epsilon;
+//        p.m_vVelocity = vPrime;
+//    }
+//}
 
 
 
 void SPHManager::Update(double dt)
 {
-	dt *= settings.simSpeed;
+	//dt *= settings.simSpeed;
 
-    WorkGroup dynamicGroup(0, m_oParticleManager.GetParticleContainer()->size());
+ //   WorkGroup dynamicGroup(0, m_oParticleManager.GetParticleContainer()->size());
 
-    WorkGroup allGroup(0, m_oParticleManager.GetParticlePositions()->size());
+ //   WorkGroup allGroup(0, m_oParticleManager.GetParticlePositions()->size());
 
-    //PreCalculations(allGroup);
-	ComputeDensityAndPressure(dynamicGroup);
-    //BoundaryForces();
-    if (settings.useImprovedBoundaryHandling) {
-        ImprovedBoundaryForceCalculation(dynamicGroup);
+ //   ComputeNeighborhoods();
+ //   //PreCalculations(allGroup);
+	//ComputeDensityAndPressure(dynamicGroup);
+ //   //BoundaryForces();
+ //   /*if (settings.useImprovedBoundaryHandling) {
+ //       ImprovedBoundaryForceCalculation(dynamicGroup);
+ //   }
+ //   else {
+ //       BoundaryForceCalculation(dynamicGroup);
+ //   }*/
+
+ //   IntegrationStep(dynamicGroup, dt);
+ //   //ApplyViscosity(dynamicGroup);
+
+    const auto numParticles = m_oParticleManager.GetParticleContainer()->size();
+    std::vector<double> density(numParticles, 0.0);
+    std::vector<double> pressure(numParticles, 0.0);
+    
+    double mass = m_oParticleManager.GetParticleMass();
+    
+    static const double stiffness = settings.stiffness;
+    static const double p0 = settings.restDensity;    // rest density
+    static const double smoothingLength = settings.smoothingLength;
+
+    // neighborhood computation
+    m_oCompactNSearch->neighborhood_search();
+    auto& discretizations = m_oCompactNSearch->discretizations();
+
+    // density + pressure computation
+    for (int i = 0; i < numParticles; ++i) {
+
+        auto x_i = m_oParticleManager.GetParticlePositions()->at(i);
+  
+        // get neighbours
+        auto numNeighbors = discretizations[m_fluidDiscretizationId].n_neighbors(i);
+        for (int j = 0; j < numNeighbors; ++j) {
+    
+            auto nID = discretizations[m_fluidDiscretizationId].neighbor(i, j);
+            auto nIndex = nID.index;
+            if (nID.object_id != m_fluidDiscretizationId) continue;
+
+            auto x_j = m_oParticleManager.GetParticlePositions()->at(nIndex);
+            double weight = m_pSPHKernel->Evaluate(x_i - x_j);
+            
+            density[i] += mass * weight;
+        }
+        pressure[i] = glm::max(stiffness * (density[i] - p0), 0.0);
     }
-    else {
-        BoundaryForceCalculation(dynamicGroup);
+
+    // boundary force computation
+    std::vector<Eigen::Vector3d> boundaryForce(numParticles, Eigen::Vector3d(0.0, 0.0, 0.0));
+    for (int i = 0; i < numParticles; ++i) {
+        auto x_i = m_oParticleManager.GetParticlePositions()->at(i);
+
+        auto boundaryPositions = m_oParticleManager.GetBoundaryPositions();
+        static const double h = 0.1;
+        static const double bR = 88.0;
+        static const double boundaryMass = 1.0;
+        const double fluidMass = m_oParticleManager.GetParticleMass();
+
+        auto numNeighbors = discretizations[m_fluidDiscretizationId].n_neighbors(i);
+        for (int j = 0; j < numNeighbors; ++j) {
+
+            auto nID = discretizations[m_fluidDiscretizationId].neighbor(i, j);
+            auto nIndex = nID.index;
+            if (nID.object_id != m_boundaryDiscretizationId) continue;
+            auto k = nIndex;
+
+            //if (k < numParticles) { continue; }
+            //k -= numParticles;
+
+            auto x_k = boundaryPositions[k];    
+
+            auto diff = x_i - x_k;
+            auto dist = diff.norm();
+            auto alpha = bR / dist;
+            auto relMass = boundaryMass / (fluidMass + boundaryMass);
+            
+            auto q = dist / h;
+
+            double x = 0.0;
+            auto a = (1 - x / h) ? x < h : 0.0;
+
+            auto tau = (bR / dist);
+            if (0 < q && q < (2.0 / 3.0)) {
+                tau *= (2.0 / 3.0);
+            }
+            else if ((2.0 / 3.0) < q && q < 1.0) {
+                tau *= (2.0 * q - (3.0 / 2.0) * (q * q));
+            }
+            else if (1.0 < q && q < 2.0) {
+                tau *= 0.5 * (2.0 - q) * (2.0 - q);
+            }
+            else {
+                tau *= 0.0;
+            }
+            auto v = m_oParticleManager.GetParticleContainer()->at(i).m_vVelocity;
+            auto f = relMass * tau * (diff / dist); // *(-diff.normalized().dot(v.normalized()) > 0.0 ? 1.0 : 0.0);
+        
+            boundaryForce[i] += f;
+        }
     }
 
-    IntegrationStep(dynamicGroup, dt);
-    //ApplyViscosity(dynamicGroup);
+
+    // pressure force calculation and integration
+    for (int i = 0; i < numParticles; ++i) {
+        auto x_i = m_oParticleManager.GetParticlePositions()->at(i);
+
+        auto accel = Eigen::Vector3d(0.0, 0.0, 0.0);
+
+        auto numNeighbors = discretizations[m_fluidDiscretizationId].n_neighbors(i);
+        for (int j = 0; j < numNeighbors; ++j) {
+
+            auto nID = discretizations[m_fluidDiscretizationId].neighbor(i, j);
+            auto nIndex = nID.index;
+            if (nID.object_id != m_fluidDiscretizationId) continue;
+
+            auto x_j = m_oParticleManager.GetParticlePositions()->at(nIndex);
+            auto weight = m_pSPHKernel->EvaluateGradient(x_i - x_j);
+            accel += mass * ((pressure[i] / (density[i] * density[i])) + (pressure[nIndex] / (density[nIndex] * density[nIndex]))) * weight;
+        }
+        accel = -accel;
+        accel += Eigen::Vector3d(0.0, -9.81, 0.0);
+        accel += (1.0 / mass) * boundaryForce[i];
+    
+        m_oParticleManager.GetParticleContainer()->at(i).m_vVelocity += accel * dt;
+        auto velocity = m_oParticleManager.GetParticleContainer()->at(i).m_vVelocity;
+        auto displacement = velocity * dt;
+        m_oParticleManager.GetParticlePositions()->at(i) += displacement;
+    }
+
+    // viscosity
+    static const double e = 0.05;
+    for (int i = 0; i < numParticles; ++i) {
+        auto vPrime = Eigen::Vector3d(0.0, 0.0, 0.0);
+
+        auto numNeighbors = discretizations[m_fluidDiscretizationId].n_neighbors(i);
+        for (int j = 0; j < numNeighbors; ++j) {
+
+            auto nID = discretizations[m_fluidDiscretizationId].neighbor(i, j);
+            auto nIndex = nID.index;
+            if (nID.object_id != m_fluidDiscretizationId) continue;
+      
+            auto v_i = m_oParticleManager.GetParticleContainer()->at(i).m_vVelocity;
+            auto v_j = m_oParticleManager.GetParticleContainer()->at(nIndex).m_vVelocity;
+            
+            auto velDiff = Eigen::Vector3d(0.0, 0.0, 0.0);// (v_j - v_i);
+            
+            auto x_i = m_oParticleManager.GetParticlePositions()->at(i);
+            auto x_j = m_oParticleManager.GetParticlePositions()->at(nIndex);
+            auto weight = m_pSPHKernel->Evaluate(x_i - x_j);
+
+            vPrime += (mass / density[nIndex]) * velDiff * weight;
+        }
+        m_oParticleManager.GetParticleContainer()->at(i).m_vVelocity += e * vPrime;
+    }
 
 }
 
@@ -145,30 +309,30 @@ void SPHManager::GUI()
 
             float gravity = (float)settings.gravityForce;
             float stiffness = (float)settings.stiffness;
-            float simSpeed = (float)settings.simSpeed;
+            //float simSpeed = (float)settings.simSpeed;
             float restDens = (float)settings.restDensity;
             float mass = (float)m_oParticleManager.GetParticleMass();
-            float radius = (float)settings.particleRadius;
+            //float radius = (float)settings.particleRadius;
             float smoothingLength = (float)settings.smoothingLength;
 
             ImGui::DragFloat("Gravity", &gravity, 0.01f, -10.0f, 10.0f);
             ImGui::DragFloat("Stiffness", &stiffness, 1.0f);
-            ImGui::DragFloat("Simulation Speed", &simSpeed, 0.01f, 0.0f, 2.0f);
+            //ImGui::DragFloat("Simulation Speed", &simSpeed, 0.01f, 0.0f, 2.0f);
             ImGui::DragFloat("Rest Density", &restDens, 0.01f);
             ImGui::DragFloat("Mass", &mass, 0.01f);
-            ImGui::DragFloat("Kernel Radius", &radius, 0.01);
+            //ImGui::DragFloat("Kernel Radius", &radius, 0.01);
             ImGui::DragFloat("Smoothing Length", &smoothingLength, 0.01f, 0.1f, 1.0f);
             ImGui::Checkbox("Use improved boundary handling", &settings.useImprovedBoundaryHandling);
 
             settings.gravityForce = (double)gravity;
             settings.stiffness = (double)stiffness;
-            settings.simSpeed = (double)simSpeed;
+            //settings.simSpeed = (double)simSpeed;
             settings.restDensity = (double)restDens;
             m_oParticleManager.SetParticleMass((double)mass);
             settings.smoothingLength = smoothingLength;
 
-            settings.particleRadius = (double)radius;
-            m_oCompactNSearch->set_radius(settings.particleRadius);
+            //settings.particleRadius = (double)radius;
+            //m_oCompactNSearch->set_radius(settings.particleRadius);
 
             ImGui::TreePop();
 
@@ -177,214 +341,213 @@ void SPHManager::GUI()
     } ImGui::End();
 }
 
-
-void SPHManager::IntegrationStep(WorkGroup workGroup, double dt)
-{
-    
-	for (unsigned int i = workGroup.particleOffset; i < (workGroup.particleOffset + workGroup.particleCount); i++)
-	{
-		Eigen::Vector3d acceleration(0, 0, 0);
-		for (unsigned int j = 0; (j < m_vSphDiscretizations[m_iDiscretizationId].n_neighbors(i)); j++)
-		{
-			int index = m_vSphDiscretizations[m_iDiscretizationId].neighbor(i, j).index;
-			if (index < (workGroup.particleOffset + workGroup.particleCount))
-			{	
-				acceleration += m_oParticleManager.GetParticleMass() * ((m_state.pressure[i] / (m_state.density[i] * m_state.density[i])) + (m_state.pressure[index] / (m_state.density[index] * m_state.density[index])))
-					* m_pSPHKernel.QuadricSmoothingFunctionKernelGradient((*m_oParticleManager.GetParticlePositions())[i] - (*m_oParticleManager.GetParticlePositions())[index], settings.smoothingLength);
-			}
-		}
-        acceleration *= -1.0;
-		acceleration += (1.0 / m_oParticleManager.GetParticleMass()) * m_state.boundaryForce[i];
-		acceleration[1] += settings.gravityForce;
-		auto vel = m_oParticleManager.GetParticleContainer()->data()[i].m_vVelocity += dt * (acceleration);
-        m_oParticleManager.GetParticlePositions()->at(i) += vel * dt;
-    }
-}
-
-void SPHManager::ComputeDensityAndPressure(WorkGroup workGroup)
-{
-	m_oCompactNSearch->neighborhood_search();
-	m_vSphDiscretizations = m_oCompactNSearch->discretizations();
-
-    if (settings.useImprovedBoundaryHandling) {
-        ImprovedDensityCalculation(workGroup);
-    }
-    for (int i = workGroup.particleOffset; i < (workGroup.particleOffset + workGroup.particleCount); i++)
-    {
-        if (!settings.useImprovedBoundaryHandling) {
-            for (unsigned int j = 0; j < m_vSphDiscretizations[m_iDiscretizationId].n_neighbors(i); j++)
-            {
-                if (m_vSphDiscretizations[m_iDiscretizationId].neighbor(i, j).index < (workGroup.particleOffset + workGroup.particleCount))
-                {
-                    m_state.density[i] += m_oParticleManager.GetParticleMass() * m_pSPHKernel.QuadricSmoothingFunctionKernel((*m_oParticleManager.GetParticlePositions())[i]
-                        - (*m_oParticleManager.GetParticlePositions())[m_vSphDiscretizations[m_iDiscretizationId].neighbor(i, j).index], settings.smoothingLength);
-                }
-
-            }
-        }
-        m_state.pressure[i] = glm::max(settings.stiffness * (m_state.density[i] - settings.restDensity), 0.0);
-    }
-    
-
-}
-
 //
-//void SPHManager::PreCalculations(WorkGroup workGroup)
+//void SPHManager::IntegrationStep(WorkGroup workGroup, double dt)
 //{
-//    //Neighbours
-//    m_oCompactNSearch->neighborhood_search();
-//    m_vSphDiscretizations = m_oCompactNSearch->discretizations();
-//    int Neighbour;
-//
-//     //Weights
-//    for (size_t i = workGroup.particleOffset; i < (workGroup.particleOffset + workGroup.particleCount); i++)
-//    {
+//    
+//	for (unsigned int i = workGroup.particleOffset; i < (workGroup.particleOffset + workGroup.particleCount); i++)
+//	{
+//		Eigen::Vector3d acceleration(0, 0, 0);
+//		for (unsigned int j = 0; (j < m_vSphDiscretizations[m_fluidDiscretizationId].n_neighbors(i)); j++)
 //		{
-//			m_precalc.weights[i].resize(m_precalc.weights[i].size() + m_vSphDiscretizations[m_iDiscretizationId].n_neighbors(i));
-//			m_precalc.deltaWeights[i].resize(m_precalc.weights[i].size());
+//			int index = m_vSphDiscretizations[m_fluidDiscretizationId].neighbor(i, j).index;
+//			if (index < (workGroup.particleOffset + workGroup.particleCount))
+//			{	
+//				acceleration += m_oParticleManager.GetParticleMass() * ((m_state.pressure[i] / (m_state.density[i] * m_state.density[i])) + (m_state.pressure[index] / (m_state.density[index] * m_state.density[index])))
+//					* m_pSPHKernel->EvaluateGradient((*m_oParticleManager.GetParticlePositions())[i] - (*m_oParticleManager.GetParticlePositions())[index]);
+//			}
 //		}
-//        for (size_t j = 0; j < m_vSphDiscretizations[m_iDiscretizationId].n_neighbors(i); j++)
-//        {
-//            Neighbour = m_vSphDiscretizations[m_iDiscretizationId].neighbor(i, j).index;
-//
-//            m_precalc.weights[i][j] = m_pSPHKernel.QuadricSmoothingFunctionKernel((*m_oParticleManager.GetParticlePositions())[i] - (*m_oParticleManager.GetParticlePositions())[Neighbour], settings.smoothingLength);
-//            m_precalc.deltaWeights[i][j] = m_pSPHKernel.QuadricSmoothingFunctionKernelGradient((*m_oParticleManager.GetParticlePositions())[i] - (*m_oParticleManager.GetParticlePositions())[Neighbour], settings.smoothingLength);
-//
-//        }
-//    }
-//
-//    //BoundaryPsi
-//    int PsiIndex;
-//    //assert(false);  // @TODO THE FOLLOWING CODE DOESNT CONSIDER WORK GROUP RANGE AT ALL
-//    for (size_t i = m_oParticleManager.GetParticleContainer()->size(); i < m_oParticleManager.GetParticlePositions()->size(); i++)
-//    {
-//        PsiIndex = i - m_oParticleManager.GetParticleContainer()->size();
-//        for (size_t j = 0; j < m_vSphDiscretizations[m_iDiscretizationId].n_neighbors(i); j++)
-//        {
-//            Neighbour = m_vSphDiscretizations[m_iDiscretizationId].neighbor(i, j).index;
-//            if (Neighbour >= m_oParticleManager.GetParticleContainer()->size())
-//            {
-//                m_precalc.psi[PsiIndex] += m_precalc.weights[i][j];
-//            }
-//        }
-//        m_precalc.psi[PsiIndex] = (1 / m_precalc.psi[PsiIndex]) * settings.restDensity;
+//        acceleration *= -1.0;
+//		acceleration += (1.0 / m_oParticleManager.GetParticleMass()) * m_state.boundaryForce[i];
+//		acceleration[1] += settings.gravityForce;
+//		auto vel = m_oParticleManager.GetParticleContainer()->data()[i].m_vVelocity += dt * (acceleration);
+//        m_oParticleManager.GetParticlePositions()->at(i) += vel * dt;
 //    }
 //}
-
-void SPHManager::ImprovedDensityCalculation(WorkGroup workGroup)
-{
-    int Neighbour;
-    double Psi, V;
-    float WeightSum = 0;
-    // @TODO doesn't work with work groups here
-    for (size_t i = workGroup.particleOffset; i < (workGroup.particleOffset + workGroup.particleCount); i++)
-    {
-        m_state.density[i] = 0;
-        for (size_t j = 0; j < m_vSphDiscretizations[m_iDiscretizationId].n_neighbors(i); j++)
-        {
-            Neighbour = m_vSphDiscretizations[m_iDiscretizationId].neighbor(i, j).index;
-
-            auto weight = m_pSPHKernel.QuadricSmoothingFunctionKernel((*m_oParticleManager.GetParticlePositions())[i] - (*m_oParticleManager.GetParticlePositions())[Neighbour], settings.smoothingLength);
-
-            //fluid neighbours
-            if (Neighbour < (workGroup.particleOffset + workGroup.particleCount))
-            {
-                //m_state.density[i] += m_oParticleManager.GetParticleMass() * m_precalc.weights[i][j];
-                m_state.density[i] += m_oParticleManager.GetParticleMass() * weight;
-            }
-
-            //boundary Neighbours
-            else
-            {
-                //m_state.density[i] += m_precalc.psi[Neighbour - m_oParticleManager.GetParticleContainer()->size()] * m_precalc.weights[i][j];#
-                double psi = 0.0;
-                for (auto k = 0; k < m_vSphDiscretizations[m_iDiscretizationId].n_neighbors(Neighbour); k++) {
-                    auto localWeight = m_pSPHKernel.QuadricSmoothingFunctionKernel((*m_oParticleManager.GetParticlePositions())[Neighbour] - (*m_oParticleManager.GetParticlePositions())[k], settings.smoothingLength);
-                    psi += localWeight;
-                }
-                psi = (1.0 / psi) * settings.restDensity;
-                m_state.density[i] += psi * weight;
-            }
-        }
-    }
-}
-
-void SPHManager::ImprovedBoundaryForceCalculation(WorkGroup workGroup)
-{
-    int Neighbour;
-    for (size_t i = workGroup.particleOffset; i < (workGroup.particleOffset + workGroup.particleCount); i++)
-    {
-        m_state.boundaryForce[i];
-        for (size_t j = 0; j < m_vSphDiscretizations[m_iDiscretizationId].n_neighbors(i); j++)
-        {
-            Neighbour = m_vSphDiscretizations[m_iDiscretizationId].neighbor(i, j).index;
-            if (Neighbour >= (workGroup.particleOffset + workGroup.particleCount))
-            {
-                //m_state.boundaryForce[i] -= m_oParticleManager.GetParticleMass() * m_precalc.psi[Neighbour - m_oParticleManager.GetParticleContainer()->size()]
-                //    * m_precalc.deltaWeights[i][j] * m_state.pressure[i] / (m_state.density[i] * m_state.density[i]);
-                double psi = 0.0;
-                for (auto k = 0; k < m_vSphDiscretizations[m_iDiscretizationId].n_neighbors(Neighbour); k++) {
-                    auto localWeight = m_pSPHKernel.QuadricSmoothingFunctionKernel((*m_oParticleManager.GetParticlePositions())[Neighbour] - (*m_oParticleManager.GetParticlePositions())[k], settings.smoothingLength);
-                    psi += localWeight;
-                }
-                psi = (1.0 / psi) * settings.restDensity;
-
-                auto deltaWeight = m_pSPHKernel.QuadricSmoothingFunctionKernelGradient((*m_oParticleManager.GetParticlePositions())[i] - (*m_oParticleManager.GetParticlePositions())[Neighbour], settings.smoothingLength);
-
-                m_state.boundaryForce[i] -= m_oParticleManager.GetParticleMass() * psi
-                    * deltaWeight * m_state.pressure[i] / (m_state.density[i] * m_state.density[i]);
-            }
-        }
-    }
-}
-
-
-void SPHManager::BoundaryForceCalculation(WorkGroup workGroup)
-{
-	std::vector<Eigen::Vector3d>* x = m_oParticleManager.GetParticlePositions(); //particle positions
-	double dGamma;
-	double q;
-
-    auto mk = 1000.0;
-
-
-	for (int i = workGroup.particleOffset; i < (workGroup.particleOffset + workGroup.particleCount); i++)
-	{
-        m_state.boundaryForce[i] = Eigen::Vector3d(0.0, 0.0, 0.0);
-		for (int j = 0; j < m_vSphDiscretizations[m_iDiscretizationId].n_neighbors(i); j++)
-		{
-			int k = m_vSphDiscretizations[m_iDiscretizationId].neighbor(i, j).index;
-			if (k >= (workGroup.particleOffset + workGroup.particleCount))
-			{
-				auto diff = (*x)[i] - (*x)[k];
-				auto distance = diff.norm();
-				q = distance / 1;
-				if (0.0 < q && q < 2.0 / 3.0)
-				{
-					dGamma = 2.0 / 3.0;
-				}
-				else if (2.0 / 3.0 < q && q < 1)
-				{
-					dGamma = 2.0 * q - (3.0 / 2.0) * q * q;
-				}
-				else if (1 < q && q < 2)
-				{
-					dGamma = 0.5 * (2 - q) * (2 - q);
-				}
-				else
-				{
-					dGamma = 0;
-				}
-
-				if (distance < DBL_EPSILON) {
-					//printf("Fuuu\n");
-				}
-
-				dGamma *= 0.08 * settings.SPEED_OF_SOUND_POW / distance;
-				m_state.boundaryForce[i] += (mk / (m_oParticleManager.GetParticleMass() + mk)) * dGamma * diff / distance;
-			}
-		}
-
-	}
-	
-}
+//
+//void SPHManager::ComputeNeighborhoods()
+//{
+//    m_oCompactNSearch->neighborhood_search();
+//    m_vSphDiscretizations = m_oCompactNSearch->discretizations();
+//}
+//
+//void SPHManager::ComputeDensityAndPressure(WorkGroup workGroup)
+//{
+//    /*if (settings.useImprovedBoundaryHandling) {
+//        ImprovedDensityCalculation(workGroup);
+//    }*/
+//    for (int i = workGroup.particleOffset; i < (workGroup.particleOffset + workGroup.particleCount); i++)
+//    {
+//        if (!settings.useImprovedBoundaryHandling) {
+//            for (unsigned int j = 0; j < m_vSphDiscretizations[m_fluidDiscretizationId].n_neighbors(i); j++)
+//            {
+//                //if (m_vSphDiscretizations[m_iDiscretizationId].neighbor(i, j).index < (workGroup.particleOffset + workGroup.particleCount))
+//                //{
+//                    m_state.density[i] += m_oParticleManager.GetParticleMass() * m_pSPHKernel->Evaluate((*m_oParticleManager.GetParticlePositions())[i]
+//                        - (*m_oParticleManager.GetParticlePositions())[m_vSphDiscretizations[m_fluidDiscretizationId].neighbor(i, j).index]);
+//                //}
+//
+//            }
+//        }
+//        m_state.pressure[i] = glm::max(settings.stiffness * (m_state.density[i] - settings.restDensity), 0.0);
+//    }
+//    
+//
+//}
+//
+////
+////void SPHManager::PreCalculations(WorkGroup workGroup)
+////{
+////      int Neighbour;
+////
+////     //Weights
+////    for (size_t i = workGroup.particleOffset; i < (workGroup.particleOffset + workGroup.particleCount); i++)
+////    {
+////		{
+////			m_precalc.weights[i].resize(m_precalc.weights[i].size() + m_vSphDiscretizations[m_iDiscretizationId].n_neighbors(i));
+////			m_precalc.deltaWeights[i].resize(m_precalc.weights[i].size());
+////		}
+////        for (size_t j = 0; j < m_vSphDiscretizations[m_iDiscretizationId].n_neighbors(i); j++)
+////        {
+////            Neighbour = m_vSphDiscretizations[m_iDiscretizationId].neighbor(i, j).index;
+////
+////            m_precalc.weights[i][j] = m_pSPHKernel.QuadricSmoothingFunctionKernel((*m_oParticleManager.GetParticlePositions())[i] - (*m_oParticleManager.GetParticlePositions())[Neighbour], settings.smoothingLength);
+////            m_precalc.deltaWeights[i][j] = m_pSPHKernel.QuadricSmoothingFunctionKernelGradient((*m_oParticleManager.GetParticlePositions())[i] - (*m_oParticleManager.GetParticlePositions())[Neighbour], settings.smoothingLength);
+////
+////        }
+////    }
+////
+////    //BoundaryPsi
+////    int PsiIndex;
+////    //assert(false);  // @TODO THE FOLLOWING CODE DOESNT CONSIDER WORK GROUP RANGE AT ALL
+////    for (size_t i = m_oParticleManager.GetParticleContainer()->size(); i < m_oParticleManager.GetParticlePositions()->size(); i++)
+////    {
+////        PsiIndex = i - m_oParticleManager.GetParticleContainer()->size();
+////        for (size_t j = 0; j < m_vSphDiscretizations[m_iDiscretizationId].n_neighbors(i); j++)
+////        {
+////            Neighbour = m_vSphDiscretizations[m_iDiscretizationId].neighbor(i, j).index;
+////            if (Neighbour >= m_oParticleManager.GetParticleContainer()->size())
+////            {
+////                m_precalc.psi[PsiIndex] += m_precalc.weights[i][j];
+////            }
+////        }
+////        m_precalc.psi[PsiIndex] = (1 / m_precalc.psi[PsiIndex]) * settings.restDensity;
+////    }
+////}
+//
+//void SPHManager::ImprovedDensityCalculation(WorkGroup workGroup)
+//{
+//    int Neighbour;
+//    double Psi, V;
+//    float WeightSum = 0;
+//    // @TODO doesn't work with work groups here
+//    for (size_t i = workGroup.particleOffset; i < (workGroup.particleOffset + workGroup.particleCount); i++)
+//    {
+//        m_state.density[i] = 0;
+//        for (size_t j = 0; j < m_vSphDiscretizations[m_fluidDiscretizationId].n_neighbors(i); j++)
+//        {
+//            Neighbour = m_vSphDiscretizations[m_fluidDiscretizationId].neighbor(i, j).index;
+//
+//            auto weight = m_pSPHKernel->Evaluate((*m_oParticleManager.GetParticlePositions())[i] - (*m_oParticleManager.GetParticlePositions())[Neighbour]);
+//
+//            //fluid neighbours
+//            if (Neighbour < (workGroup.particleOffset + workGroup.particleCount))
+//            {
+//                //m_state.density[i] += m_oParticleManager.GetParticleMass() * m_precalc.weights[i][j];
+//                m_state.density[i] += m_oParticleManager.GetParticleMass() * weight;
+//            }
+//
+//            //boundary Neighbours
+//            else
+//            {
+//                //m_state.density[i] += m_precalc.psi[Neighbour - m_oParticleManager.GetParticleContainer()->size()] * m_precalc.weights[i][j];#
+//                double psi = 0.0;
+//                for (auto k = 0; k < m_vSphDiscretizations[m_fluidDiscretizationId].n_neighbors(Neighbour); k++) {
+//                    auto localWeight = m_pSPHKernel->Evaluate((*m_oParticleManager.GetParticlePositions())[Neighbour] - (*m_oParticleManager.GetParticlePositions())[m_vSphDiscretizations[m_fluidDiscretizationId].neighbor(Neighbour, k).index]);
+//                    psi += localWeight;
+//                }
+//                psi = (1.0 / psi) * settings.restDensity;
+//                m_state.density[i] += psi * weight;
+//            }
+//        }
+//    }
+//}
+//
+//void SPHManager::ImprovedBoundaryForceCalculation(WorkGroup workGroup)
+//{
+//    int Neighbour;
+//    for (size_t i = workGroup.particleOffset; i < (workGroup.particleOffset + workGroup.particleCount); i++)
+//    {
+//        m_state.boundaryForce[i].setZero();
+//        for (size_t j = 0; j < m_vSphDiscretizations[m_fluidDiscretizationId].n_neighbors(i); j++)
+//        {
+//            Neighbour = m_vSphDiscretizations[m_fluidDiscretizationId].neighbor(i, j).index;
+//            if (Neighbour >= (workGroup.particleOffset + workGroup.particleCount))
+//            {
+//                //m_state.boundaryForce[i] -= m_oParticleManager.GetParticleMass() * m_precalc.psi[Neighbour - m_oParticleManager.GetParticleContainer()->size()]
+//                //    * m_precalc.deltaWeights[i][j] * m_state.pressure[i] / (m_state.density[i] * m_state.density[i]);
+//                double psi = 0.0;
+//                for (auto k = 0; k < m_vSphDiscretizations[m_fluidDiscretizationId].n_neighbors(Neighbour); k++) {
+//                    auto localWeight = m_pSPHKernel->Evaluate((*m_oParticleManager.GetParticlePositions())[Neighbour] - (*m_oParticleManager.GetParticlePositions())[m_vSphDiscretizations[m_fluidDiscretizationId].neighbor(Neighbour, k).index]);
+//                    psi += localWeight;
+//                }
+//                psi = (1.0 / psi) * settings.restDensity;
+//
+//                auto deltaWeight = m_pSPHKernel->EvaluateGradient((*m_oParticleManager.GetParticlePositions())[i] - (*m_oParticleManager.GetParticlePositions())[Neighbour]);
+//
+//                m_state.boundaryForce[i] -= m_oParticleManager.GetParticleMass() * psi
+//                    * deltaWeight * m_state.pressure[i] / (m_state.density[i] * m_state.density[i]);
+//            }
+//        }
+//    }
+//}
+//
+//
+//void SPHManager::BoundaryForceCalculation(WorkGroup workGroup)
+//{
+//	std::vector<Eigen::Vector3d>* x = m_oParticleManager.GetParticlePositions(); //particle positions
+//	double dGamma;
+//	double q;
+//
+//    auto mk = 1000.0;
+//
+//	for (int i = workGroup.particleOffset; i < (workGroup.particleOffset + workGroup.particleCount); i++)
+//	{
+//        m_state.boundaryForce[i] = Eigen::Vector3d(0.0, 0.0, 0.0);
+//		for (int j = 0; j < m_vSphDiscretizations[m_fluidDiscretizationId].n_neighbors(i); j++)
+//		{
+//			int k = m_vSphDiscretizations[m_fluidDiscretizationId].neighbor(i, j).index;
+//			if (k >= (workGroup.particleOffset + workGroup.particleCount))
+//			{
+//				auto diff = (*x)[i] - (*x)[k];
+//				auto distance = diff.norm();
+//				q = distance / 1;
+//				if (0.0 < q && q < 2.0 / 3.0)
+//				{
+//					dGamma = 2.0 / 3.0;
+//				}
+//				else if (2.0 / 3.0 < q && q < 1)
+//				{
+//					dGamma = 2.0 * q - (3.0 / 2.0) * q * q;
+//				}
+//				else if (1 < q && q < 2)
+//				{
+//					dGamma = 0.5 * (2 - q) * (2 - q);
+//				}
+//				else
+//				{
+//					dGamma = 0;
+//				}
+//
+//				if (distance < DBL_EPSILON) {
+//					//printf("Fuuu\n");
+//				}
+//
+//				dGamma *= 0.08 * settings.SPEED_OF_SOUND_POW / distance;
+//				m_state.boundaryForce[i] += (mk / (m_oParticleManager.GetParticleMass() + mk)) * dGamma * diff / distance;
+//			}
+//		}
+//
+//	}
+//	
+//}

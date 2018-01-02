@@ -35,13 +35,17 @@ void SimProgramm::InitScene()
 	ParticleManager *x = SimSystem::GetInstance()->GetSPHManager()->GetParticleManager();
 	x->GetParticlePositions()->reserve(6 * x->m_iBoundariesPerFaceInOneDirection * x->m_iBoundariesPerFaceInOneDirection + boxWidth * boxWidth * boxWidth);
 
+    //SimSystem::GetInstance()->GetSPHManager()->GetParticleManager()->AddParticle(Eigen::Vector3d(0.0f, 0.5f, 0.0f));
+    //SimSystem::GetInstance()->GetSPHManager()->GetParticleManager()->AddParticle(Eigen::Vector3d(0.0f, 0.25f, 0.0f));
+
+
 	for (int i = 0; i < boxWidth; i++)
 	{
 		for (int j = 0; j < boxWidth; j++)
 		{	
 			for (int k = 0; k < boxWidth; k++)
 			{
-                auto pos = Eigen::Vector3d((i - (boxWidth / 2)) * 0.07f, (j - (boxWidth / 2)) * 0.07f, (k - (boxWidth / 2)) * 0.07f);
+                auto pos = Eigen::Vector3d((i - (boxWidth / 2)) * 0.1, (j - (boxWidth / 2)) * 0.1, (k - (boxWidth / 2)) * 0.1);
                 pos += Eigen::Vector3d(1.0, 0.0, 0.0);
 				SimSystem::GetInstance()->GetSPHManager()->GetParticleManager()->AddParticle(pos);
 			}

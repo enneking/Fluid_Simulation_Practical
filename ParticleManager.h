@@ -44,17 +44,18 @@ public:
 	std::vector<Particle>* GetParticleContainer();
 	std::vector<Eigen::Vector3d>* GetParticlePositions();
 	Eigen::Vector3d* GetBoundaryPositions();
-	int GetBoundarieParticleCount();
+	int GetBoundaryParticleCount();
+
 
 	int m_iBoundariesPerFaceInOneDirection = 200;
-	Eigen::Vector3d m_vBoxLeftLowerBack = Eigen::Vector3d(-2.1f, -1.1f, -1.1f);
-	Eigen::Vector3d m_vBoxRightUpperFront = Eigen::Vector3d(2.1f, 1.1f, 1.1f);
+	Eigen::Vector3d m_vBoxLeftLowerBack = Eigen::Vector3d(-2.1f, -1.2f, -2.1f);
+	Eigen::Vector3d m_vBoxRightUpperFront = Eigen::Vector3d(2.1f, 2.1f, 2.1f);
 
     bool SerialiseStateToFile(std::ofstream& file);
     bool LoadStateFromFile(std::ifstream& file);
 
 private:
-	double m_fParticleMass = 20.0;
+	double m_fParticleMass = 1.0;
 	std::vector<Particle> m_vParticleContainer;
 	std::vector<Eigen::Vector3d> m_vParticlePositions;
 

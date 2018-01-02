@@ -28,7 +28,7 @@ private:
 
 	static SimSystem* s_oSimSystem;
 
-	const double m_dt = 1.0 / 240.0;
+	const double m_dt = 1.0 / 800.0;
 
 };
 

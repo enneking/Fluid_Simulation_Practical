@@ -44,8 +44,8 @@ void ParticleManager::SetUpBoundaryBox()
 
     for (auto i = 0; i < n; i++) {  // front
         for (auto j = 0; j < n; j++) {
-            m_vParticlePositions.push_back({ m_vBoxLeftLowerBack.x() + (boxWidth / (n - 1)) * i,  m_vBoxLeftLowerBack.x() + (boxHeight / (n - 1)) * j, m_vBoxRightUpperFront.z() });   // front
-			m_vParticlePositions.push_back({ m_vBoxLeftLowerBack.x() + (boxWidth / (n - 1)) * i,  m_vBoxLeftLowerBack.x() + (boxHeight / (n - 1)) * j, m_vBoxLeftLowerBack.z() });     // back
+            m_vParticlePositions.push_back({ m_vBoxLeftLowerBack.x() + (boxWidth / (n - 1)) * i,  m_vBoxLeftLowerBack.y() + (boxHeight / (n - 1)) * j, m_vBoxRightUpperFront.z() });   // front
+			m_vParticlePositions.push_back({ m_vBoxLeftLowerBack.x() + (boxWidth / (n - 1)) * i,  m_vBoxLeftLowerBack.y() + (boxHeight / (n - 1)) * j, m_vBoxLeftLowerBack.z() });     // back
 			m_vParticlePositions.push_back({ m_vBoxRightUpperFront.x(), m_vBoxLeftLowerBack.y() + (boxHeight / (n - 1)) * i,  m_vBoxLeftLowerBack.z() + (boxDepth / (n - 1)) * j });   // right
 			m_vParticlePositions.push_back({ m_vBoxLeftLowerBack.x(), m_vBoxLeftLowerBack.y() + (boxHeight / (n - 1)) * i,  m_vBoxLeftLowerBack.z() + (boxDepth / (n - 1)) * j });   // left
 			m_vParticlePositions.push_back({ m_vBoxLeftLowerBack.x() + (boxWidth / (n - 1)) * i,  m_vBoxLeftLowerBack.y(), m_vBoxLeftLowerBack.z() + (boxDepth / (n - 1)) * j });   // bottom
@@ -162,7 +162,7 @@ std::vector<Eigen::Vector3d>* ParticleManager::GetParticlePositions()
 
 Eigen::Vector3d* ParticleManager::GetBoundaryPositions()
 {
-	return &m_vParticlePositions[m_vParticlePositions.size() - GetBoundarieParticleCount()];
+	return &m_vParticlePositions[m_vParticlePositions.size() - GetBoundaryParticleCount()];
 }
 
 double ParticleManager::GetParticleMass()
@@ -195,12 +195,14 @@ void ParticleManager::DrawParticles()
     glBindBuffer(GL_ARRAY_BUFFER, m_iVertexBufferObject);
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Eigen::Vector3d) * m_vParticlePositions.size(), &m_vParticlePositions[0]);
     
+    glUniform4fv(glGetUniformLocation(m_oShaderManager.getProg(0), "uColor"), 1, &red[0]);
+    glDrawArrays(GL_POINTS, (GLsizei)m_vParticleContainer.size() + 1, (GLsizei)m_vParticlePositions.size() - (GLsizei)m_vParticleContainer.size() - 1);
+    
+
     glUniform4fv(glGetUniformLocation(m_oShaderManager.getProg(0), "uColor"), 1, &blue[0]);
 	glDrawArrays(GL_POINTS, 0, (GLsizei)m_vParticleContainer.size());
 
-    //glUniform4fv(glGetUniformLocation(m_oShaderManager.getProg(0), "uColor"), 1, &red[0]);
-    //glDrawArrays(GL_POINTS, (GLsizei)m_vParticleContainer.size(), (GLsizei)m_vParticlePositions.size() - (GLsizei)m_vParticleContainer.size());
-
+    
     //boundary 
    /* glBindVertexArray(Vao);
     glEnableVertexAttribArray(0);
@@ -247,7 +249,7 @@ bool ParticleManager::LoadStateFromFile(std::ifstream& file)
     return true;
 }
 
-int ParticleManager::GetBoundarieParticleCount()
+int ParticleManager::GetBoundaryParticleCount()
 {
 	return m_iBoundaryCount;
 }

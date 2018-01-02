@@ -64,77 +64,74 @@ void SimSystem::Run()
 
         bool playFromFile = false;
 
-		while (accumulator >= m_dt)
-		{
-			accumulator -= m_dt;
 
-		    glfwPollEvents();
-            ImGui_ImplGlfwGL3_NewFrame();
+		glfwPollEvents();
+        ImGui_ImplGlfwGL3_NewFrame();
 
-            static char path[512] = "foo.replay";
-            ImGui::InputText("File", path, 512);
-            ImGui::SameLine();
-            if (ImGui::Button("Play")) {
-                if (fileIn.is_open()) {
-                    fileIn.close();
-                }
-                fileIn.open(path, std::ios::in | std::ios::binary);
-                if (!fileIn.is_open()) {
-                    assert(false);
-                }
-                if (fileOut.is_open()) {
-                    fileOut.close();
-                }
+        static char path[512] = "foo.replay";
+        ImGui::InputText("File", path, 512);
+        ImGui::SameLine();
+        if (ImGui::Button("Play")) {
+            if (fileIn.is_open()) {
+                fileIn.close();
             }
-            ImGui::SameLine();
-            if (ImGui::Button("Record")) {
-                if (fileOut.is_open()) {
-                    fileOut.close();
-                }
-                fileOut.open(path, std::ios::out | std::ios::binary | std::ios::trunc);
-                if (!fileOut.is_open()) {
-                    assert(false);
-                }
-                if (fileIn.is_open()) {
-                    fileIn.close();
-                }
+            fileIn.open(path, std::ios::in | std::ios::binary);
+            if (!fileIn.is_open()) {
+                assert(false);
             }
-
-            ImGui::InputInt("Num steps to record", &numStepsToRecord);
-            numStepsToRecord = numStepsToRecord < 0 ? 0 : numStepsToRecord;
-            if (numSteps > numStepsToRecord) {
-                if (fileOut.is_open()) {
-                    fileOut.close();
-                }
-                stepSim = multiStep = false;
+            if (fileOut.is_open()) {
+                fileOut.close();
             }
-
-            ImGui::Checkbox("Run", &multiStep);
-            ImGui::SameLine();
-            if (ImGui::Button("Step")) {
-                stepSim = true;
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Record")) {
+            if (fileOut.is_open()) {
+                fileOut.close();
             }
-            ImGui::SameLine();
-            ImGui::Text("Num steps: %llu", numSteps);
+            fileOut.open(path, std::ios::out | std::ios::binary | std::ios::trunc);
+            if (!fileOut.is_open()) {
+                assert(false);
+            }
+            if (fileIn.is_open()) {
+                fileIn.close();
+            }
+        }
 
-            //ImGui::ShowTestWindow();
+        ImGui::InputInt("Num steps to record", &numStepsToRecord);
+        numStepsToRecord = numStepsToRecord < 0 ? 0 : numStepsToRecord;
+        if (numSteps > numStepsToRecord) {
+            if (fileOut.is_open()) {
+                fileOut.close();
+            }
+            stepSim = multiStep = false;
+        }
+
+        ImGui::Checkbox("Run", &multiStep);
+        ImGui::SameLine();
+        if (ImGui::Button("Step")) {
+            stepSim = true;
+        }
+        ImGui::SameLine();
+        ImGui::Text("Num steps: %llu", numSteps);
+
+        //ImGui::ShowTestWindow();
             
-			m_oCamera.Update(m_oWindow);
+		m_oCamera.Update(m_oWindow);
 
-            m_oSPHManager.GUI();
+        m_oSPHManager.GUI();
 
 
-            if ((stepSim || multiStep) && !fileIn.is_open()) {
-                m_oSPHManager.Update(m_dt);
-                if (fileOut.is_open()) {
-                    m_oSPHManager.GetParticleManager()->SerialiseStateToFile(fileOut);
-                }
-                numSteps++;
-                stepSim = false;
+        if ((stepSim || multiStep) && !fileIn.is_open()) {
+            m_oSPHManager.Update(m_dt);
+            if (fileOut.is_open()) {
+                m_oSPHManager.GetParticleManager()->SerialiseStateToFile(fileOut);
             }
+            numSteps++;
+            stepSim = false;
+        }
           
-            ImGui::Render();
-		}
+        ImGui::Render();
+		
            
 		//draw code goes here
 		glClearColor(255.0f, 255.0f, 255.0f, 1.0f);

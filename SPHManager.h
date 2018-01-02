@@ -30,12 +30,10 @@ public:
 
     struct {
         double gravityForce = -9.81;
-        double stiffness = 1000.0;
-        double simSpeed = 0.01;
-        double SPEED_OF_SOUND_POW = 50.0;
-        double restDensity = 1000;
-        double particleRadius = .2;
-        double smoothingLength = 1.;
+        double stiffness = 100000.0;
+        double restDensity = 1000.0;
+        //double particleRadius = .4;
+        double smoothingLength = 0.2;
 
         bool   useImprovedBoundaryHandling = true;
     } settings;
@@ -51,6 +49,7 @@ public:
     };
 
 private:
+    void ComputeNeighborhoods();
 	void IntegrationStep(WorkGroup workGroup, double dt);
 	void ComputeDensityAndPressure(WorkGroup workGroup);
 
@@ -77,8 +76,8 @@ private:
 
 	ParticleManager m_oParticleManager;
 	std::unique_ptr<CompactNSearch> m_oCompactNSearch;
-	unsigned int m_iDiscretizationId;
-	std::vector<SPHDiscretization> m_vSphDiscretizations;
+	unsigned int m_fluidDiscretizationId;
+    unsigned int m_boundaryDiscretizationId;
 	
 
     typedef void(*TaskFunc)(void*);
@@ -119,7 +118,7 @@ private:
         }
     } m_threadpool;
 
-	SPHKernel   m_pSPHKernel;
+	SPH::Kernel*    m_pSPHKernel = nullptr;
 };
 
 
