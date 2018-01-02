@@ -32,7 +32,6 @@ public:
         double gravityForce = -9.81;
         double stiffness = 100000.0;
         double restDensity = 1000.0;
-        //double particleRadius = .4;
         double smoothingLength = 0.2;
 
         bool   useImprovedBoundaryHandling = true;
