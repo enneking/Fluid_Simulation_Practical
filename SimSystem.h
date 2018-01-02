@@ -29,7 +29,8 @@ private:
 	static SimSystem* s_oSimSystem;
 
 	const double m_dt = 1.0 / 800.0;
-
+	const double RenderFPS = 1.0 / 60.0;
+	const double StepsPerFrame = RenderFPS / m_dt;
 };
 
 static void error_callback(int error, const char* description)

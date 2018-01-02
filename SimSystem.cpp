@@ -49,19 +49,13 @@ void SimSystem::Run()
     bool multiStep = false;
     int numSteps = 0;
     int numStepsToRecord = 100;
+	double StepsThisFrame = 0;
 
     std::ifstream fileIn;
     std::ofstream fileOut;
 
 	while (glfwGetKey(m_oWindow, GLFW_KEY_ESCAPE) != GLFW_PRESS && !glfwWindowShouldClose(m_oWindow))
 	{
-		NewTime = std::chrono::system_clock::now();
-		LagTime = std::chrono::duration_cast<std::chrono::duration<double>>(NewTime - CurrentTime);
-		if (LagTime.count() > 0.25)
-			accumulator += 0.25;
-		CurrentTime = NewTime;
-		accumulator += LagTime.count();
-
         bool playFromFile = false;
 
 
@@ -123,7 +117,9 @@ void SimSystem::Run()
 
         if ((stepSim || multiStep) && !fileIn.is_open()) {
             m_oSPHManager.Update(m_dt);
-            if (fileOut.is_open()) {
+			StepsThisFrame += 1.0;
+            if (fileOut.is_open() && StepsThisFrame >= StepsPerFrame) {
+				StepsThisFrame -= StepsPerFrame;
                 m_oSPHManager.GetParticleManager()->SerialiseStateToFile(fileOut);
             }
             numSteps++;
@@ -137,10 +133,17 @@ void SimSystem::Run()
 		glClearColor(255.0f, 255.0f, 255.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		NewTime = std::chrono::system_clock::now();
+		LagTime = std::chrono::duration_cast<std::chrono::duration<double>>(NewTime - CurrentTime);
+		CurrentTime = NewTime;
+		accumulator += LagTime.count();
+
 		//render our game objects
-        if (fileIn.is_open()) {
+        if (fileIn.is_open() && accumulator >= RenderFPS) {
+			accumulator -= RenderFPS;
             m_oSPHManager.GetParticleManager()->LoadStateFromFile(fileIn);
         }
+
 
 		m_oSPHManager.GetParticleManager()->DrawParticles();
 
