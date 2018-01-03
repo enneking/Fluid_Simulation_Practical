@@ -107,7 +107,7 @@ void SimSystem::Run()
         }
         ImGui::SameLine();
         ImGui::Text("Num steps: %llu", numSteps);
-
+        ImGui::Text("Num particles: %llu", m_oSPHManager.GetParticleManager()->GetParticleContainer()->size());
         //ImGui::ShowTestWindow();
             
 		m_oCamera.Update(m_oWindow);
