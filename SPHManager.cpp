@@ -57,11 +57,11 @@ void SPHManager::Init()
 
     // initialize threads and work groups
     const auto numParticles = m_oParticleManager.GetParticleContainer()->size();
-
     state.boundaryForce.resize(numParticles, Eigen::Vector3d(0.0, 0.0, 0.0));
     state.pressure.resize(numParticles, 0.0);
     state.density.resize(numParticles, 0.0);
-    const auto numThreads = 1;// std::thread::hardware_concurrency() <= 8 ? std::thread::hardware_concurrency() : 8;
+    
+    const auto numThreads = m_numThreads = std::thread::hardware_concurrency() < MAX_THREADS ? std::thread::hardware_concurrency() : MAX_THREADS;
 
     size_t particleOffset = 0;
     size_t numDistributedParticles = 0;
@@ -88,8 +88,8 @@ void SPHManager::Init()
         //}));
     }
     {
-        auto context = &m_threadContext[7];
-        context->id = 7;
+        auto context = &m_threadContext[MAX_THREADS - 1];
+        context->id = MAX_THREADS - 1;
         //context->pool = &m_threadPool;
         context->sph = this;
 
@@ -109,7 +109,15 @@ void SPHManager::Update(double dt)
     // neighborhood computation
     m_oCompactNSearch->neighborhood_search();
 
-    auto numThreads = 1;
+    auto numParticles = m_oParticleManager.GetParticleContainer()->size();
+
+    for (size_t i = 0; i < numParticles; ++i) {
+        state.boundaryForce[i] = Eigen::Vector3d(0.0, 0.0, 0.0);
+        state.pressure[i]= 0.0;
+        state.density[i] = 0.0;
+    }
+
+    auto numThreads = m_numThreads;
     m_openPressureCounter = numThreads;
     m_openBoundaryForceCounter = numThreads;
     m_openIntegrationCounter = numThreads;
@@ -124,7 +132,7 @@ void SPHManager::Update(double dt)
         });
     }
 
-    UpdateWorkGroup(&m_threadContext[7].workGroup, dt);
+    UpdateWorkGroup(&m_threadContext[numThreads - 1].workGroup, dt);
     
     for (auto& thread : threads) { thread.join();  }
 
@@ -170,7 +178,7 @@ void SPHManager::UpdateWorkGroup(WorkGroup* workGroup, double dt)
 
             density[i] += mass * weight;
         }
-        pressure[i] = glm::max(stiffness * (p0 - p0), 0.0);
+        pressure[i] = glm::max(stiffness * (density[i] - p0), 0.0);
     }
 
     {   // wait for other work groups to reach this stage

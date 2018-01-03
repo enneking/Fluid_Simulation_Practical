@@ -31,7 +31,7 @@ void SimProgramm::InitScene()
 	//	SimSystem::GetInstance()->GetParticleManager()->AddParticle(Eigen::Vector3d(Dis(Gen), Dis(Gen), Dis(Gen)));
 	//}
 
-    static constexpr int boxWidth = 5;
+    static constexpr int boxWidth = 25;
 	ParticleManager *x = SimSystem::GetInstance()->GetSPHManager()->GetParticleManager();
 	x->GetParticlePositions()->reserve(6 * x->m_iBoundariesPerFaceInOneDirection * x->m_iBoundariesPerFaceInOneDirection + boxWidth * boxWidth * boxWidth);
 
