@@ -22,7 +22,7 @@ public:
 
     inline double GetDensityWithIndex(size_t idx)
     {
-        return m_state.density[idx];
+        return state.density[idx];
     }
 
     void GUI();
@@ -45,78 +45,36 @@ public:
         WorkGroup() = default;
         WorkGroup(size_t offset, size_t count)
             :   particleOffset(offset), particleCount(count) {}
-    };
+    
+    };  
 
-private:
-    void ComputeNeighborhoods();
-	void IntegrationStep(WorkGroup workGroup, double dt);
-	void ComputeDensityAndPressure(WorkGroup workGroup);
+    struct ThreadContext {
+        int id = 0;
+        WorkGroup workGroup;
+        SPHManager* sph = nullptr;
+        //ThreadPool* pool = nullptr;
+    } m_threadContext[8]; // not expecting more than 8 cores 
 
-    void ImprovedDensityCalculation(WorkGroup workGroup);
-    void ImprovedBoundaryForceCalculation(WorkGroup workGroup);
-    //void PreCalculations(WorkGroup workGroup);
-
-	void BoundaryForceCalculation(WorkGroup workGroup);
-
-    void ApplyViscosity(WorkGroup workGroup);
-
-private:
-    /*struct {
-		std::vector<std::vector<double>> weights;
-		std::vector<std::vector<Eigen::Vector3d>> deltaWeights;
-        std::vector<double> psi;
-    } m_precalc;*/
-
+    double m_dt = 0.0;
+    
+    std::atomic_int m_openPressureCounter = 0;
+    std::atomic_int m_openBoundaryForceCounter = 0;
+    std::atomic_int m_openIntegrationCounter = 0;
+    std::atomic_int m_openWorkCounter = 0;
     struct {
         std::vector<double> density;
         std::vector<double> pressure;
         std::vector<Eigen::Vector3d> boundaryForce;
-    } m_state;
+    } state;
+    void UpdateWorkGroup(WorkGroup* workGroup, double dt);
+private:
+
 
 	ParticleManager m_oParticleManager;
 	std::unique_ptr<CompactNSearch> m_oCompactNSearch;
 	unsigned int m_fluidDiscretizationId;
     unsigned int m_boundaryDiscretizationId;
 	
-
-    typedef void(*TaskFunc)(void*);
-    struct Task
-    {
-        TaskFunc func = nullptr;
-        void* data = nullptr;
-        Task() = default;
-        Task(TaskFunc f, void* d)
-            :   func(f), data(d) {}
-    };
-    struct {
-        std::vector<std::unique_ptr<std::thread>> threads;
-        std::mutex workMutex;
-        std::vector<Task>  workQueue;
-        std::atomic<uint32_t> workQueueSize = 0;
-        std::atomic<bool> exit = false;
-
-       
-        void PushTask(Task work)
-        {
-            {
-                std::lock_guard<std::mutex> lock(workMutex);
-                workQueue.push_back(work);
-            }
-            workQueueSize++;
-        }
-
-        bool FetchTask(Task* outWork)
-        {
-            {
-                std::lock_guard<std::mutex> lock(workMutex);
-                if (workQueue.empty()) { return false; }
-                *outWork = workQueue.back();
-                workQueue.pop_back();
-            }
-            return true;
-        }
-    } m_threadpool;
-
 	SPH::Kernel*    m_pSPHKernel = nullptr;
 };
 
