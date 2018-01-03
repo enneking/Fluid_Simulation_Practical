@@ -56,6 +56,7 @@ public:
 
 private:
 	double m_fParticleMass = 1.0;
+	float m_fParticleRadius = 0.05f;
 	std::vector<Particle> m_vParticleContainer;
 	std::vector<Eigen::Vector3d> m_vParticlePositions;
 

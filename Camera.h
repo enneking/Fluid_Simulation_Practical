@@ -29,6 +29,10 @@ public:
 
 	glm::mat4 m_mProjectionMatrix;
 	glm::mat4 m_mViewMatrix;
+
+	glm::vec3* GetPosition() { return &m_vPosition; };
+	glm::vec3* GetUpVector() { return &m_vUp; };
+	glm::vec3* GetRightVector() { return &m_vRight; };
 private:
 
 

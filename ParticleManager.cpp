@@ -24,6 +24,7 @@ void ParticleManager::Init(Camera* pCamera)
 	glEnable(GL_LINE_SMOOTH);
 	glLineWidth(10.0f);
 	glEnable(GL_BLEND); 
+	
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glGenVertexArrays(1, &m_iVertexArrayObject);
 	glGenBuffers(1, &m_iVertexBufferObject);
@@ -100,7 +101,7 @@ void ParticleManager::SetUpBoundaryBox()
 	m_vBoundaryIndices[11 * 3] = 1;
 	m_vBoundaryIndices[11 * 3 + 1] = 5;
 	m_vBoundaryIndices[11 * 3 + 2] = 7;	
-	
+
 	GLuint iVboBox, iElementBuffer;
 	glBindVertexArray(m_iVaoBox);
 	glGenBuffers(1, &iVboBox);
@@ -123,14 +124,30 @@ void ParticleManager::InitBuffers()
 {
 	SetUpBoundaryBox();
 	
+	GLfloat BillboardVec[8] = {
+		-m_fParticleRadius,  m_fParticleRadius,
+		-m_fParticleRadius, -m_fParticleRadius,
+		m_fParticleRadius,  m_fParticleRadius,
+		m_fParticleRadius,  -m_fParticleRadius,
+	};
+
+	GLuint iBillboardBuffer;
+	glCreateBuffers(1, &iBillboardBuffer);
+
 	//Particles
 	glBindVertexArray(m_iVertexArrayObject);
-	glBindBuffer(GL_ARRAY_BUFFER, m_iVertexBufferObject);
 
+	glBindBuffer(GL_ARRAY_BUFFER, m_iVertexBufferObject);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(Eigen::Vector3d) * m_vParticlePositions.size(), &m_vParticlePositions[0], GL_DYNAMIC_DRAW);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, 0, (void*)0);
-    //glDisableVertexAttribArray(0);
+	glVertexAttribDivisor(0, 1);
+    
+	glBindBuffer(GL_ARRAY_BUFFER, iBillboardBuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(BillboardVec), BillboardVec, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
+	glVertexAttribDivisor(1, 0);
 	
 }
 
@@ -180,29 +197,34 @@ void ParticleManager::SetParticleMass(double value)
 void ParticleManager::DrawParticles()
 {
 	
+	//Particles
+	glEnable(GL_DEPTH_TEST);
 	glUseProgram(m_oShaderManager.getProg(0));
 
-	glm::mat4 ViewProjectionMatrix = m_pCamera->m_mProjectionMatrix * m_pCamera->m_mViewMatrix;
-	glUniformMatrix4fv(glGetUniformLocation(m_oShaderManager.getProg(0), "ViewProjection"), 1, GL_FALSE, &ViewProjectionMatrix[0][0]);
+	glm::mat4 ProjectionMatrix = m_pCamera->m_mProjectionMatrix;
+	glUniformMatrix4fv(glGetUniformLocation(m_oShaderManager.getProg(0), "uProjectionMatrix"), 1, GL_FALSE, &ProjectionMatrix[0][0]);
 
+	glm::mat4 ViewMatrix = m_pCamera->m_mViewMatrix;
+	glUniformMatrix4fv(glGetUniformLocation(m_oShaderManager.getProg(0), "uViewMatrix"), 1, GL_FALSE, &ViewMatrix[0][0]);
 
-	//Particles
-
-    glm::vec4 red(1.0f, 0.0f, 0.0f, 1.0f);
-    glm::vec4 blue(0.0f, 0.0f, 1.0f, 1.0f);
+	glm::vec3 blue(0.0f, 0.0f, 1.0f);
+	glUniform3fv(glGetUniformLocation(m_oShaderManager.getProg(0), "uUpVector"), 1, &(*m_pCamera->GetUpVector())[0]);
+	glUniform3fv(glGetUniformLocation(m_oShaderManager.getProg(0), "uRightVector"), 1, &(*m_pCamera->GetRightVector())[0]);
+    glUniform3fv(glGetUniformLocation(m_oShaderManager.getProg(0), "uColor"), 1, &blue[0]);
+	glUniform1f(glGetUniformLocation(m_oShaderManager.getProg(0), "uParticleRadius"), m_fParticleRadius);
+	glUniform3fv(glGetUniformLocation(m_oShaderManager.getProg(0), "uViewPos"),1, &(*m_pCamera->GetPosition())[0]);
 
 	glBindVertexArray(m_iVertexArrayObject);
     glBindBuffer(GL_ARRAY_BUFFER, m_iVertexBufferObject);
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Eigen::Vector3d) * m_vParticlePositions.size(), &m_vParticlePositions[0]);
     
-    glUniform4fv(glGetUniformLocation(m_oShaderManager.getProg(0), "uColor"), 1, &red[0]);
-    glDrawArrays(GL_POINTS, (GLsizei)m_vParticleContainer.size() + 1, (GLsizei)m_vParticlePositions.size() - (GLsizei)m_vParticleContainer.size() - 1);
+    //glUniform4fv(glGetUniformLocation(m_oShaderManager.getProg(0), "uColor"), 1, &red[0]);
+    //glDrawArrays(GL_POINTS, (GLsizei)m_vParticleContainer.size() + 1, (GLsizei)m_vParticlePositions.size() - (GLsizei)m_vParticleContainer.size() - 1);
     
 
-    glUniform4fv(glGetUniformLocation(m_oShaderManager.getProg(0), "uColor"), 1, &blue[0]);
-	glDrawArrays(GL_POINTS, 0, (GLsizei)m_vParticleContainer.size());
+	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, (GLsizei)m_vParticleContainer.size());
+	glDisable(GL_DEPTH_TEST);
 
-    
     //boundary 
    /* glBindVertexArray(Vao);
     glEnableVertexAttribArray(0);
@@ -211,7 +233,8 @@ void ParticleManager::DrawParticles()
 
 	//Box
  	glUseProgram(m_oShaderManager.getProg(1));
-	glUniformMatrix4fv(glGetUniformLocation(m_oShaderManager.getProg(1), "ViewProjection"), 1, GL_FALSE, &ViewProjectionMatrix[0][0]);
+	glUniformMatrix4fv(glGetUniformLocation(m_oShaderManager.getProg(0), "uViewMatrix"), 1, GL_FALSE, &ViewMatrix[0][0]);
+	glUniformMatrix4fv(glGetUniformLocation(m_oShaderManager.getProg(0), "uProjectionMatrix"), 1, GL_FALSE, &ProjectionMatrix[0][0]);
 
 	glBindVertexArray(m_iVaoBox);
 	glEnableVertexAttribArray(0);
