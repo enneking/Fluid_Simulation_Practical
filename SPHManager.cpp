@@ -255,7 +255,7 @@ void SPHManager::Update(double dt)
     }
 
     // viscosity
-    static const double e = 0.05;
+    static const double e = 0.1;
     for (int i = 0; i < numParticles; ++i) {
         auto vPrime = Eigen::Vector3d(0.0, 0.0, 0.0);
 
@@ -269,7 +269,7 @@ void SPHManager::Update(double dt)
             auto v_i = m_oParticleManager.GetParticleContainer()->at(i).m_vVelocity;
             auto v_j = m_oParticleManager.GetParticleContainer()->at(nIndex).m_vVelocity;
             
-            auto velDiff = Eigen::Vector3d(0.0, 0.0, 0.0);// (v_j - v_i);
+            auto velDiff = (v_j - v_i);
             
             auto x_i = m_oParticleManager.GetParticlePositions()->at(i);
             auto x_j = m_oParticleManager.GetParticlePositions()->at(nIndex);
