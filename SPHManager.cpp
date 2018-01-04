@@ -28,7 +28,7 @@ void SPHManager::Init()
 
     m_oParticleManager.InitBuffers();
  
-    m_oCompactNSearch = std::make_unique<CompactNSearch>(settings.smoothingLength * 2.0);
+    m_oCompactNSearch = std::make_unique<CompactNSearch>(settings.smoothingLength);
     m_fluidDiscretizationId = m_oCompactNSearch->add_discretization(
         &(*m_oParticleManager.GetParticlePositions())[0],
         m_oParticleManager.GetParticleContainer()->size(),
@@ -59,6 +59,7 @@ void SPHManager::Init()
     const auto numParticles = m_oParticleManager.GetParticleContainer()->size();
     state.boundaryForce.resize(numParticles, Eigen::Vector3d(0.0, 0.0, 0.0));
     state.pressure.resize(numParticles, 0.0);
+    state.boundaryD.resize(numParticles, 0.0);
     state.density.resize(numParticles, 0.0);
     
     const auto numThreads = m_numThreads = std::thread::hardware_concurrency() < MAX_THREADS ? std::thread::hardware_concurrency() : MAX_THREADS;
@@ -115,6 +116,7 @@ void SPHManager::Update(double dt)
         state.boundaryForce[i] = Eigen::Vector3d(0.0, 0.0, 0.0);
         state.pressure[i]= 0.0;
         state.density[i] = 0.0;
+        state.boundaryD[i] = 0.0;
     }
 
     auto numThreads = m_numThreads;
@@ -145,12 +147,19 @@ void SPHManager::UpdateWorkGroup(WorkGroup* workGroup, double dt)
     const auto firstParticle = workGroup->particleOffset;
     const auto numParticles = workGroup->particleCount;
     const auto lastParticle = numParticles + firstParticle;
-    assert(numParticles != 0);
-    if (numParticles == 0) { return; }
+    //assert(numParticles != 0);
+    if (numParticles == 0) { 
+        m_openBoundaryForceCounter--;
+        m_openPressureCounter--;
+        m_openIntegrationCounter--;
+        m_openWorkCounter--;
+        return; 
+    }
 
     auto density = &state.density[0];
     auto pressure = &state.pressure[0];
-    
+    auto boundaryD = &state.boundaryD[0];
+
     double mass = m_oParticleManager.GetParticleMass();
 
     const double stiffness = settings.stiffness;
@@ -167,16 +176,39 @@ void SPHManager::UpdateWorkGroup(WorkGroup* workGroup, double dt)
 
         // get neighbours
         auto numNeighbors = discretizations[m_fluidDiscretizationId].n_neighbors(i);
+
+        if (settings.useImprovedBoundaryHandling) {
+            double t = 0.0;
+            for (int k = 0; k < numNeighbors; ++k) {
+                auto kID = discretizations[m_fluidDiscretizationId].neighbor(i, k);
+                auto kIndex = kID.index;
+                if (kID.object_id != m_fluidDiscretizationId) {
+                    auto x_k = m_oParticleManager.GetBoundaryPositions()[kIndex];
+                    double weight = m_pSPHKernel->Evaluate(x_i - x_k);
+                    t += weight;
+                }
+            }
+            if (t > DBL_EPSILON) {
+                boundaryD[i] = settings.restDensity / t;
+            }
+        }
+
         for (int j = 0; j < numNeighbors; ++j) {
 
             auto nID = discretizations[m_fluidDiscretizationId].neighbor(i, j);
             auto nIndex = nID.index;
-            if (nID.object_id != m_fluidDiscretizationId) continue;
 
-            auto x_j = m_oParticleManager.GetParticlePositions()->at(nIndex);
-            double weight = m_pSPHKernel->Evaluate(x_i - x_j);
-
-            density[i] += mass * weight;
+            if (nID.object_id != m_fluidDiscretizationId) {
+                if (!settings.useImprovedBoundaryHandling) { continue; }  
+                auto x_j = m_oParticleManager.GetBoundaryPositions()[nIndex];
+                double weight = m_pSPHKernel->Evaluate(x_i - x_j);
+                density[i] += boundaryD[i] * weight;
+            }
+            else {
+                auto x_j = m_oParticleManager.GetParticlePositions()->at(nIndex);
+                double weight = m_pSPHKernel->Evaluate(x_i - x_j);
+                density[i] += mass * weight;
+            }
         }
         pressure[i] = glm::max(stiffness * (density[i] - p0), 0.0);
     }
@@ -194,7 +226,7 @@ void SPHManager::UpdateWorkGroup(WorkGroup* workGroup, double dt)
         auto boundaryPositions = m_oParticleManager.GetBoundaryPositions();
         const double h = 0.1;
         const double bR = 88.0;
-        const double boundaryMass = 1.0;
+        const double boundaryMass = 1.0;   
         const double fluidMass = m_oParticleManager.GetParticleMass();
 
         auto numNeighbors = discretizations[m_fluidDiscretizationId].n_neighbors(i);
@@ -210,32 +242,37 @@ void SPHManager::UpdateWorkGroup(WorkGroup* workGroup, double dt)
 
             auto x_k = boundaryPositions[k];
 
-            auto diff = x_i - x_k;
-            auto dist = diff.norm();
-            auto alpha = bR / dist;
-            auto relMass = boundaryMass / (fluidMass + boundaryMass);
+            auto f = Eigen::Vector3d(0.0, 0.0, 0.0);
+            if (!settings.useImprovedBoundaryHandling) {
+                auto diff = x_i - x_k;
+                auto dist = diff.norm();
+                auto alpha = bR / dist;
+                auto relMass = boundaryMass / (fluidMass + boundaryMass);
 
-            auto q = dist / h;
+                auto q = dist / h;
 
-            //double x = 0.0;
-            //auto a = (1 - x / h) ? x < h : 0.0;
+                //double x = 0.0;
+                //auto a = (1 - x / h) ? x < h : 0.0;
 
-            auto tau = (bR / dist);
-            if (0 < q && q < (2.0 / 3.0)) {
-                tau *= (2.0 / 3.0);
-            }
-            else if ((2.0 / 3.0) < q && q < 1.0) {
-                tau *= (2.0 * q - (3.0 / 2.0) * (q * q));
-            }
-            else if (1.0 < q && q < 2.0) {
-                tau *= 0.5 * (2.0 - q) * (2.0 - q);
+                auto tau = (bR / dist);
+                if (0 < q && q < (2.0 / 3.0)) {
+                    tau *= (2.0 / 3.0);
+                }
+                else if ((2.0 / 3.0) < q && q < 1.0) {
+                    tau *= (2.0 * q - (3.0 / 2.0) * (q * q));
+                }
+                else if (1.0 < q && q < 2.0) {
+                    tau *= 0.5 * (2.0 - q) * (2.0 - q);
+                }
+                else {
+                    tau *= 0.0;
+                }
+                auto v = m_oParticleManager.GetParticleContainer()->at(i).m_vVelocity;
+                f = relMass * tau * (diff / dist); // *(-diff.normalized().dot(v.normalized()) > 0.0 ? 1.0 : 0.0);
             }
             else {
-                tau *= 0.0;
+                f = -(fluidMass * boundaryD[i]) * (pressure[i] / (density[i] * density[i])) * m_pSPHKernel->EvaluateGradient(x_i - x_k);
             }
-            auto v = m_oParticleManager.GetParticleContainer()->at(i).m_vVelocity;
-            auto f = relMass * tau * (diff / dist); // *(-diff.normalized().dot(v.normalized()) > 0.0 ? 1.0 : 0.0);
-
             boundaryForce[i] += f;
         }
     }
@@ -308,7 +345,7 @@ void SPHManager::UpdateWorkGroup(WorkGroup* workGroup, double dt)
     }
 }
 
-
+static double g_avgDensity = 0.0;
 void SPHManager::GUI()
 {
 
@@ -320,9 +357,11 @@ void SPHManager::GUI()
         ImGui::PlotHistogram("Density Samples", [](void* data, int idx) -> float {
             auto densityPlotData = static_cast<DensityPlotData*>(data);
             auto density = densityPlotData->self->GetDensityWithIndex(idx);
+            g_avgDensity += density;
             return (float)density;
         }, &densityPlotData, m_oParticleManager.GetParticleContainer()->size(), /*m_oParticleManager.GetParticleContainer()->size() - 1024*/0, nullptr, 0.0f, FLT_MAX, ImVec2(0, 200));
-
+        g_avgDensity /= m_oParticleManager.GetParticleContainer()->size();
+        ImGui::Text("Average density: %f", g_avgDensity);
 
         ImGui::PlotHistogram("Boundary Forces", [](void* data, int idx) -> float {
             Eigen::Vector3d* forces = static_cast<Eigen::Vector3d*>(data);

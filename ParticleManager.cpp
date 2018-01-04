@@ -54,6 +54,16 @@ void ParticleManager::SetUpBoundaryBox()
         }
     }
    
+    //{   // some additional boundaries
+    //    for (double i = -2.0; i < 5.0; i += 0.05) {
+    //        for (double j = -0.25; j < 0.25; j += 0.05) {
+    //            for (double k = -0.25; k < 0.25; k += 0.25) {
+    //                m_vParticlePositions.push_back(Eigen::Vector3d(k - 1.0, i, j));
+    //            }
+    //        }
+    //    }
+    //}
+
 	//walls
     Eigen::Vector3d boxCorners[8];
 
@@ -222,7 +232,7 @@ void ParticleManager::DrawParticles()
     //glDrawArrays(GL_POINTS, (GLsizei)m_vParticleContainer.size() + 1, (GLsizei)m_vParticlePositions.size() - (GLsizei)m_vParticleContainer.size() - 1);
     
 
-	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, (GLsizei)m_vParticleContainer.size());
+	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, (GLsizei)m_vParticlePositions.size());
 	glDisable(GL_DEPTH_TEST);
 
     //boundary 
@@ -274,5 +284,6 @@ bool ParticleManager::LoadStateFromFile(std::ifstream& file)
 
 int ParticleManager::GetBoundaryParticleCount()
 {
+    return m_vParticlePositions.size() - m_vParticleContainer.size();
 	return m_iBoundaryCount;
 }

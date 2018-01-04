@@ -65,6 +65,7 @@ public:
     struct {
         std::vector<double> density;
         std::vector<double> pressure;
+        std::vector<double> boundaryD;
         std::vector<Eigen::Vector3d> boundaryForce;
     } state;
     void UpdateWorkGroup(WorkGroup* workGroup, double dt);

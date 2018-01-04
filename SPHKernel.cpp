@@ -24,7 +24,6 @@ void CubicSplineKernel::SetSmoothingLength(double smoothingLength)
 double CubicSplineKernel::Evaluate(const Eigen::Vector3d& x)
 {
 	double relDist = x.norm() / m_smoothingLength;
-
     double mul = 0.0;
 	if (relDist < 1)
 	{
