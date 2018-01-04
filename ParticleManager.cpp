@@ -232,7 +232,7 @@ void ParticleManager::DrawParticles()
     //glDrawArrays(GL_POINTS, (GLsizei)m_vParticleContainer.size() + 1, (GLsizei)m_vParticlePositions.size() - (GLsizei)m_vParticleContainer.size() - 1);
     
 
-	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, (GLsizei)m_vParticlePositions.size());
+	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, (GLsizei)m_vParticleContainer.size());
 	glDisable(GL_DEPTH_TEST);
 
     //boundary 

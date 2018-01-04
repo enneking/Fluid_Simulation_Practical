@@ -47,7 +47,7 @@ public:
 	int GetBoundaryParticleCount();
 
 
-	int m_iBoundariesPerFaceInOneDirection = 40;
+	int m_iBoundariesPerFaceInOneDirection = 80;
 	Eigen::Vector3d m_vBoxLeftLowerBack = Eigen::Vector3d(-2.5f, -1.8, -1.7f);
 	Eigen::Vector3d m_vBoxRightUpperFront = Eigen::Vector3d(2.7f, 2.1f, 1.6f);
 

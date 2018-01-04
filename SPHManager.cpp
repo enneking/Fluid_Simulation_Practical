@@ -59,8 +59,22 @@ void SPHManager::Init()
     const auto numParticles = m_oParticleManager.GetParticleContainer()->size();
     state.boundaryForce.resize(numParticles, Eigen::Vector3d(0.0, 0.0, 0.0));
     state.pressure.resize(numParticles, 0.0);
-    state.boundaryD.resize(numParticles, 0.0);
+    state.boundaryD.resize(m_oParticleManager.GetBoundaryParticleCount(), 0.0);
+
+    // precompute volume estimation function for boundaries
     state.density.resize(numParticles, 0.0);
+    auto boundaryKernel = SPH::CubicSplineKernel(0.4);  // @TODO compute that smoothing length from boundary resolution
+    for (size_t i = 0; i < m_oParticleManager.GetBoundaryParticleCount(); ++i) {
+        auto x_i = m_oParticleManager.GetBoundaryPositions()[i];
+        double t = 0.0;
+        for (int k = 0; k < m_oParticleManager.GetBoundaryParticleCount(); ++k) {
+            //if (k == i) continue;
+            auto x_k = m_oParticleManager.GetBoundaryPositions()[k];
+            double weight = boundaryKernel.Evaluate(x_i - x_k);
+            t += weight;
+        }
+        state.boundaryD[i] = settings.restDensity / t;
+    }
     
     const auto numThreads = m_numThreads = std::thread::hardware_concurrency() < MAX_THREADS ? std::thread::hardware_concurrency() : MAX_THREADS;
 
@@ -116,9 +130,8 @@ void SPHManager::Update(double dt)
         state.boundaryForce[i] = Eigen::Vector3d(0.0, 0.0, 0.0);
         state.pressure[i]= 0.0;
         state.density[i] = 0.0;
-        state.boundaryD[i] = 0.0;
     }
-
+    
     auto numThreads = m_numThreads;
     m_openPressureCounter = numThreads;
     m_openBoundaryForceCounter = numThreads;
@@ -177,22 +190,7 @@ void SPHManager::UpdateWorkGroup(WorkGroup* workGroup, double dt)
         // get neighbours
         auto numNeighbors = discretizations[m_fluidDiscretizationId].n_neighbors(i);
 
-        if (settings.useImprovedBoundaryHandling) {
-            double t = 0.0;
-            for (int k = 0; k < numNeighbors; ++k) {
-                auto kID = discretizations[m_fluidDiscretizationId].neighbor(i, k);
-                auto kIndex = kID.index;
-                if (kID.object_id != m_fluidDiscretizationId) {
-                    auto x_k = m_oParticleManager.GetBoundaryPositions()[kIndex];
-                    double weight = m_pSPHKernel->Evaluate(x_i - x_k);
-                    t += weight;
-                }
-            }
-            if (t > DBL_EPSILON) {
-                boundaryD[i] = settings.restDensity / t;
-            }
-        }
-
+        
         for (int j = 0; j < numNeighbors; ++j) {
 
             auto nID = discretizations[m_fluidDiscretizationId].neighbor(i, j);
@@ -202,7 +200,7 @@ void SPHManager::UpdateWorkGroup(WorkGroup* workGroup, double dt)
                 if (!settings.useImprovedBoundaryHandling) { continue; }  
                 auto x_j = m_oParticleManager.GetBoundaryPositions()[nIndex];
                 double weight = m_pSPHKernel->Evaluate(x_i - x_j);
-                density[i] += boundaryD[i] * weight;
+                density[i] += boundaryD[nIndex] * weight;
             }
             else {
                 auto x_j = m_oParticleManager.GetParticlePositions()->at(nIndex);
@@ -271,7 +269,7 @@ void SPHManager::UpdateWorkGroup(WorkGroup* workGroup, double dt)
                 f = relMass * tau * (diff / dist); // *(-diff.normalized().dot(v.normalized()) > 0.0 ? 1.0 : 0.0);
             }
             else {
-                f = -(fluidMass * boundaryD[i]) * (pressure[i] / (density[i] * density[i])) * m_pSPHKernel->EvaluateGradient(x_i - x_k);
+                f = -(fluidMass * boundaryD[k]) * (pressure[i] / (density[i] * density[i])) * m_pSPHKernel->EvaluateGradient(x_i - x_k);
             }
             boundaryForce[i] += f;
         }
