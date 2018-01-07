@@ -59,22 +59,35 @@ void SPHManager::Init()
     const auto numParticles = m_oParticleManager.GetParticleContainer()->size();
     state.boundaryForce.resize(numParticles, Eigen::Vector3d(0.0, 0.0, 0.0));
     state.pressure.resize(numParticles, 0.0);
-    state.boundaryD.resize(m_oParticleManager.GetBoundaryParticleCount(), 0.0);
+    state.density.resize(numParticles, 0.0);
 
     // precompute volume estimation function for boundaries
-    state.density.resize(numParticles, 0.0);
-    auto boundaryKernel = SPH::CubicSplineKernel(0.4);  // @TODO compute that smoothing length from boundary resolution
-    for (size_t i = 0; i < m_oParticleManager.GetBoundaryParticleCount(); ++i) {
-        auto x_i = m_oParticleManager.GetBoundaryPositions()[i];
-        double t = 0.0;
-        for (int k = 0; k < m_oParticleManager.GetBoundaryParticleCount(); ++k) {
-            //if (k == i) continue;
-            auto x_k = m_oParticleManager.GetBoundaryPositions()[k];
-            double weight = boundaryKernel.Evaluate(x_i - x_k);
-            t += weight;
+    {
+        double smoothingLength = 0.4; // @TODO compute that smoothing length from boundary resolution because that's important
+        CompactNSearch search(smoothingLength);
+        auto discrId = search.add_discretization(
+            m_oParticleManager.GetBoundaryPositions(),
+            m_oParticleManager.GetBoundaryParticleCount(),
+            false, true);
+        search.neighborhood_search();
+        auto& boundaryDiscretization = search.discretizations()[discrId];
+        state.boundaryD.resize(m_oParticleManager.GetBoundaryParticleCount(), 0.0);
+        auto boundaryKernel = SPH::CubicSplineKernel(smoothingLength);  
+        for (size_t i = 0; i < m_oParticleManager.GetBoundaryParticleCount(); ++i) {
+            auto x_i = m_oParticleManager.GetBoundaryPositions()[i];
+            double t = 0.0;
+            for (int j = 0; j < boundaryDiscretization.n_neighbors(i); ++j) {
+                auto k = boundaryDiscretization.neighbor(i, j).index;
+                if (boundaryDiscretization.neighbor(i, j).object_id != discrId) continue;
+                //if (k == i) continue;
+                auto x_k = m_oParticleManager.GetBoundaryPositions()[k];
+                double weight = boundaryKernel.Evaluate(x_i - x_k);
+                t += weight;
+            }
+            state.boundaryD[i] = settings.restDensity / t;
         }
-        state.boundaryD[i] = settings.restDensity / t;
     }
+
     
     const auto numThreads = m_numThreads = std::thread::hardware_concurrency() < MAX_THREADS ? std::thread::hardware_concurrency() : MAX_THREADS;
 
