@@ -32,7 +32,7 @@ public:
 
 	void InitBuffers();
 
-	void SetUpBoundaryBox();
+	void SetupBoundaries();
 
 	Particle* AddParticle(Eigen::Vector3d fInitialPos = Eigen::Vector3d::Zero(), Eigen::Vector3d fInitialVelocity = Eigen::Vector3d::Zero());
 

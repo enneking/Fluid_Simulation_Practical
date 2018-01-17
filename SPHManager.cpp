@@ -235,7 +235,7 @@ void SPHManager::UpdateWorkGroup(WorkGroup* workGroup, double dt)
         auto x_i = m_oParticleManager.GetParticlePositions()->at(i);
 
         auto boundaryPositions = m_oParticleManager.GetBoundaryPositions();
-        const double h = 0.1;
+        const double h = 0.05;  // @TODO work this out, too
         const double bR = 88.0;
         const double boundaryMass = 1.0;   
         const double fluidMass = m_oParticleManager.GetParticleMass();
@@ -365,6 +365,7 @@ void SPHManager::GUI()
         {
             SPHManager* self = nullptr;
         } densityPlotData = { this };
+        g_avgDensity = 0.0;
         ImGui::PlotHistogram("Density Samples", [](void* data, int idx) -> float {
             auto densityPlotData = static_cast<DensityPlotData*>(data);
             auto density = densityPlotData->self->GetDensityWithIndex(idx);
