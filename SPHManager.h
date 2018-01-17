@@ -69,6 +69,8 @@ public:
         std::vector<Eigen::Vector3d> boundaryForce;
     } state;
     void UpdateWorkGroup(WorkGroup* workGroup, double dt);
+	
+	SPH::Kernel*    m_pSPHKernel = nullptr;
 private:
 
 
@@ -77,7 +79,7 @@ private:
 	unsigned int m_fluidDiscretizationId;
     unsigned int m_boundaryDiscretizationId;
 	
-	SPH::Kernel*    m_pSPHKernel = nullptr;
+	
 };
 
 

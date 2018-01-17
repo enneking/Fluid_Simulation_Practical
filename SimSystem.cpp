@@ -38,6 +38,7 @@ void SimSystem::Run()
 {
 
 	m_oSPHManager.Init();
+	m_SurfaceManager.Init(&m_oSPHManager);
 
 	std::chrono::system_clock::time_point CurrentTime = std::chrono::system_clock::now();
 	std::chrono::system_clock::time_point NewTime;
@@ -144,8 +145,9 @@ void SimSystem::Run()
             m_oSPHManager.GetParticleManager()->LoadStateFromFile(fileIn);
         }
 
-
-		m_oSPHManager.GetParticleManager()->DrawParticles();
+		m_SurfaceManager.CreateSurface();
+		m_SurfaceManager.Draw();
+		//m_oSPHManager.GetParticleManager()->DrawParticles();
 
         // render UI
         auto imguiDrawData = ImGui::GetDrawData();
