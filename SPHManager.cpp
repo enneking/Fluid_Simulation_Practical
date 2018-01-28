@@ -90,7 +90,7 @@ void SPHManager::Init()
     }
 
     // @TODO look into why quintic and quadric smoothing function dont work well
-    m_pSPHKernel = new SPH::QuadricSmoothingFunctionKernel(settings.smoothingLength);
+    m_pSPHKernel = new SPH::CubicSplineKernel(settings.smoothingLength);
 
     double relError = 0.0;
     for (int i = 0; i < 10; ++i) {
@@ -119,7 +119,7 @@ void SPHManager::Init()
         search.neighborhood_search();
         auto& boundaryDiscretization = search.discretizations()[discrId];
         state.boundaryD.resize(m_oParticleManager.GetBoundaryParticleCount(), 0.0);
-        auto boundaryKernel = SPH::QuadricSmoothingFunctionKernel(smoothingLength);
+        auto boundaryKernel = SPH::CubicSplineKernel(smoothingLength);
         for (size_t i = 0; i < m_oParticleManager.GetBoundaryParticleCount(); ++i) {
             auto x_i = m_oParticleManager.GetBoundaryPositions()[i];
             double t = 0.0;
@@ -373,7 +373,7 @@ void SPHManager::UpdateWorkGroup(WorkGroup* workGroup, double dt)
     }
 
     // viscosity
-    const double e = 0.25;
+    const double e = 0.05;
     for (int i = firstParticle; i < lastParticle; ++i) {
         auto vPrime = Eigen::Vector3d(0.0, 0.0, 0.0);
 
