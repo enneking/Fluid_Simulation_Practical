@@ -29,6 +29,7 @@ namespace SPH {
 
         void    SetSmoothingLength(double smoothingLength) final override;
         double  Evaluate(const Eigen::Vector3d& x) final override;
+		double EvaluateUnnormailized(const Eigen::Vector3d& x);
         Eigen::Vector3d  EvaluateGradient(const Eigen::Vector3d& x) final override;
 
     private:

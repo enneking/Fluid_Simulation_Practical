@@ -1,6 +1,7 @@
 #include "Camera.h"
 #include <Eigen\Core>
 #include <Eigen\Geometry>
+#include <iostream>
 
 #include "imgui.h"
 
@@ -74,6 +75,9 @@ void Camera::Update(GLFWwindow *window)
 	m_vTarget = m_vFront + m_vPosition;
 
 	m_mViewMatrix = glm::lookAt(m_vPosition, m_vTarget, m_vUp);
+
+	//std::cout << "\n view : " << m_mViewMatrix[3][0] << " " << m_mViewMatrix[3][1] << " " << m_mViewMatrix[3][2];
+	//std::cout << "\n pos : " << m_vPosition[0] << " " << m_vPosition[1] << " " << m_vPosition[2];
 }
 
 

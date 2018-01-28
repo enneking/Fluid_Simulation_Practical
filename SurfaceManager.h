@@ -31,25 +31,28 @@ public:
 		std::vector<Eigen::Vector3d> Pos;
 
 	};
-
 	
 	void Draw();
 	ShaderManager m_ShaderManager;
 	void CreateSurface();
 
+	bool SaveVertexPosToFile(std::ofstream& file);
+	bool LoadVertexPosFromFile(std::ifstream& file);
 
 private:
-
 
 private:
 	ParticleManager* m_pParticleManager;
 
 	std::vector<GLfloat> m_SurfaceVertices;
-	std::vector<uint8_t> m_CellMarks;
-	std::vector<bool> m_VoxelMarks;
+	std::vector<float> m_VoxelWeights;
 
-	GLfloat m_CubeWidth = 0.2f;
+	GLfloat m_CubeWidth = 0.06f;
 	GLuint m_iVertexArrayObject;
+
+	const float m_kSurfaceConst = 0.0f;
+
+	Eigen::Vector3d m_LowerLeftBackVec;
 
 	Mesh m_Mesh;
 	SPH::Kernel* m_pKernel;
@@ -59,5 +62,8 @@ private:
 	std::vector<double>* m_density;
 
 	static int8_t const marching_cubes_lut[256][16];
+
+	std::ofstream out;
+	std::ifstream in;
 
 };
