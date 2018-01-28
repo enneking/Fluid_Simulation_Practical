@@ -34,7 +34,7 @@ void ParticleManager::Init(Camera* pCamera)
 
 }
 
-void ParticleManager::SetUpBoundaryBox()
+void ParticleManager::SetupBoundaries()
 {
 	int n = m_iBoundariesPerFaceInOneDirection;
 
@@ -132,7 +132,7 @@ void ParticleManager::SetUpBoundaryBox()
 
 void ParticleManager::InitBuffers()
 {
-	SetUpBoundaryBox();
+	SetupBoundaries();
 	
 	GLfloat BillboardVec[8] = {
 		-m_fParticleRadius,  m_fParticleRadius,
@@ -285,5 +285,4 @@ bool ParticleManager::LoadStateFromFile(std::ifstream& file)
 int ParticleManager::GetBoundaryParticleCount()
 {
     return m_vParticlePositions.size() - m_vParticleContainer.size();
-	return m_iBoundaryCount;
 }

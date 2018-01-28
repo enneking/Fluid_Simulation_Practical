@@ -12,6 +12,52 @@ SPHManager::~SPHManager()
     
 }
 
+
+double SPHManager::EvaluateConstraint(size_t idx)
+{
+    return glm::max(state.density[idx] / settings.restDensity - 1.0, 0.0);
+}
+
+Eigen::Vector3d SPHManager::EvaluateConstraintDerivativeJ(size_t i, size_t j)
+{
+    auto const mass = m_oParticleManager.GetParticleMass();
+
+    auto const xi = m_oParticleManager.GetParticlePositions()->at(i);
+    auto const xj = m_oParticleManager.GetParticlePositions()->at(j);
+
+    return -((mass / settings.restDensity) * m_pSPHKernel->EvaluateGradient(xi - xj));
+}
+
+Eigen::Vector3d SPHManager::EvaluateConstraintDerivativeI(size_t idx)
+{
+    auto const mass = m_oParticleManager.GetParticleMass();
+
+    auto const xi = m_oParticleManager.GetParticlePositions()->at(idx);
+
+    Eigen::Vector3d accum = Eigen::Vector3d(0.0, 0.0, 0.0);
+    for (size_t j = 0; j < m_oParticleManager.GetParticleContainer()->size(); ++j) {
+        // if(j == idx) continue;
+        auto const xj = m_oParticleManager.GetParticlePositions()->at(j);
+        accum += mass * m_pSPHKernel->EvaluateGradient(xi - xj);
+    }
+    return accum * (1.0 / settings.restDensity);
+}
+
+double SPHManager::ComputeLambda(size_t idx)
+{
+    static const double epsilon = 10e-4;
+    double accum = 0.0;
+    for (size_t j = 0; j < m_oParticleManager.GetParticleContainer()->size(); ++j) {
+        accum += EvaluateConstraintDerivativeJ(idx, j).squaredNorm();
+    }
+    return -(EvaluateConstraint(idx) / ((accum) + epsilon));
+}
+
+Eigen::Vector3d SPHManager::ComputeDisplacement(size_t idx)
+{
+    return Eigen::Vector3d();
+}
+
 ParticleManager* SPHManager::GetParticleManager()
 {
 	return &m_oParticleManager;
@@ -27,8 +73,9 @@ void SPHManager::Init()
     */
 
     m_oParticleManager.InitBuffers();
+    settings.smoothingLength = m_oParticleManager.m_fParticleRadius * 4.0;
  
-    m_oCompactNSearch = std::make_unique<CompactNSearch>(settings.smoothingLength);
+    m_oCompactNSearch = std::make_unique<CompactNSearch>(settings.smoothingLength * 2.0f);
     m_fluidDiscretizationId = m_oCompactNSearch->add_discretization(
         &(*m_oParticleManager.GetParticlePositions())[0],
         m_oParticleManager.GetParticleContainer()->size(),
@@ -63,7 +110,7 @@ void SPHManager::Init()
 
     // precompute volume estimation function for boundaries
     {
-        double smoothingLength = 0.4; // @TODO compute that smoothing length from boundary resolution because that's important
+        double smoothingLength = settings.smoothingLength; // @TODO compute that smoothing length from boundary resolution because that's important
         CompactNSearch search(smoothingLength);
         auto discrId = search.add_discretization(
             m_oParticleManager.GetBoundaryPositions(),
@@ -72,7 +119,7 @@ void SPHManager::Init()
         search.neighborhood_search();
         auto& boundaryDiscretization = search.discretizations()[discrId];
         state.boundaryD.resize(m_oParticleManager.GetBoundaryParticleCount(), 0.0);
-        auto boundaryKernel = SPH::CubicSplineKernel(smoothingLength);  
+        auto boundaryKernel = SPH::CubicSplineKernel(smoothingLength);
         for (size_t i = 0; i < m_oParticleManager.GetBoundaryParticleCount(); ++i) {
             auto x_i = m_oParticleManager.GetBoundaryPositions()[i];
             double t = 0.0;
@@ -235,7 +282,7 @@ void SPHManager::UpdateWorkGroup(WorkGroup* workGroup, double dt)
         auto x_i = m_oParticleManager.GetParticlePositions()->at(i);
 
         auto boundaryPositions = m_oParticleManager.GetBoundaryPositions();
-        const double h = 0.1;
+        const double h = 0.1;  // @TODO work this out, too
         const double bR = 88.0;
         const double boundaryMass = 1.0;   
         const double fluidMass = m_oParticleManager.GetParticleMass();
@@ -365,6 +412,7 @@ void SPHManager::GUI()
         {
             SPHManager* self = nullptr;
         } densityPlotData = { this };
+        g_avgDensity = 0.0;
         ImGui::PlotHistogram("Density Samples", [](void* data, int idx) -> float {
             auto densityPlotData = static_cast<DensityPlotData*>(data);
             auto density = densityPlotData->self->GetDensityWithIndex(idx);

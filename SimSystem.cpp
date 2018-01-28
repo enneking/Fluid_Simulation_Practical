@@ -37,7 +37,7 @@ SPHManager* SimSystem::GetSPHManager()
 void SimSystem::Run()
 {
 	m_oSPHManager.Init();
-	m_SurfaceManager.Init(&m_oSPHManager);
+	//m_SurfaceManager.Init(&m_oSPHManager);
 
 	std::chrono::system_clock::time_point CurrentTime = std::chrono::system_clock::now();
 	std::chrono::system_clock::time_point NewTime;

@@ -32,7 +32,7 @@ public:
 
 	void InitBuffers();
 
-	void SetUpBoundaryBox();
+	void SetupBoundaries();
 
 	Particle* AddParticle(Eigen::Vector3d fInitialPos = Eigen::Vector3d::Zero(), Eigen::Vector3d fInitialVelocity = Eigen::Vector3d::Zero());
 
@@ -54,12 +54,11 @@ public:
     bool SerialiseStateToFile(std::ofstream& file);
     bool LoadStateFromFile(std::ifstream& file);
 
+	float m_fParticleRadius = 0.2f;
 	Camera* GetCamera() { return m_pCamera; }
 
 private:
-	double m_fParticleMass = 1.0;
-	float m_fParticleRadius = 0.2f;
-	std::vector<Particle> m_vParticleContainer;
+	double m_fParticleMass = 1.0;	std::vector<Particle> m_vParticleContainer;
 	std::vector<Eigen::Vector3d> m_vParticlePositions;
 
 	GLushort m_vBoundaryIndices[36];
