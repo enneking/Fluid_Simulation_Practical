@@ -55,6 +55,8 @@ public:
     bool LoadStateFromFile(std::ifstream& file);
 
 	float m_fParticleRadius = 0.05f;
+	Camera* GetCamera() { return m_pCamera; }
+
 private:
 	double m_fParticleMass = 1.0;
 	std::vector<Particle> m_vParticleContainer;

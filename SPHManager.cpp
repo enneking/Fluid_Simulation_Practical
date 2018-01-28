@@ -55,7 +55,7 @@ double SPHManager::ComputeLambda(size_t idx)
 
 Eigen::Vector3d SPHManager::ComputeDisplacement(size_t idx)
 {
-
+    return Eigen::Vector3d();
 }
 
 ParticleManager* SPHManager::GetParticleManager()

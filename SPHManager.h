@@ -72,6 +72,8 @@ public:
         Eigen::Vector3d     externalForceAccum = Eigen::Vector3d(0.0, 0.0, 0.0);
     } state;
     void UpdateWorkGroup(WorkGroup* workGroup, double dt);
+	
+	SPH::Kernel*    m_pSPHKernel = nullptr;
 private:
 
     // pressure solver
@@ -86,7 +88,7 @@ private:
 	unsigned int m_fluidDiscretizationId;
     unsigned int m_boundaryDiscretizationId;
 	
-	SPH::Kernel*    m_pSPHKernel = nullptr;
+	
 };
 
 

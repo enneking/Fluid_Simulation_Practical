@@ -3,6 +3,7 @@
 #include <chrono>
 #include "Camera.h"
 #include "SPHManager.h"
+#include "SurfaceManager.h"
 
 
 class SimSystem
@@ -22,6 +23,7 @@ private:
 	SimSystem::~SimSystem();
 
 	SPHManager m_oSPHManager;
+	SurfaceManager m_SurfaceManager;
 
 	GLFWwindow* m_oWindow;
 	Camera m_oCamera;
