@@ -66,11 +66,20 @@ public:
         std::vector<double> density;
         std::vector<double> pressure;
         std::vector<double> boundaryD;
+        
         std::vector<Eigen::Vector3d> boundaryForce;
+
+        Eigen::Vector3d     externalForceAccum = Eigen::Vector3d(0.0, 0.0, 0.0);
     } state;
     void UpdateWorkGroup(WorkGroup* workGroup, double dt);
 private:
 
+    // pressure solver
+    double EvaluateConstraint(size_t idx);
+    Eigen::Vector3d EvaluateConstraintDerivativeJ(size_t i, size_t j);
+    Eigen::Vector3d EvaluateConstraintDerivativeI(size_t idx);
+    double ComputeLambda(size_t idx);
+    Eigen::Vector3d ComputeDisplacement(size_t idx);
 
 	ParticleManager m_oParticleManager;
 	std::unique_ptr<CompactNSearch> m_oCompactNSearch;
