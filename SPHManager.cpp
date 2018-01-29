@@ -16,7 +16,6 @@ SPHManager::~SPHManager()
 double SPHManager::EvaluateConstraint(size_t idx)
 {
     auto val = glm::max((state.density[idx] / settings.restDensity) - 1.0, 0.0);
-    if (val > 1.0) { std::cout << "C = " << val << std::endl; }
     return val;
 }
 
@@ -36,8 +35,15 @@ Eigen::Vector3d SPHManager::EvaluateConstraintDerivativeI(size_t idx)
     auto const xi = m_oParticleManager.GetParticlePositions()->at(idx);
 
     Eigen::Vector3d accum = Eigen::Vector3d(0.0, 0.0, 0.0);
-    for (size_t j = 0; j < m_oParticleManager.GetParticleContainer()->size(); ++j) {
+    auto& discretizations = m_oCompactNSearch->discretizations();
+    auto numNeighbors = discretizations[m_fluidDiscretizationId].n_neighbors(idx);
+
+    for (int n = 0; n < numNeighbors; ++n) {
+
+        auto nID = discretizations[m_fluidDiscretizationId].neighbor(idx, n);
+        auto j = nID.index;
         // if(j == idx) continue;
+        if (nID.object_id != m_fluidDiscretizationId) continue;
         auto const xj = m_oParticleManager.GetParticlePositions()->at(j);
         accum += mass * m_pSPHKernel->EvaluateGradient(xi - xj);
     }
@@ -367,6 +373,9 @@ void SPHManager::UpdateWorkGroup(WorkGroup* workGroup, double dt)
                     tau *= 0.0;
                 }
                 f = relMass * tau * (diff / dist); // *(-diff.normalized().dot(v.normalized()) > 0.0 ? 1.0 : 0.0);
+            }
+            else {
+                f = -(fluidMass * boundaryD[k]) * (pressure[i] / (density[i] * density[i])) * m_pSPHKernel->EvaluateGradient(x_i - x_k);
 
                 {   // viscosity / friction (assignment04-1)
                     const double alpha = 0.2f;    // viscosity coefficient
@@ -380,9 +389,6 @@ void SPHManager::UpdateWorkGroup(WorkGroup* workGroup, double dt)
                     const double pi = -v * (std::min(vDiff.dot(xDiff), 0.0) / std::abs((xDiff.dot(xDiff) + epsilon * h * h)));
                     f += -mass * state.boundaryD[k] * pi * m_pSPHKernel->EvaluateGradient(x_i - x_k);
                 }
-            }
-            else {
-                f = -(fluidMass * boundaryD[k]) * (pressure[i] / (density[i] * density[i])) * m_pSPHKernel->EvaluateGradient(x_i - x_k);
             }
             boundaryForce[i] += f;
         }
