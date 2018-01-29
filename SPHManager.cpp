@@ -479,8 +479,6 @@ void SPHManager::UpdateWorkGroup(WorkGroup* workGroup, double dt)
         }
         m_oParticleManager.GetParticleContainer()->at(i).m_vVelocity += e * vPrime;
 
-
-        
     }
 
 
