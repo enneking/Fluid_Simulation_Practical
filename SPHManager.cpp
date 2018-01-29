@@ -426,6 +426,10 @@ void SPHManager::UpdateWorkGroup(WorkGroup* workGroup, double dt)
         m_oParticleManager.GetParticleContainer()->at(i).m_vVelocity += accel * dt;
         auto velocity = m_oParticleManager.GetParticleContainer()->at(i).m_vVelocity;
         displacement[i - workGroup->particleOffset] = velocity * dt;
+
+        if (!settings.usePressureSolver) {
+            m_oParticleManager.GetParticlePositions()->at(i) += displacement[i - workGroup->particleOffset];
+        }
     }
 
     if(settings.usePressureSolver) {   // pressure solver iterations
@@ -439,6 +443,9 @@ void SPHManager::UpdateWorkGroup(WorkGroup* workGroup, double dt)
         for (auto i = firstParticle; i < lastParticle; ++i) {
             auto newX = m_oParticleManager.GetParticlePositions()->at(i) + displacement[i - workGroup->particleOffset];
             m_oParticleManager.GetParticleContainer()->at(i).m_vVelocity = (1.0 / dt) * (newX - m_oParticleManager.GetParticlePositions()->at(i));
+
+            // position update
+            m_oParticleManager.GetParticlePositions()->at(i) += displacement[i - workGroup->particleOffset];
         }
     }
 
@@ -473,8 +480,7 @@ void SPHManager::UpdateWorkGroup(WorkGroup* workGroup, double dt)
         m_oParticleManager.GetParticleContainer()->at(i).m_vVelocity += e * vPrime;
 
 
-        // position update
-        m_oParticleManager.GetParticlePositions()->at(i) += displacement[i - workGroup->particleOffset];
+        
     }
 
 
