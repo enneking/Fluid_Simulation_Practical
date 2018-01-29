@@ -36,7 +36,6 @@ SPHManager* SimSystem::GetSPHManager()
 
 void SimSystem::Run()
 {
-
 	m_oSPHManager.Init();
 	//m_SurfaceManager.Init(&m_oSPHManager);
 
@@ -121,7 +120,9 @@ void SimSystem::Run()
 			StepsThisFrame += 1.0;
             if (fileOut.is_open() && StepsThisFrame >= StepsPerFrame) {
 				StepsThisFrame -= StepsPerFrame;
-                m_oSPHManager.GetParticleManager()->SerialiseStateToFile(fileOut);
+                //m_oSPHManager.GetParticleManager()->SerialiseStateToFile(fileOut);
+				m_SurfaceManager.CreateSurface();
+				m_SurfaceManager.SaveVertexPosToFile(fileOut);
             }
             numSteps++;
             stepSim = false;
@@ -142,12 +143,15 @@ void SimSystem::Run()
 		//render our game objects
         if (fileIn.is_open() && accumulator >= RenderFPS) {
 			accumulator -= RenderFPS;
-            m_oSPHManager.GetParticleManager()->LoadStateFromFile(fileIn);
+           // m_oSPHManager.GetParticleManager()->LoadStateFromFile(fileIn);
+			m_SurfaceManager.LoadVertexPosFromFile(fileIn);
+			m_SurfaceManager.Draw();
         }
-
-		//m_SurfaceManager.CreateSurface();
-		//m_SurfaceManager.Draw();
-		m_oSPHManager.GetParticleManager()->DrawParticles();
+		else
+		{
+			m_oSPHManager.GetParticleManager()->DrawParticles();
+		}
+		
 
         // render UI
         auto imguiDrawData = ImGui::GetDrawData();

@@ -1,4 +1,5 @@
 #include "SurfaceManager.h"
+#include <fstream>
 
 void SurfaceManager::Init(SPHManager* pSPHManager)
 {
@@ -6,16 +7,15 @@ void SurfaceManager::Init(SPHManager* pSPHManager)
 	m_density = &pSPHManager->state.density;
 	m_pKernel = pSPHManager->m_pSPHKernel;
 	auto UpperRightFrontVec = m_pParticleManager->m_vBoxRightUpperFront;
-	auto LowerLeftBackVec = m_pParticleManager->m_vBoxLeftLowerBack;
+	m_LowerLeftBackVec = m_pParticleManager->m_vBoxLeftLowerBack;
 
 
-	m_Mesh.i_max = (int)(((UpperRightFrontVec)[0] - (LowerLeftBackVec)[0]) / m_CubeWidth) + 1;
-	m_Mesh.j_max = (int)(((UpperRightFrontVec)[1] - (LowerLeftBackVec)[1]) / m_CubeWidth) + 1;
-	m_Mesh.k_max = (int)(((UpperRightFrontVec)[2] - (LowerLeftBackVec)[2]) / m_CubeWidth) + 1;
+	m_Mesh.i_max = 6+(size_t)(((UpperRightFrontVec)[0] - (m_LowerLeftBackVec)[0]) / m_CubeWidth);
+	m_Mesh.j_max = 6+(size_t)(((UpperRightFrontVec)[1] - (m_LowerLeftBackVec)[1]) / m_CubeWidth);
+	m_Mesh.k_max = 6+(size_t)(((UpperRightFrontVec)[2] - (m_LowerLeftBackVec)[2]) / m_CubeWidth);
 
-	m_Mesh.Pos.reserve(m_Mesh.i_max * m_Mesh.j_max * m_Mesh.k_max);
-	m_CellMarks.resize((m_Mesh.i_max - 1) * (m_Mesh.j_max - 1) * (m_Mesh.k_max - 1));
-	m_VoxelMarks.resize((m_Mesh.i_max) * (m_Mesh.j_max) * (m_Mesh.k_max));
+	m_Mesh.Pos.reserve((m_Mesh.i_max) * (m_Mesh.j_max) * (m_Mesh.k_max));
+	m_VoxelWeights.resize((m_Mesh.i_max) * (m_Mesh.j_max) * (m_Mesh.k_max));
 
 	for (int i = 0; i < m_Mesh.i_max; i++)
 	{
@@ -23,7 +23,7 @@ void SurfaceManager::Init(SPHManager* pSPHManager)
 		{
 			for (int k = 0; k < m_Mesh.k_max; k++)
 			{
-				m_Mesh.Pos.emplace_back((LowerLeftBackVec)[0] + i * m_CubeWidth, (LowerLeftBackVec)[1] + j * m_CubeWidth, (LowerLeftBackVec)[1] + k * m_CubeWidth);
+				m_Mesh.Pos.emplace_back((m_LowerLeftBackVec)[0] + (i-3) * m_CubeWidth, (m_LowerLeftBackVec)[1] + (j-3) * m_CubeWidth, (m_LowerLeftBackVec)[1] + (k-3) * m_CubeWidth);
 			}
 		}
 	}
@@ -37,25 +37,33 @@ void SurfaceManager::Init(SPHManager* pSPHManager)
 	glGenBuffers(1, &iVertexBufferObject);
 
 	glBindBuffer(GL_ARRAY_BUFFER, iVertexBufferObject);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * m_SurfaceVertices.size() * 3, 0, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * m_SurfaceVertices.size(), 0, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, (void*)0);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, (void*)(sizeof(GLfloat) * 3));
 	glDisableVertexAttribArray(0);
+	glDisableVertexAttribArray(1);
 
-	m_pCompactNSearch = std::make_unique<CompactNSearch>(0.2); ///!!!!!!!!!!!!!!!!!! change 
-	m_fluidDiscretizationId = m_pCompactNSearch->add_discretization(
-		&(*m_pParticleManager->GetParticlePositions())[0],
-		m_pParticleManager->GetParticleContainer()->size(),
-		true, false);
-	m_surfaceDiscretizationId = m_pCompactNSearch->add_discretization(
-		&m_Mesh.Pos[0],
-		m_Mesh.Pos.size(),
-		false, true);
+	//m_pCompactNSearch = std::make_unique<CompactNSearch>(0.1);
+	//m_fluidDiscretizationId = m_pCompactNSearch->add_discretization(
+	//	&(*m_pParticleManager->GetParticlePositions())[0],
+	//	m_pParticleManager->GetParticleContainer()->size(),
+	//	true, false);
+	//m_surfaceDiscretizationId = m_pCompactNSearch->add_discretization(
+	//	&m_Mesh.Pos[0],
+	//	m_Mesh.Pos.size(),
+	//	false, true);
 
+	////m_pCompactNSearch->neighborhood_search();
+	
 }
 
 void SurfaceManager::Draw()
 {
+	glm::vec3 *CameraPos = m_pParticleManager->GetCamera()->GetPosition();
+	glUniform3fv(glGetUniformLocation(m_ShaderManager.getProg(0), "view_pos"), 1, &(*CameraPos)[0]);
+
 	glm::mat4 ProjectionMatrix = m_pParticleManager->GetCamera()->m_mProjectionMatrix;
 	glUniformMatrix4fv(glGetUniformLocation(m_ShaderManager.getProg(0), "uProjectionMatrix"), 1, GL_FALSE, &ProjectionMatrix[0][0]);
 
@@ -68,150 +76,409 @@ void SurfaceManager::Draw()
 	glBindVertexArray(m_iVertexArrayObject);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * m_SurfaceVertices.size(), &m_SurfaceVertices[0], GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, (void*)0);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, (void*)(sizeof(GLfloat) * 3));
 	glDrawArrays(GL_TRIANGLES, 0, (GLsizei)m_SurfaceVertices.size() / 3);
 	glDisableVertexAttribArray(0);
+	glDisableVertexAttribArray(1);
 	glDisable(GL_DEPTH_TEST);
 }
 
 
 void SurfaceManager::CreateSurface()
 {
-	m_pCompactNSearch->neighborhood_search();
-	auto discretization = m_pCompactNSearch->discretizations()[m_surfaceDiscretizationId];
-	//
-	for (size_t i = 0; i < m_Mesh.Pos.size(); i++)
+	std::fill(m_VoxelWeights.begin(), m_VoxelWeights.end(), 0);
+	for (size_t i = 0; i < m_pParticleManager->GetParticleContainer()->size(); i++)
 	{
-		auto num_neighbors = discretization.n_neighbors(i);
-		double sum = 0.0f;
-		for(int j = 0; j < num_neighbors; j++)
+		int x_i = (int)(3+((*m_pParticleManager->GetParticlePositions())[i][0] - m_LowerLeftBackVec[0]) / m_CubeWidth);
+		int x_j = (int)(3+((*m_pParticleManager->GetParticlePositions())[i][1] - m_LowerLeftBackVec[1]) / m_CubeWidth);
+		int x_k = (int)(3+((*m_pParticleManager->GetParticlePositions())[i][2] - m_LowerLeftBackVec[2]) / m_CubeWidth);
+
+		volatile int i_0 = x_i * (int)(m_Mesh.j_max) * (int)(m_Mesh.k_max) + x_j * (int)(m_Mesh.k_max) + x_k;
+		int i_1 = (x_i + 1) * (int)m_Mesh.j_max *(int)m_Mesh.k_max + x_j * (int)m_Mesh.k_max + x_k;
+		int i_2 = (x_i + 1) * (int)m_Mesh.j_max * (int)m_Mesh.k_max + x_j * (int)m_Mesh.k_max + (x_k + 1);
+		int i_3 = x_i * (int)m_Mesh.j_max * (int)m_Mesh.k_max + x_j * (int)m_Mesh.k_max + (x_k + 1);
+		int i_4 = x_i * (int)m_Mesh.j_max * (int)m_Mesh.k_max + (x_j + 1) * (int)m_Mesh.k_max + x_k;
+		int i_5 = (x_i + 1) *(int)m_Mesh.j_max * (int)m_Mesh.k_max + (x_j + 1) * (int)m_Mesh.k_max + x_k;
+		int i_6 = (x_i + 1) * (int)m_Mesh.j_max * (int)m_Mesh.k_max + (x_j + 1) * (int)m_Mesh.k_max + (x_k + 1);
+		volatile int i_7 = x_i * (int)m_Mesh.j_max * (int)m_Mesh.k_max + (x_j + 1) * (int)m_Mesh.k_max + (x_k + 1);
+		//std::cout << "i " << i << std::endl;
+		//std::cout << "xi " << x_i << std::endl;
+		//std::cout << "xj " << x_j << std::endl;
+		//std::cout << "xk " << x_k << std::endl;
+		//std::cout << "mesh size " << m_VoxelWeights.size() << std::endl;
+		//std::cout << "particle size " << m_pParticleManager->GetParticlePositions()->size() << std::endl;
+		//std::cout << "density size " << m_density->size() << std::endl;
+		//std::cout << "i0 " << i_0 << std::endl;
+		//std::cout << "i7 " << i_7 << std::endl;
+
+		//std::cout << "----------------\n";
+
+		if (i_6 < m_VoxelWeights.size() - (int)(3 * (m_Mesh.j_max) * (m_Mesh.k_max) + 3 * (m_Mesh.k_max) + 3) && i_0 > (int)(3 * (m_Mesh.j_max) * (m_Mesh.k_max) + 3 * (m_Mesh.k_max) + 3))
 		{
-			if (discretization.neighbor(i, j).object_id == m_fluidDiscretizationId)
-			{
-				auto k = discretization.neighbor(i, j).index;
-				sum += m_pKernel->Evaluate(m_Mesh.Pos[i] - (*m_pParticleManager->GetParticlePositions())[k]) / (*m_density)[k];
-			}
+
+			m_VoxelWeights[i_0] += (float)(m_pKernel->Evaluate(m_Mesh.Pos[i_0] - (*m_pParticleManager->GetParticlePositions())[i]) * m_pParticleManager->GetParticleMass() / ((*m_density)[i]));
+			m_VoxelWeights[i_1] += (float)(m_pKernel->Evaluate(m_Mesh.Pos[i_1] - (*m_pParticleManager->GetParticlePositions())[i]) * m_pParticleManager->GetParticleMass() / ((*m_density)[i]));
+			m_VoxelWeights[i_2] += (float)(m_pKernel->Evaluate(m_Mesh.Pos[i_2] - (*m_pParticleManager->GetParticlePositions())[i]) * m_pParticleManager->GetParticleMass() / ((*m_density)[i]));
+			m_VoxelWeights[i_3] += (float)(m_pKernel->Evaluate(m_Mesh.Pos[i_3] - (*m_pParticleManager->GetParticlePositions())[i]) * m_pParticleManager->GetParticleMass() / ((*m_density)[i]));
+			m_VoxelWeights[i_4] += (float)(m_pKernel->Evaluate(m_Mesh.Pos[i_4] - (*m_pParticleManager->GetParticlePositions())[i]) * m_pParticleManager->GetParticleMass() / ((*m_density)[i]));
+			m_VoxelWeights[i_5] += (float)(m_pKernel->Evaluate(m_Mesh.Pos[i_5] - (*m_pParticleManager->GetParticlePositions())[i]) * m_pParticleManager->GetParticleMass() / ((*m_density)[i]));
+			m_VoxelWeights[i_6] += (float)(m_pKernel->Evaluate(m_Mesh.Pos[i_6] - (*m_pParticleManager->GetParticlePositions())[i]) * m_pParticleManager->GetParticleMass() / ((*m_density)[i]));
+			m_VoxelWeights[i_7] += (float)(m_pKernel->Evaluate(m_Mesh.Pos[i_7] - (*m_pParticleManager->GetParticlePositions())[i]) * m_pParticleManager->GetParticleMass() / ((*m_density)[i]));
 		}
-		if (sum > 0.0)
-		{
-			m_VoxelMarks[i] = true;
-		}
-		else
-		{
-			m_VoxelMarks[i] = false;
-		}
+
 	}
-	for (size_t i = 0; i < m_Mesh.i_max - 1; i++)
-	{
-		for (size_t j = 0; j < m_Mesh.j_max - 1; j++)
-		{
-			for (size_t k = 0; k < m_Mesh.k_max - 1; k++)
-			{
-				size_t Index = i * (m_Mesh.j_max) * (m_Mesh.k_max) + j * (m_Mesh.k_max) + k;
 
-				m_CellMarks[Index]  = m_VoxelMarks[Index];
 
-				m_CellMarks[Index] |= m_VoxelMarks[(i + 1) * m_Mesh.j_max * m_Mesh.k_max + j * m_Mesh.k_max + k] << 1;
-
-				m_CellMarks[Index] |= m_VoxelMarks[(i + 1) * m_Mesh.j_max * m_Mesh.k_max + j * m_Mesh.k_max + (k + 1)] << 2;
-
-				m_CellMarks[Index] |= m_VoxelMarks[i * m_Mesh.j_max * m_Mesh.k_max + j * m_Mesh.k_max + (k + 1)] << 3;
-
-				m_CellMarks[Index] |= m_VoxelMarks[i * m_Mesh.j_max * m_Mesh.k_max + (j + 1) * m_Mesh.k_max + k] << 4;
-
-				m_CellMarks[Index] |= m_VoxelMarks[(i + 1) *m_Mesh.j_max * m_Mesh.k_max + (j + 1) * m_Mesh.k_max + k] << 5;
-
-				m_CellMarks[Index] |= m_VoxelMarks[(i + 1) * m_Mesh.j_max * m_Mesh.k_max + (j + 1) * m_Mesh.k_max + (k + 1)] << 6;
-
-				m_CellMarks[Index] |= m_VoxelMarks[i * m_Mesh.j_max * m_Mesh.k_max + (j + 1) * m_Mesh.k_max + (k + 1)] << 7;
-			}
-		}
-	}
+	//for (size_t i = 0; i < m_Mesh.Pos.size(); i++)
+	//{
+	//	auto num_neighbors = discretization.n_neighbors((unsigned int)i);
+	//	double sum_weight = 0.0f;
+	//	for(size_t j = 0; j < num_neighbors; j++)
+	//	{
+	//		if (discretization.neighbor((unsigned int)i, (unsigned int)j).object_id == m_fluidDiscretizationId)
+	//		{
+	//			auto k = discretization.neighbor((unsigned int)i, (unsigned int)j).index;
+	//			if ((*m_density)[k] > 0.0f)
+	//			{
+	//				sum_weight += m_pKernel->Evaluate(m_Mesh.Pos[i] - (*m_pParticleManager->GetParticlePositions())[k]) * m_pParticleManager->GetParticleMass() / ((*m_density)[k]);
+	//			}
+	//		}
+	//	}
+	//	m_VoxelWeights[i] = (float)sum_weight;
+	//}
+	uint8_t cellmarks;
 	m_SurfaceVertices.clear();
-	for (size_t i = 0; i < m_CellMarks.size(); i++)
+	for (size_t i = 0; i < (m_Mesh.i_max - 2); i++)
 	{
 
-		for (int j = 0; marching_cubes_lut[m_CellMarks[i]][j] != -1; j++)
+		for (size_t j = 0; j < (m_Mesh.j_max - 2); j++)
 		{
+			for (size_t k = 0; k < (m_Mesh.k_max - 2); k++)
+			{
+				size_t i_full = i * (m_Mesh.j_max) * (m_Mesh.k_max) + j * (m_Mesh.k_max) + k;
+				size_t i_1 = (i + 1) * m_Mesh.j_max * m_Mesh.k_max + j * m_Mesh.k_max + k;
+				size_t i_2 = (i + 1) * m_Mesh.j_max * m_Mesh.k_max + j * m_Mesh.k_max + (k + 1);
+				size_t i_3 = i * m_Mesh.j_max * m_Mesh.k_max + j * m_Mesh.k_max + (k + 1);
+				size_t i_4 = i * m_Mesh.j_max * m_Mesh.k_max + (j + 1) * m_Mesh.k_max + k;
+				size_t i_5 = (i + 1) *m_Mesh.j_max * m_Mesh.k_max + (j + 1) * m_Mesh.k_max + k;
+				size_t i_6 = (i + 1) * m_Mesh.j_max * m_Mesh.k_max + (j + 1) * m_Mesh.k_max + (k + 1);
+				size_t i_7 = i * m_Mesh.j_max * m_Mesh.k_max + (j + 1) * m_Mesh.k_max + (k + 1);
 
-			switch (marching_cubes_lut[m_CellMarks[i]][j]) {
 
-			case 0:
-				m_SurfaceVertices.emplace_back(m_Mesh.Pos[i][0] + m_CubeWidth * 0.5f);
-				m_SurfaceVertices.emplace_back(m_Mesh.Pos[i][1]);
-				m_SurfaceVertices.emplace_back(m_Mesh.Pos[i][2]);
-				break;
+				cellmarks  = (m_VoxelWeights[i_full] > 0);
 
-			case 1:
-				m_SurfaceVertices.emplace_back(m_Mesh.Pos[i][0] + m_CubeWidth);
-				m_SurfaceVertices.emplace_back(m_Mesh.Pos[i][1]);
-				m_SurfaceVertices.emplace_back(m_Mesh.Pos[i][2] + m_CubeWidth * 0.5f);
-				break;
+				cellmarks |= (m_VoxelWeights[i_1] > m_kSurfaceConst) << 1;
 
-			case 2:
-				m_SurfaceVertices.emplace_back(m_Mesh.Pos[i][0] + m_CubeWidth * 0.5f);
-				m_SurfaceVertices.emplace_back(m_Mesh.Pos[i][1]);
-				m_SurfaceVertices.emplace_back(m_Mesh.Pos[i][2] + m_CubeWidth);
-				break;
+				cellmarks |= (m_VoxelWeights[i_2] > m_kSurfaceConst) << 2;
 
-			case 3:
-				m_SurfaceVertices.emplace_back(m_Mesh.Pos[i][0]);
-				m_SurfaceVertices.emplace_back(m_Mesh.Pos[i][1]);
-				m_SurfaceVertices.emplace_back(m_Mesh.Pos[i][2] + m_CubeWidth * 0.5f);
-				break;
+				cellmarks |= (m_VoxelWeights[i_3] > m_kSurfaceConst) << 3;
 
-			case 4:
-				m_SurfaceVertices.emplace_back(m_Mesh.Pos[i][0] + m_CubeWidth * 0.5f);
-				m_SurfaceVertices.emplace_back(m_Mesh.Pos[i][1] + m_CubeWidth);
-				m_SurfaceVertices.emplace_back(m_Mesh.Pos[i][2]);
-				break;
+				cellmarks |= (m_VoxelWeights[i_4] > m_kSurfaceConst) << 4;
 
-			case 5:
-				m_SurfaceVertices.emplace_back(m_Mesh.Pos[i][0] + m_CubeWidth);
-				m_SurfaceVertices.emplace_back(m_Mesh.Pos[i][1] + m_CubeWidth);
-				m_SurfaceVertices.emplace_back(m_Mesh.Pos[i][2] + m_CubeWidth * 0.5f);
-				break;
+				cellmarks |= (m_VoxelWeights[i_5] > m_kSurfaceConst) << 5;
+				
+				cellmarks |= (m_VoxelWeights[i_6] > m_kSurfaceConst) << 6;
 
-			case 6:
-				m_SurfaceVertices.emplace_back(m_Mesh.Pos[i][0] + m_CubeWidth * 0.5f);
-				m_SurfaceVertices.emplace_back(m_Mesh.Pos[i][1] + m_CubeWidth);
-				m_SurfaceVertices.emplace_back(m_Mesh.Pos[i][2] + m_CubeWidth);
-				break;
+				cellmarks |= (m_VoxelWeights[i_7] > m_kSurfaceConst) << 7;
 
-			case 7:
-				m_SurfaceVertices.emplace_back(m_Mesh.Pos[i][0]);
-				m_SurfaceVertices.emplace_back(m_Mesh.Pos[i][1] + m_CubeWidth);
-				m_SurfaceVertices.emplace_back(m_Mesh.Pos[i][2] + m_CubeWidth * 0.5f);
-				break;
-			case 8:
-				m_SurfaceVertices.emplace_back(m_Mesh.Pos[i][0]);
-				m_SurfaceVertices.emplace_back(m_Mesh.Pos[i][1] + m_CubeWidth * 0.5f);
-				m_SurfaceVertices.emplace_back(m_Mesh.Pos[i][2]);
-				break;
+				for (size_t l = 0; marching_cubes_lut[cellmarks][l] != -1; l++)
+				{
 
-			case 9:
-				m_SurfaceVertices.emplace_back(m_Mesh.Pos[i][0] + m_CubeWidth);
-				m_SurfaceVertices.emplace_back(m_Mesh.Pos[i][1] + m_CubeWidth * 0.5f);
-				m_SurfaceVertices.emplace_back(m_Mesh.Pos[i][2]);
-				break;
+					float x0, y0, z0, x1, y1, z1;
+					float offset;
+					switch (marching_cubes_lut[cellmarks][l]) {		
 
-			case 10:
-				m_SurfaceVertices.emplace_back(m_Mesh.Pos[i][0] + m_CubeWidth);
-				m_SurfaceVertices.emplace_back(m_Mesh.Pos[i][1] + m_CubeWidth * 0.5f);
-				m_SurfaceVertices.emplace_back(m_Mesh.Pos[i][2] + m_CubeWidth);
-				break;
+					case 0:
+						offset = (float)((m_kSurfaceConst - m_VoxelWeights[i_full]) / (m_VoxelWeights[i_1] - m_VoxelWeights[i_full])) * m_CubeWidth;
 
-			case 11:
-				m_SurfaceVertices.emplace_back(m_Mesh.Pos[i][0]);
-				m_SurfaceVertices.emplace_back(m_Mesh.Pos[i][1] + m_CubeWidth * 0.5f);
-				m_SurfaceVertices.emplace_back(m_Mesh.Pos[i][2] + m_CubeWidth);
-				break;
+						m_SurfaceVertices.emplace_back(m_Mesh.Pos[i_full][0] + offset);
+						m_SurfaceVertices.emplace_back(m_Mesh.Pos[i_full][1]);
+						m_SurfaceVertices.emplace_back(m_Mesh.Pos[i_full][2]);
 
-			default:
-				break;
+						x0 = (m_VoxelWeights[i_1] - m_VoxelWeights[(i - 1) * (m_Mesh.j_max) * (m_Mesh.k_max) + j * (m_Mesh.k_max) + k]) / m_CubeWidth;
+						y0 = (m_VoxelWeights[i_4] - m_VoxelWeights[i * (m_Mesh.j_max) * (m_Mesh.k_max) + (j - 1) * (m_Mesh.k_max) + k]) / m_CubeWidth;
+						z0 = (m_VoxelWeights[i_3] - m_VoxelWeights[i * (m_Mesh.j_max) * (m_Mesh.k_max) + j * (m_Mesh.k_max) + (k - 1)]) / m_CubeWidth;
+
+						x1 = (m_VoxelWeights[(i + 2) * m_Mesh.j_max * m_Mesh.k_max + j * m_Mesh.k_max + k] - m_VoxelWeights[i_full]) / m_CubeWidth;
+						y1 = (m_VoxelWeights[i_5] - m_VoxelWeights[(i+1) * (m_Mesh.j_max) * (m_Mesh.k_max) + (j - 1) * (m_Mesh.k_max) + k]) / m_CubeWidth;
+						z1 = (m_VoxelWeights[i_2] - m_VoxelWeights[(i+1) * (m_Mesh.j_max) * (m_Mesh.k_max) + j * (m_Mesh.k_max) + (k - 1)]) / m_CubeWidth;
+
+						m_SurfaceVertices.emplace_back(x0 + offset * (x1 - x0) / m_CubeWidth);
+						m_SurfaceVertices.emplace_back(y0 + offset * (y1 - y0) / m_CubeWidth);
+						m_SurfaceVertices.emplace_back(z0 + offset * (z1 - z0) / m_CubeWidth);
+						break;
+
+					case 1:
+						offset = (float)((m_kSurfaceConst - m_VoxelWeights[i_1]) / (m_VoxelWeights[i_2] - m_VoxelWeights[i_1])) * m_CubeWidth;
+
+						m_SurfaceVertices.emplace_back(m_Mesh.Pos[i_full][0] + m_CubeWidth);
+						m_SurfaceVertices.emplace_back(m_Mesh.Pos[i_full][1]);
+						m_SurfaceVertices.emplace_back(m_Mesh.Pos[i_full][2] + offset);
+
+
+						x0 = (m_VoxelWeights[(i + 2) * m_Mesh.j_max * m_Mesh.k_max + j * m_Mesh.k_max + k] - m_VoxelWeights[i_full]) / m_CubeWidth;
+						y0 = (m_VoxelWeights[i_5] - m_VoxelWeights[(i + 1) * (m_Mesh.j_max) * (m_Mesh.k_max) + (j - 1) * (m_Mesh.k_max) + k]) / m_CubeWidth;
+						z0 = (m_VoxelWeights[i_2] - m_VoxelWeights[(i + 1) * (m_Mesh.j_max) * (m_Mesh.k_max) + j * (m_Mesh.k_max) + (k - 1)]) / m_CubeWidth;
+
+						x1 = (m_VoxelWeights[(i + 2) * m_Mesh.j_max * m_Mesh.k_max + j * m_Mesh.k_max + (k+1)] - m_VoxelWeights[i_3]) / m_CubeWidth;
+						y1 = (m_VoxelWeights[i_6] - m_VoxelWeights[(i + 1) * (m_Mesh.j_max) * (m_Mesh.k_max) + (j - 1) * (m_Mesh.k_max) + (k + 1)]) / m_CubeWidth;
+						z1 = (m_VoxelWeights[(i + 1) * m_Mesh.j_max * m_Mesh.k_max + j * m_Mesh.k_max + (k + 2)] - m_VoxelWeights[i_1]) / m_CubeWidth;
+
+						m_SurfaceVertices.emplace_back(x0 + offset * (x1 - x0) / m_CubeWidth);
+						m_SurfaceVertices.emplace_back(y0 + offset * (y1 - y0) / m_CubeWidth);
+						m_SurfaceVertices.emplace_back(z0 + offset * (z1 - z0) / m_CubeWidth);
+
+						break;
+
+					case 2:
+						offset = (float)((m_kSurfaceConst - m_VoxelWeights[i_3]) / (m_VoxelWeights[i_2] - m_VoxelWeights[i_3])) * m_CubeWidth;
+
+						m_SurfaceVertices.emplace_back(m_Mesh.Pos[i_full][0] + offset);
+						m_SurfaceVertices.emplace_back(m_Mesh.Pos[i_full][1]);
+						m_SurfaceVertices.emplace_back(m_Mesh.Pos[i_full][2] + m_CubeWidth);
+
+						x0 = (m_VoxelWeights[i_2] - m_VoxelWeights[(i - 1) * m_Mesh.j_max * m_Mesh.k_max + j * m_Mesh.k_max + (k + 1)]) / m_CubeWidth;
+						y0 = (m_VoxelWeights[i_7] - m_VoxelWeights[i * m_Mesh.j_max * m_Mesh.k_max + (j - 1) * m_Mesh.k_max + (k + 1)]) / m_CubeWidth;
+						z0 = (m_VoxelWeights[i * m_Mesh.j_max * m_Mesh.k_max + j * m_Mesh.k_max + (k + 2)] - m_VoxelWeights[i_full]) / m_CubeWidth;
+
+						x1 = (m_VoxelWeights[(i + 2) * m_Mesh.j_max * m_Mesh.k_max + j * m_Mesh.k_max + (k + 1)] - m_VoxelWeights[i_3]) / m_CubeWidth;
+						y1 = (m_VoxelWeights[i_6] - m_VoxelWeights[(i + 1) * (m_Mesh.j_max) * (m_Mesh.k_max) + (j - 1) * (m_Mesh.k_max) + (k + 1)]) / m_CubeWidth;
+						z1 = (m_VoxelWeights[(i + 1) * m_Mesh.j_max * m_Mesh.k_max + j * m_Mesh.k_max + (k + 2)] - m_VoxelWeights[i_1]) / m_CubeWidth;
+					
+						m_SurfaceVertices.emplace_back(x0 + offset * (x1 - x0) / m_CubeWidth);
+						m_SurfaceVertices.emplace_back(y0 + offset * (y1 - y0) / m_CubeWidth);
+						m_SurfaceVertices.emplace_back(z0 + offset * (z1 - z0) / m_CubeWidth);
+
+						break;
+
+					case 3:
+						offset = (float)((m_kSurfaceConst - m_VoxelWeights[i_full]) / (m_VoxelWeights[i_3] - m_VoxelWeights[i_full])) * m_CubeWidth;
+
+						m_SurfaceVertices.emplace_back(m_Mesh.Pos[i_full][0]);
+						m_SurfaceVertices.emplace_back(m_Mesh.Pos[i_full][1]);
+						m_SurfaceVertices.emplace_back(m_Mesh.Pos[i_full][2] + offset);
+
+						x0 = (m_VoxelWeights[i_1] - m_VoxelWeights[(i - 1) * (m_Mesh.j_max) * (m_Mesh.k_max) + j * (m_Mesh.k_max) + k]) / m_CubeWidth;
+						y0 = (m_VoxelWeights[i_4] - m_VoxelWeights[i * (m_Mesh.j_max) * (m_Mesh.k_max) + (j - 1) * (m_Mesh.k_max) + k]) / m_CubeWidth;
+						z0 = (m_VoxelWeights[i_3] - m_VoxelWeights[i * (m_Mesh.j_max) * (m_Mesh.k_max) + j * (m_Mesh.k_max) + (k - 1)]) / m_CubeWidth;
+
+						x1 = (m_VoxelWeights[i_2] - m_VoxelWeights[(i - 1) * m_Mesh.j_max * m_Mesh.k_max + j * m_Mesh.k_max + (k + 1)]) / m_CubeWidth;
+						y1 = (m_VoxelWeights[i_7] - m_VoxelWeights[i * m_Mesh.j_max * m_Mesh.k_max + (j - 1) * m_Mesh.k_max + (k + 1)]) / m_CubeWidth;
+						z1 = (m_VoxelWeights[i * m_Mesh.j_max * m_Mesh.k_max + j * m_Mesh.k_max + (k + 2)] - m_VoxelWeights[i_full]) / m_CubeWidth;
+
+						m_SurfaceVertices.emplace_back(x0 + offset * (x1 - x0) / m_CubeWidth);
+						m_SurfaceVertices.emplace_back(y0 + offset * (y1 - y0) / m_CubeWidth);
+						m_SurfaceVertices.emplace_back(z0 + offset * (z1 - z0) / m_CubeWidth);
+
+						break;
+
+					case 4:
+						offset = (float)((m_kSurfaceConst - m_VoxelWeights[i_4]) / (m_VoxelWeights[i_5] - m_VoxelWeights[i_4])) * m_CubeWidth;
+
+						m_SurfaceVertices.emplace_back(m_Mesh.Pos[i_full][0] + offset);
+						m_SurfaceVertices.emplace_back(m_Mesh.Pos[i_full][1] + m_CubeWidth);
+						m_SurfaceVertices.emplace_back(m_Mesh.Pos[i_full][2]);
+
+						x0 = (m_VoxelWeights[i_5] - m_VoxelWeights[(i - 1) * (m_Mesh.j_max) * (m_Mesh.k_max) + (j + 1) * (m_Mesh.k_max) + k]) / m_CubeWidth;
+						y0 = (m_VoxelWeights[i * (m_Mesh.j_max) * (m_Mesh.k_max) + (j + 2) * (m_Mesh.k_max) + k] - m_VoxelWeights[i_full]) / m_CubeWidth;
+						z0 = (m_VoxelWeights[i_7] - m_VoxelWeights[i * (m_Mesh.j_max) * (m_Mesh.k_max) + (j+1) * (m_Mesh.k_max) + (k - 1)]) / m_CubeWidth;
+
+						x1 = (m_VoxelWeights[(i + 2) * m_Mesh.j_max * m_Mesh.k_max + (j+1) * m_Mesh.k_max + k] - m_VoxelWeights[i_4]) / m_CubeWidth;
+						y1 = (m_VoxelWeights[(i + 1) * (m_Mesh.j_max) * (m_Mesh.k_max) + (j + 2) * (m_Mesh.k_max) + k] - m_VoxelWeights[i_1]) / m_CubeWidth;
+						z1 = (m_VoxelWeights[i_6] - m_VoxelWeights[(i + 1) * (m_Mesh.j_max) * (m_Mesh.k_max) + (j+1) * (m_Mesh.k_max) + (k - 1)]) / m_CubeWidth;
+
+						m_SurfaceVertices.emplace_back(x0 + offset * (x1 - x0) / m_CubeWidth);
+						m_SurfaceVertices.emplace_back(y0 + offset * (y1 - y0) / m_CubeWidth);
+						m_SurfaceVertices.emplace_back(z0 + offset * (z1 - z0) / m_CubeWidth);
+
+						break;
+						
+					case 5:
+						offset = (float)((m_kSurfaceConst - m_VoxelWeights[i_5]) / (m_VoxelWeights[i_6] - m_VoxelWeights[i_5])) * m_CubeWidth;
+
+						m_SurfaceVertices.emplace_back(m_Mesh.Pos[i_full][0] + m_CubeWidth);
+						m_SurfaceVertices.emplace_back(m_Mesh.Pos[i_full][1] + m_CubeWidth);
+						m_SurfaceVertices.emplace_back(m_Mesh.Pos[i_full][2] + offset);
+
+						x0 = (m_VoxelWeights[(i + 2) * m_Mesh.j_max * m_Mesh.k_max + (j + 1) * m_Mesh.k_max + k] - m_VoxelWeights[i_4]) / m_CubeWidth;
+						y0 = (m_VoxelWeights[(i + 1) * (m_Mesh.j_max) * (m_Mesh.k_max) + (j + 2) * (m_Mesh.k_max) + k] - m_VoxelWeights[i_1]) / m_CubeWidth;
+						z0 = (m_VoxelWeights[i_6] - m_VoxelWeights[(i + 1) * (m_Mesh.j_max) * (m_Mesh.k_max) + (j + 1) * (m_Mesh.k_max) + (k - 1)]) / m_CubeWidth;
+
+						x1 = (m_VoxelWeights[(i + 2) * m_Mesh.j_max * m_Mesh.k_max + (j + 1) * m_Mesh.k_max + (k + 1)] - m_VoxelWeights[i_7]) / m_CubeWidth;
+						y1 = (m_VoxelWeights[(i + 1) * (m_Mesh.j_max) * (m_Mesh.k_max) + (j + 2) * (m_Mesh.k_max) + (k + 1)] - m_VoxelWeights[i_2]) / m_CubeWidth;
+						z1 = (m_VoxelWeights[(i + 1) * m_Mesh.j_max * m_Mesh.k_max + (j+1) * m_Mesh.k_max + (k + 2)] - m_VoxelWeights[i_5]) / m_CubeWidth;
+
+						m_SurfaceVertices.emplace_back(x0 + offset * (x1 - x0) / m_CubeWidth);
+						m_SurfaceVertices.emplace_back(y0 + offset * (y1 - y0) / m_CubeWidth);
+						m_SurfaceVertices.emplace_back(z0 + offset * (z1 - z0) / m_CubeWidth);
+						
+						break;
+						
+						
+					case 6:
+						offset = (float)((m_kSurfaceConst - m_VoxelWeights[i_7]) / (m_VoxelWeights[i_6] - m_VoxelWeights[i_7])) * m_CubeWidth;
+
+						m_SurfaceVertices.emplace_back(m_Mesh.Pos[i_full][0] + offset);
+						m_SurfaceVertices.emplace_back(m_Mesh.Pos[i_full][1] + m_CubeWidth);
+						m_SurfaceVertices.emplace_back(m_Mesh.Pos[i_full][2] + m_CubeWidth);
+
+						x0 = (m_VoxelWeights[i_6] - m_VoxelWeights[(i - 1) * m_Mesh.j_max * m_Mesh.k_max + (j+1) * m_Mesh.k_max + (k + 1)]) / m_CubeWidth;
+						y0 = (m_VoxelWeights[i * m_Mesh.j_max * m_Mesh.k_max + (j + 2) * m_Mesh.k_max + (k + 1)] - m_VoxelWeights[i_3]) / m_CubeWidth;
+						z0 = (m_VoxelWeights[i * m_Mesh.j_max * m_Mesh.k_max + (j+1) * m_Mesh.k_max + (k + 2)] - m_VoxelWeights[i_4]) / m_CubeWidth;
+
+						x1 = (m_VoxelWeights[(i + 2) * m_Mesh.j_max * m_Mesh.k_max + (j + 1) * m_Mesh.k_max + (k + 1)] - m_VoxelWeights[i_7]) / m_CubeWidth;
+						y1 = (m_VoxelWeights[(i + 1) * (m_Mesh.j_max) * (m_Mesh.k_max) + (j + 2) * (m_Mesh.k_max) + (k + 1)] - m_VoxelWeights[i_2]) / m_CubeWidth;
+						z1 = (m_VoxelWeights[(i + 1) * m_Mesh.j_max * m_Mesh.k_max + (j + 1) * m_Mesh.k_max + (k + 2)] - m_VoxelWeights[i_5]) / m_CubeWidth;
+
+						m_SurfaceVertices.emplace_back(x0 + offset * (x1 - x0) / m_CubeWidth);
+						m_SurfaceVertices.emplace_back(y0 + offset * (y1 - y0) / m_CubeWidth);
+						m_SurfaceVertices.emplace_back(z0 + offset * (z1 - z0) / m_CubeWidth);
+
+						break;
+
+					case 7:
+						offset = (float)((m_kSurfaceConst - m_VoxelWeights[i_4]) / (m_VoxelWeights[i_7] - m_VoxelWeights[i_4])) * m_CubeWidth;
+
+						m_SurfaceVertices.emplace_back(m_Mesh.Pos[i_full][0]);
+						m_SurfaceVertices.emplace_back(m_Mesh.Pos[i_full][1] + m_CubeWidth);
+						m_SurfaceVertices.emplace_back(m_Mesh.Pos[i_full][2] + offset);
+
+						x0 = (m_VoxelWeights[i_5] - m_VoxelWeights[(i - 1) * (m_Mesh.j_max) * (m_Mesh.k_max) + (j + 1) * (m_Mesh.k_max) + k]) / m_CubeWidth;
+						y0 = (m_VoxelWeights[i * (m_Mesh.j_max) * (m_Mesh.k_max) + (j + 2) * (m_Mesh.k_max) + k] - m_VoxelWeights[i_full]) / m_CubeWidth;
+						z0 = (m_VoxelWeights[i_7] - m_VoxelWeights[i * (m_Mesh.j_max) * (m_Mesh.k_max) + (j + 1) * (m_Mesh.k_max) + (k - 1)]) / m_CubeWidth;
+
+						x1 = (m_VoxelWeights[i_6] - m_VoxelWeights[(i - 1) * m_Mesh.j_max * m_Mesh.k_max + (j + 1) * m_Mesh.k_max + (k + 1)]) / m_CubeWidth;
+						y1 = (m_VoxelWeights[i * m_Mesh.j_max * m_Mesh.k_max + (j + 2) * m_Mesh.k_max + (k + 1)] - m_VoxelWeights[i_3]) / m_CubeWidth;
+						z1 = (m_VoxelWeights[i * m_Mesh.j_max * m_Mesh.k_max + (j + 1) * m_Mesh.k_max + (k + 2)] - m_VoxelWeights[i_4]) / m_CubeWidth;
+
+						m_SurfaceVertices.emplace_back(x0 + offset * (x1 - x0) / m_CubeWidth);
+						m_SurfaceVertices.emplace_back(y0 + offset * (y1 - y0) / m_CubeWidth);
+						m_SurfaceVertices.emplace_back(z0 + offset * (z1 - z0) / m_CubeWidth);
+						break;	
+
+					case 8:
+						offset = (float)((m_kSurfaceConst - m_VoxelWeights[i_full]) / (m_VoxelWeights[i_4] - m_VoxelWeights[i_full])) * m_CubeWidth;
+
+						m_SurfaceVertices.emplace_back(m_Mesh.Pos[i_full][0]);
+						m_SurfaceVertices.emplace_back(m_Mesh.Pos[i_full][1] + offset);
+						m_SurfaceVertices.emplace_back(m_Mesh.Pos[i_full][2]);
+
+						x0 = (m_VoxelWeights[i_1] - m_VoxelWeights[(i - 1) * (m_Mesh.j_max) * (m_Mesh.k_max) + j * (m_Mesh.k_max) + k]) / m_CubeWidth;
+						y0 = (m_VoxelWeights[i_4] - m_VoxelWeights[i * (m_Mesh.j_max) * (m_Mesh.k_max) + (j - 1) * (m_Mesh.k_max) + k]) / m_CubeWidth;
+						z0 = (m_VoxelWeights[i_3] - m_VoxelWeights[i * (m_Mesh.j_max) * (m_Mesh.k_max) + j * (m_Mesh.k_max) + (k - 1)]) / m_CubeWidth;
+
+						x1 = (m_VoxelWeights[i_5] - m_VoxelWeights[(i - 1) * (m_Mesh.j_max) * (m_Mesh.k_max) + (j + 1) * (m_Mesh.k_max) + k]) / m_CubeWidth;
+						y1 = (m_VoxelWeights[i * (m_Mesh.j_max) * (m_Mesh.k_max) + (j + 2) * (m_Mesh.k_max) + k] - m_VoxelWeights[i_full]) / m_CubeWidth;
+						z1 = (m_VoxelWeights[i_7] - m_VoxelWeights[i * (m_Mesh.j_max) * (m_Mesh.k_max) + (j + 1) * (m_Mesh.k_max) + (k - 1)]) / m_CubeWidth;
+
+						m_SurfaceVertices.emplace_back(x0 + offset * (x1 - x0) / m_CubeWidth);
+						m_SurfaceVertices.emplace_back(y0 + offset * (y1 - y0) / m_CubeWidth);
+						m_SurfaceVertices.emplace_back(z0 + offset * (z1 - z0) / m_CubeWidth);
+						break;
+
+					case 9:
+						offset = (float)((m_kSurfaceConst - m_VoxelWeights[i_1]) / (m_VoxelWeights[i_5] - m_VoxelWeights[i_1])) * m_CubeWidth;
+
+						m_SurfaceVertices.emplace_back(m_Mesh.Pos[i_full][0] + m_CubeWidth);
+						m_SurfaceVertices.emplace_back(m_Mesh.Pos[i_full][1] + offset);
+						m_SurfaceVertices.emplace_back(m_Mesh.Pos[i_full][2]);
+
+						x1 = (m_VoxelWeights[(i + 2) * m_Mesh.j_max * m_Mesh.k_max + j * m_Mesh.k_max + k] - m_VoxelWeights[i_full]) / m_CubeWidth;
+						y1 = (m_VoxelWeights[i_5] - m_VoxelWeights[(i + 1) * (m_Mesh.j_max) * (m_Mesh.k_max) + (j - 1) * (m_Mesh.k_max) + k]) / m_CubeWidth;
+						z1 = (m_VoxelWeights[i_2] - m_VoxelWeights[(i + 1) * (m_Mesh.j_max) * (m_Mesh.k_max) + j * (m_Mesh.k_max) + (k - 1)]) / m_CubeWidth;
+
+						x1 = (m_VoxelWeights[(i + 2) * m_Mesh.j_max * m_Mesh.k_max + (j + 1) * m_Mesh.k_max + k] - m_VoxelWeights[i_4]) / m_CubeWidth;
+						y1 = (m_VoxelWeights[(i + 1) * (m_Mesh.j_max) * (m_Mesh.k_max) + (j + 2) * (m_Mesh.k_max) + k] - m_VoxelWeights[i_1]) / m_CubeWidth;
+						z1 = (m_VoxelWeights[i_6] - m_VoxelWeights[(i + 1) * (m_Mesh.j_max) * (m_Mesh.k_max) + (j + 1) * (m_Mesh.k_max) + (k - 1)]) / m_CubeWidth;
+
+						m_SurfaceVertices.emplace_back(x0 + offset * (x1 - x0) / m_CubeWidth);
+						m_SurfaceVertices.emplace_back(y0 + offset * (y1 - y0) / m_CubeWidth);
+						m_SurfaceVertices.emplace_back(z0 + offset * (z1 - z0) / m_CubeWidth);
+						break;
+
+					case 10:
+						offset = (float)((m_kSurfaceConst - m_VoxelWeights[i_2]) / (m_VoxelWeights[i_6] - m_VoxelWeights[i_2])) * m_CubeWidth;
+
+						m_SurfaceVertices.emplace_back(m_Mesh.Pos[i_full][0] + m_CubeWidth);
+						m_SurfaceVertices.emplace_back(m_Mesh.Pos[i_full][1] + offset);
+						m_SurfaceVertices.emplace_back(m_Mesh.Pos[i_full][2] + m_CubeWidth);
+
+						x0 = (m_VoxelWeights[(i + 2) * m_Mesh.j_max * m_Mesh.k_max + j * m_Mesh.k_max + (k + 1)] - m_VoxelWeights[i_3]) / m_CubeWidth;
+						y0 = (m_VoxelWeights[i_6] - m_VoxelWeights[(i + 1) * (m_Mesh.j_max) * (m_Mesh.k_max) + (j - 1) * (m_Mesh.k_max) + (k + 1)]) / m_CubeWidth;
+						z0 = (m_VoxelWeights[(i + 1) * m_Mesh.j_max * m_Mesh.k_max + j * m_Mesh.k_max + (k + 2)] - m_VoxelWeights[i_1]) / m_CubeWidth;
+
+						x1 = (m_VoxelWeights[(i + 2) * m_Mesh.j_max * m_Mesh.k_max + (j + 1) * m_Mesh.k_max + (k + 1)] - m_VoxelWeights[i_7]) / m_CubeWidth;
+						y1 = (m_VoxelWeights[(i + 1) * (m_Mesh.j_max) * (m_Mesh.k_max) + (j + 2) * (m_Mesh.k_max) + (k + 1)] - m_VoxelWeights[i_2]) / m_CubeWidth;
+						z1 = (m_VoxelWeights[(i + 1) * m_Mesh.j_max * m_Mesh.k_max + (j + 1) * m_Mesh.k_max + (k + 2)] - m_VoxelWeights[i_5]) / m_CubeWidth;
+
+						m_SurfaceVertices.emplace_back(x0 + offset * (x1 - x0) / m_CubeWidth);
+						m_SurfaceVertices.emplace_back(y0 + offset * (y1 - y0) / m_CubeWidth);
+						m_SurfaceVertices.emplace_back(z0 + offset * (z1 - z0) / m_CubeWidth);
+						break;
+
+					case 11:
+						offset = (float)((m_kSurfaceConst - m_VoxelWeights[i_3]) / (m_VoxelWeights[i_7] - m_VoxelWeights[i_3])) * m_CubeWidth;
+
+						m_SurfaceVertices.emplace_back(m_Mesh.Pos[i_full][0]);
+						m_SurfaceVertices.emplace_back(m_Mesh.Pos[i_full][1] + offset);
+						m_SurfaceVertices.emplace_back(m_Mesh.Pos[i_full][2] + m_CubeWidth);
+						
+						x0 = (m_VoxelWeights[i_2] - m_VoxelWeights[(i - 1) * m_Mesh.j_max * m_Mesh.k_max + j * m_Mesh.k_max + (k + 1)]) / m_CubeWidth;
+						y0 = (m_VoxelWeights[i_7] - m_VoxelWeights[i * m_Mesh.j_max * m_Mesh.k_max + (j - 1) * m_Mesh.k_max + (k + 1)]) / m_CubeWidth;
+						z0 = (m_VoxelWeights[i * m_Mesh.j_max * m_Mesh.k_max + j * m_Mesh.k_max + (k + 2)] - m_VoxelWeights[i_full]) / m_CubeWidth;
+
+						x1 = (m_VoxelWeights[i_6] - m_VoxelWeights[(i - 1) * m_Mesh.j_max * m_Mesh.k_max + (j + 1) * m_Mesh.k_max + (k + 1)]) / m_CubeWidth;
+						y1 = (m_VoxelWeights[i * m_Mesh.j_max * m_Mesh.k_max + (j + 2) * m_Mesh.k_max + (k + 1)] - m_VoxelWeights[i_3]) / m_CubeWidth;
+						z1 = (m_VoxelWeights[i * m_Mesh.j_max * m_Mesh.k_max + (j + 1) * m_Mesh.k_max + (k + 2)] - m_VoxelWeights[i_4]) / m_CubeWidth;
+
+						m_SurfaceVertices.emplace_back(x0 + offset * (x1 - x0) / m_CubeWidth);
+						m_SurfaceVertices.emplace_back(y0 + offset * (y1 - y0) / m_CubeWidth);
+						m_SurfaceVertices.emplace_back(z0 + offset * (z1 - z0) / m_CubeWidth);
+						break;
+
+					default:
+						break;
+					}
+				}
 			}
 		}
 	}
+	
+
+}
+
+
+
+
+bool SurfaceManager::SaveVertexPosToFile(std::ofstream& file)
+{
+	std::vector<char> buf;
+
+	buf.resize(sizeof(GLfloat) * m_SurfaceVertices.size());
+	memcpy(buf.data(), m_SurfaceVertices.data(), buf.size());
+
+	auto res = buf.size() > 0 && file.is_open();
+	if (res)
+	{
+		uint64_t bufSize = (uint64_t)m_SurfaceVertices.size();
+		file.write((char*)&bufSize, sizeof(uint64_t));
+		file.write(buf.data(), buf.size());
+	}
+
+	return res;
+}
+
+bool SurfaceManager::LoadVertexPosFromFile(std::ifstream& file)
+{
+
+	if (file.peek() == EOF) { return false; }
+	uint64_t bufSize = 0;
+	file.read((char*)&bufSize, sizeof(uint64_t));
+	m_SurfaceVertices.resize(bufSize);
+	file.read((char*)m_SurfaceVertices.data(), bufSize * sizeof(GLfloat));
+	return true;
 }
 
 
