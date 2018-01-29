@@ -38,7 +38,6 @@ void SimSystem::Run()
 {
 	m_oSPHManager.Init();
 	m_SurfaceManager.Init(&m_oSPHManager);
-
 	std::chrono::system_clock::time_point CurrentTime = std::chrono::system_clock::now();
 	std::chrono::system_clock::time_point NewTime;
 	std::chrono::duration<double> LagTime;
@@ -143,7 +142,7 @@ void SimSystem::Run()
 		//render our game objects
         if (fileIn.is_open() && accumulator >= RenderFPS) {
 			accumulator -= RenderFPS;
-           // m_oSPHManager.GetParticleManager()->LoadStateFromFile(fileIn);
+            //m_oSPHManager.GetParticleManager()->LoadStateFromFile(fileIn);
 			m_SurfaceManager.LoadVertexPosFromFile(fileIn);
 			m_SurfaceManager.Draw();
         }
