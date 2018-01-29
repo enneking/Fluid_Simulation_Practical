@@ -19,47 +19,128 @@
 
 \refsection{0}
   \sortlist[entry]{nyt/global/}
-    \entry{article}{article}{}
-      \name{author}{4}{}{%
-        {{uniquename=0,hash=81a3feeb579a36f8ed14c22d7264cf2c}{%
-           family={Müller},
-           family_i={M\bibinitperiod},
+    \entry{Akinci}{article}{}
+      \name{author}{5}{}{%
+        {{uniquename=0,hash=424ea18033d75ffa4805ffdd50d6a7f7}{%
+           family={Akinci},
+           family_i={A\bibinitperiod},
+           given={Nadir},
+           given_i={N\bibinitperiod}}}%
+        {{uniquename=0,hash=6d8a96e06d334e1b81b365d17e231c81}{%
+           family={Ihmsen},
+           family_i={I\bibinitperiod},
+           given={Markus},
+           given_i={M\bibinitperiod}}}%
+        {{uniquename=0,hash=88d0410c76319343a0d13de971b52fdc}{%
+           family={Akinci},
+           family_i={A\bibinitperiod},
+           given={Gizem},
+           given_i={G\bibinitperiod}}}%
+        {{uniquename=0,hash=1b2149ad300f2fa2543ab0292070bf34}{%
+           family={Solenthaler},
+           family_i={S\bibinitperiod},
+           given={Barbara},
+           given_i={B\bibinitperiod}}}%
+        {{uniquename=0,hash=f11935ee15f7a87cffdf63cabfe0954f}{%
+           family={Teschner},
+           family_i={T\bibinitperiod},
            given={Matthias},
            given_i={M\bibinitperiod}}}%
-        {{uniquename=0,hash=a919bbab63f2d39d696c710212912c88}{%
-           family={Heidelberger},
-           family_i={H\bibinitperiod},
-           given={Bruno},
-           given_i={B\bibinitperiod}}}%
-        {{uniquename=0,hash=bc041c62053b5d58ee5a5dc2e07353d0}{%
-           family={Hennix},
-           family_i={H\bibinitperiod},
-           given={Marcus},
-           given_i={M\bibinitperiod}}}%
-        {{uniquename=0,hash=d83e0d11cf6bfe9c47bff8483640dab1}{%
-           family={Ratcliff},
-           family_i={R\bibinitperiod},
-           given={John},
-           given_i={J\bibinitperiod}}}%
       }
-      \strng{namehash}{a60c046cae2056b528852224c016e125}
-      \strng{fullhash}{11caba46d10d3d900bfaed5c8b395c96}
-      \field{sortinit}{M}
-      \field{sortinithash}{2684bec41e9697b92699b46491061da2}
-      \field{labelyear}{2007}
-      \field{labelmonth}{04}
+      \list{location}{1}{%
+        {New York, NY, USA}%
+      }
+      \list{publisher}{1}{%
+        {ACM}%
+      }
+      \strng{namehash}{3a7f41f17992ebed348aa4dc6072b06a}
+      \strng{fullhash}{a5e6b8ec54712e29f25f1441719025fa}
+      \field{sortinit}{A}
+      \field{sortinithash}{b685c7856330eaee22789815b49de9bb}
+      \field{labelyear}{2012}
+      \field{labelmonth}{07}
       \field{datelabelsource}{}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
-      \field{booktitle}{Journal of Visual Communication and Image Representation}
-      \field{month}{04}
-      \field{title}{Position Based Dynamics}
-      \field{volume}{18}
+      \field{issn}{0730-0301}
+      \field{journaltitle}{ACM Trans. Graph.}
+      \field{month}{07}
+      \field{number}{4}
+      \field{title}{Versatile Rigid-fluid Coupling for Incompressible SPH}
+      \field{volume}{31}
+      \field{year}{2012}
+      \field{pages}{62:1\bibrangedash 62:8}
+      \range{pages}{-1}
+      \verb{doi}
+      \verb 10.1145/2185520.2185558
+      \endverb
+      \verb{url}
+      \verb http://doi.acm.org/10.1145/2185520.2185558
+      \endverb
+      \keyw{fluid simulation,fluid-solid coupling,physically-based animation,smoothed particle hydrodynamics}
+    \endentry
+    \entry{Liu}{article}{}
+      \name{author}{2}{}{%
+        {{uniquename=0,hash=4274a0309ea64847bae95ef7134611ca}{%
+           family={B.\bibnamedelimi Liu},
+           family_i={B\bibinitperiod\bibinitdelim L\bibinitperiod},
+           given={M},
+           given_i={M\bibinitperiod}}}%
+        {{uniquename=0,hash=e9f2747ba8441f3fea8c670969119c9d}{%
+           family={Liu},
+           family_i={L\bibinitperiod},
+           given={G.R.},
+           given_i={G\bibinitperiod}}}%
+      }
+      \strng{namehash}{cf02c0e6508e0ac88adcd3e97a527988}
+      \strng{fullhash}{cf02c0e6508e0ac88adcd3e97a527988}
+      \field{sortinit}{B}
+      \field{sortinithash}{4ecbea03efd0532989d3836d1a048c32}
+      \field{labelyear}{2010}
+      \field{labelmonth}{03}
+      \field{datelabelsource}{}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{Archives of Computational Methods in Engineering}
+      \field{month}{03}
+      \field{title}{Smoothed Particle Hydrodynamics (SPH): an Overview and Recent Developments}
+      \field{volume}{17}
+      \field{year}{2010}
+      \field{pages}{25\bibrangedash 76}
+      \range{pages}{52}
+    \endentry
+    \entry{Becker}{article}{}
+      \name{author}{2}{}{%
+        {{uniquename=0,hash=289f7783ec708dc87fc345ccf5c8fb25}{%
+           family={Becker},
+           family_i={B\bibinitperiod},
+           given={Markus},
+           given_i={M\bibinitperiod}}}%
+        {{uniquename=0,hash=f11935ee15f7a87cffdf63cabfe0954f}{%
+           family={Teschner},
+           family_i={T\bibinitperiod},
+           given={Matthias},
+           given_i={M\bibinitperiod}}}%
+      }
+      \strng{namehash}{85db3254c458a47ee735fd18c5ed0d7b}
+      \strng{fullhash}{85db3254c458a47ee735fd18c5ed0d7b}
+      \field{sortinit}{B}
+      \field{sortinithash}{4ecbea03efd0532989d3836d1a048c32}
+      \field{labelyear}{2007}
+      \field{labelmonth}{01}
+      \field{datelabelsource}{}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{Proceedings of the 2007 ACM SIGGRAPH/Eurographics Symposium on Computer Animation}
+      \field{month}{01}
+      \field{title}{Weakly Compressible SPH for Free Surface Flows}
+      \field{volume}{9}
       \field{year}{2007}
-      \field{pages}{109\bibrangedash 118}
-      \range{pages}{10}
+      \field{pages}{209\bibrangedash 217}
+      \range{pages}{9}
     \endentry
   \endsortlist
+  \missing{BRIDSON2016}
 \endrefsection
 \endinput
 

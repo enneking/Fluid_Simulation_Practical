@@ -49,7 +49,7 @@ The kernel functions are chosen such that they satisfy a set of requirements:\\
 \item Non-negativity 
 \item Compact support
 \end{enumerate}
-The first assignment proposed three different functions that satisfy these requirements, as found in [REF]: The cubic spline function, the quintic spline function, and the quadric smooth function.
+The first assignment proposed three different functions that satisfy these requirements, as found in [~\cite{Liu}] The cubic spline function, the quintic spline function, and the quadric smooth function.
 In our implementation, we mostly use the cubic spline function.\\
 \\
 These kernel functions are used in all of the subsequent stages, so correctness of implementation was of crucial importance here.\\
@@ -106,7 +106,7 @@ W(x + \epsilon\mathbf{e}_{z}, h) - W(x - \epsilon\mathbf{e}_{z}, h)\\
 \end{aligned}
 \end{equation}
 \\
-We implemented the kernel functions off the equations as given in [REF: ll10], deriving the gradient functions for each. However, the first implementation yielded irritating results when testing the gradient for correctness. For the cubic spline kernel, the relative and absolute errors when comparing to the values computed using central differences were far too high. \\
+We implemented the kernel functions off the equations as given in [\cite{Liu}], deriving the gradient functions for each. However, the first implementation yielded irritating results when testing the gradient for correctness. For the cubic spline kernel, the relative and absolute errors when comparing to the values computed using central differences were far too high. \\
 \\
 After consulting with another group, we plugged in their implementation for the cubic spline kernel gradient (which should be mathematically equivalent) and noticed the values now being in an acceptable range, so we adapted our implementation to their formula. After this, the curves for the kernel functions looked promising:\\
 \\
@@ -122,7 +122,7 @@ In the second phase of our project we started to implement the actual smoothed p
 \\
 We started off with a simple shader that projected the particles positions into screen space and displayed them as red dots. We did this by using \verb|GL_POINTS| primitives which does not provide visually pleasing results and lacks perspective projection due to it producing unit-sized screen spaced dots. Yet it was sufficient for visualizing the correctness of our functions. \\
 \\
-Later on we switched the \verb|GL_POINTS| solution with instanced billboards and achieved spherical results with our blinn-phong based fragment shader. In order to create a sphere from the billboard we provide our fragment shader with the interpolated world-space position of the billboard \(p\) and the interpolated billboard vertex position which, in the billboard-model-space, is the vector from the origin to the billboard position at the current fragment \(\vec{v_0}\). Using the particle radius \(r\) we can create a circle from the billboard by discarding the fragment if for the  \(\vec{v} = \frac{||\vec{v_0}||}{r} > 1\). Creating a sphere from the circle can then be done by calculating the vector from the origin to the sphere surface at the current fragment \(\vec{u}\).
+Later on we switched the \verb|GL_POINTS| solution with instanced billboards and achieved spherical results with our blinn-phong based fragment shader. In order to create a sphere from the billboard we provide our fragment shader with the interpolated world-space position of the billboard \(p\) and the interpolated billboard vertex position which, in the billboard-model-space, is the vector from the origin to the billboard position at the current fragment \(\vec{v}\). Du to the billboard being defined from \([-1, -1]\) to \([1, 1]\), we can create a circle by discarding the fragment if \(||\vec{v}|| > 1\). Creating a sphere from the circle can then be done by calculating the vector from the origin to the sphere surface at the current fragment \(\vec{u}\).
 \begin{equation} 
 \begin{aligned}
 ||\vec{u}||^2 = 1 = ||\vec{v}||^2 + ||\vec{w}||^2 \Rightarrow ||\vec{w}|| = \sqrt{1 - ||\vec{v}||^2}
@@ -195,7 +195,7 @@ P_i = \text{max}(B(\rho_i - \rho_0),0)
 \end{aligned}
 \end{equation}
 Here, \(p_0\) describes the rest density for the medium that is being simulated and \(B\) serves as a stiffness coefficient. Similiarly to a spring constraint, pressure increases when the particle configuration is further from a rest configuration. This is a approximation of incompressability, which later is replaced with a position based pressure solver, removing the need for a stiffness coefficient.
-During our first implementation, we chose \(B\) far too low (about three or four magnitudes too low), resulting in very odd behaviour at boundary collisions. After consulting [bt07] [ll10] [aia+12] [zb05] we were able to correct this mistake.\\
+During our first implementation, we chose \(B\) far too low (about three or four magnitudes too low), resulting in very odd behaviour at boundary collisions. After consulting [~\cite{Becker}] [\cite{Liu}] [\cite{Akinci}] [\cite{BRIDSON2016}] we were able to correct this mistake.\\
 \\
 \subsection{Pressure Force}
 The first approach towards modeling pressure forces within the fluid given in Assignment 2 was directly computing acceleration values using the following equation:\\
@@ -325,7 +325,7 @@ For rendering purposes we also need the normal of every surface vertex:
 (G_{(i,j,k)})_z = \Phi_{(i,j,k+1)} - \Phi_{(i,j,k-1)}
 \end{aligned} 
 \end{equation}
-For shading we use Blinn-Phong with alpha blending for transparency.
+For shading we use Blinn-Phong.
 
 \section{Issues}
 \subsection{Neighborhood Search}
@@ -338,7 +338,7 @@ Intuitively, it makes sense to choose the radius equal to the smoothing length, 
 
 \subsection{Behaviour of quintic and quadric smoothing function kernels}
 
-When using the quadric smoothing function or the quintic spline kernel instad of the cubic spline kernel, we observe inconsistent behaviour under non-iterative pressure force integration. Using the same start configuration, it seems like the rest density is exceeded with lower distances between particles, leading to the configuration exploding when starting the simulation. The simulation seems stable afterwards and converges towards a behaviour that seems correct, but the initial behaviour seems largely incorrect. We have not found the cause for this at the point of writing.  ~\cite{article}
+When using the quadric smoothing function or the quintic spline kernel instad of the cubic spline kernel, we observe inconsistent behaviour under non-iterative pressure force integration. Using the same start configuration, it seems like the rest density is exceeded with lower distances between particles, leading to the configuration exploding when starting the simulation. The simulation seems stable afterwards and converges towards a behaviour that seems correct, but the initial behaviour seems largely incorrect. We have not found the cause for this at the point of writing.
 
 
 
