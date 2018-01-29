@@ -1,0 +1,65 @@
+% $ biblatex auxiliary file $
+% $ biblatex bbl format version 2.7 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated by
+% biber as required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+
+\refsection{0}
+  \sortlist[entry]{nyt/global/}
+    \entry{article}{article}{}
+      \name{author}{4}{}{%
+        {{uniquename=0,hash=81a3feeb579a36f8ed14c22d7264cf2c}{%
+           family={Müller},
+           family_i={M\bibinitperiod},
+           given={Matthias},
+           given_i={M\bibinitperiod}}}%
+        {{uniquename=0,hash=a919bbab63f2d39d696c710212912c88}{%
+           family={Heidelberger},
+           family_i={H\bibinitperiod},
+           given={Bruno},
+           given_i={B\bibinitperiod}}}%
+        {{uniquename=0,hash=bc041c62053b5d58ee5a5dc2e07353d0}{%
+           family={Hennix},
+           family_i={H\bibinitperiod},
+           given={Marcus},
+           given_i={M\bibinitperiod}}}%
+        {{uniquename=0,hash=d83e0d11cf6bfe9c47bff8483640dab1}{%
+           family={Ratcliff},
+           family_i={R\bibinitperiod},
+           given={John},
+           given_i={J\bibinitperiod}}}%
+      }
+      \strng{namehash}{a60c046cae2056b528852224c016e125}
+      \strng{fullhash}{11caba46d10d3d900bfaed5c8b395c96}
+      \field{sortinit}{M}
+      \field{sortinithash}{2684bec41e9697b92699b46491061da2}
+      \field{labelyear}{2007}
+      \field{labelmonth}{04}
+      \field{datelabelsource}{}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{Journal of Visual Communication and Image Representation}
+      \field{month}{04}
+      \field{title}{Position Based Dynamics}
+      \field{volume}{18}
+      \field{year}{2007}
+      \field{pages}{109\bibrangedash 118}
+      \range{pages}{10}
+    \endentry
+  \endsortlist
+\endrefsection
+\endinput
+
