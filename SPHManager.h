@@ -34,7 +34,9 @@ public:
         double restDensity = 1000.0;
         double smoothingLength = 0.2;
 
-        bool   useImprovedBoundaryHandling = true;
+        bool    useImprovedBoundaryHandling = true;
+        bool    usePressureSolver = true;
+        size_t  numSolverIterations = 5;
     } settings;
 
     struct WorkGroup
@@ -66,6 +68,8 @@ public:
         std::vector<double> density;
         std::vector<double> pressure;
         std::vector<double> boundaryD;
+
+        std::vector<double> lambda;
         
         std::vector<Eigen::Vector3d> boundaryForce;
 
@@ -80,7 +84,7 @@ private:
     double EvaluateConstraint(size_t idx);
     Eigen::Vector3d EvaluateConstraintDerivativeJ(size_t i, size_t j);
     Eigen::Vector3d EvaluateConstraintDerivativeI(size_t idx);
-    double ComputeLambda(size_t idx);
+    void ComputeLambdas(WorkGroup* workGroup);
     Eigen::Vector3d ComputeDisplacement(size_t idx);
 
 	ParticleManager m_oParticleManager;
