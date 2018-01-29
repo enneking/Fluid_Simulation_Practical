@@ -21,11 +21,9 @@ void ParticleManager::Init(Camera* pCamera)
 	//glEnable(GL_ARB_separate_shader_objects);
 	glEnable(GL_POINT_SMOOTH);
 	glPointSize(10.0f);
-	glEnable(GL_LINE_SMOOTH);
-	glLineWidth(10.0f);
-	glEnable(GL_BLEND); 
+
 	
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 	glGenVertexArrays(1, &m_iVertexArrayObject);
 	glGenBuffers(1, &m_iVertexBufferObject);
 	glGenVertexArrays(1, &m_iVaoBox);
@@ -134,12 +132,7 @@ void ParticleManager::InitBuffers()
 {
 	SetupBoundaries();
 	
-	/*GLfloat BillboardVec[8] = {
-		-m_fParticleRadius,  m_fParticleRadius,
-		-m_fParticleRadius, -m_fParticleRadius,
-		m_fParticleRadius,  m_fParticleRadius,
-		m_fParticleRadius,  -m_fParticleRadius,
-	};*/
+
 
     GLfloat BillboardVec[8] = {
         -1.0f,  1.0f,

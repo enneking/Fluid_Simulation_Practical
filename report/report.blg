@@ -1,21 +1,18 @@
 [0] Config.pm:343> INFO - This is Biber 2.5
 [0] Config.pm:346> INFO - Logfile is 'report.blg'
-[25] biber-MSWIN32:290> INFO - === 
-[41] Biber.pm:351> INFO - Reading 'report.bcf'
-[113] Biber.pm:776> INFO - Found 1 citekeys in bib section 0
-[123] Biber.pm:3493> INFO - Processing section 0
-[137] Biber.pm:3657> INFO - Looking for bibtex format file 'references.bib' for section 0
-[139] bibtex.pm:1187> INFO - Decoding LaTeX character macros into UTF-8
-[139] bibtex.pm:1048> INFO - Found BibTeX data source 'references.bib'
-[140] Utils.pm:149> WARN - Duplicate entry key: 'article' in file 'references.bib', skipping ...
-[140] Utils.pm:149> WARN - Duplicate entry key: 'article' in file 'references.bib', skipping ...
-[142] Utils.pm:149> WARN - Duplicate entry key: 'article' in file 'references.bib', skipping ...
-[142] Utils.pm:149> WARN - Duplicate entry key: 'article' in file 'references.bib', skipping ...
-[142] Utils.pm:149> WARN - Duplicate entry key: 'unknown' in file 'references.bib', skipping ...
-[156] UCollate.pm:66> INFO - Overriding locale 'en-US' defaults 'variable = shifted' with 'variable = non-ignorable'
-[156] UCollate.pm:66> INFO - Overriding locale 'en-US' defaults 'normalization = NFD' with 'normalization = prenormalized'
-[156] Biber.pm:3306> INFO - Sorting list 'nyt/global/' of type 'entry' with scheme 'nyt' and locale 'en-US'
-[156] Biber.pm:3310> INFO - No sort tailoring available for locale 'en-US'
-[157] bbl.pm:526> INFO - Writing 'report.bbl' with encoding 'UTF-8'
-[157] bbl.pm:619> INFO - Output to report.bbl
-[157] Biber.pm:108> INFO - WARNINGS: 5
+[26] biber-MSWIN32:290> INFO - === 
+[43] Biber.pm:351> INFO - Reading 'report.bcf'
+[118] Biber.pm:776> INFO - Found 4 citekeys in bib section 0
+[128] Biber.pm:3493> INFO - Processing section 0
+[142] Biber.pm:3657> INFO - Looking for bibtex format file 'references.bib' for section 0
+[145] bibtex.pm:1187> INFO - Decoding LaTeX character macros into UTF-8
+[145] bibtex.pm:1048> INFO - Found BibTeX data source 'references.bib'
+[152] Utils.pm:149> WARN - Possible typo (case mismatch) between citation and datasource keys: 'BRIDSON2016' and 'Bridson2016' in file 'references.bib'
+[155] Utils.pm:149> WARN - I didn't find a database entry for 'BRIDSON2016' (section 0)
+[168] UCollate.pm:66> INFO - Overriding locale 'en-US' defaults 'variable = shifted' with 'variable = non-ignorable'
+[168] UCollate.pm:66> INFO - Overriding locale 'en-US' defaults 'normalization = NFD' with 'normalization = prenormalized'
+[168] Biber.pm:3306> INFO - Sorting list 'nyt/global/' of type 'entry' with scheme 'nyt' and locale 'en-US'
+[168] Biber.pm:3310> INFO - No sort tailoring available for locale 'en-US'
+[171] bbl.pm:526> INFO - Writing 'report.bbl' with encoding 'UTF-8'
+[171] bbl.pm:619> INFO - Output to report.bbl
+[172] Biber.pm:108> INFO - WARNINGS: 2
