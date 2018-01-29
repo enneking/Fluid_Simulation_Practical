@@ -13,7 +13,7 @@ uniform vec3 uColor;
 
 void main(){
 
-	vec2 FragmentPosNorm = FragmentPosition / uParticleRadius;
+	vec2 FragmentPosNorm = FragmentPosition;
 
 	float distance = length(FragmentPosNorm);
 

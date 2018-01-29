@@ -134,12 +134,19 @@ void ParticleManager::InitBuffers()
 {
 	SetupBoundaries();
 	
-	GLfloat BillboardVec[8] = {
+	/*GLfloat BillboardVec[8] = {
 		-m_fParticleRadius,  m_fParticleRadius,
 		-m_fParticleRadius, -m_fParticleRadius,
 		m_fParticleRadius,  m_fParticleRadius,
 		m_fParticleRadius,  -m_fParticleRadius,
-	};
+	};*/
+
+    GLfloat BillboardVec[8] = {
+        -1.0f,  1.0f,
+        -1.0f, -1.0f,
+        1.0f,  1.0f,
+        1.0f,  -1.0f,
+    };
 
 	GLuint iBillboardBuffer;
 	glCreateBuffers(1, &iBillboardBuffer);

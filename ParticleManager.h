@@ -54,7 +54,7 @@ public:
     bool SerialiseStateToFile(std::ofstream& file);
     bool LoadStateFromFile(std::ifstream& file);
 
-	float m_fParticleRadius = 0.2f;
+	float m_fParticleRadius = 0.05f;
 	Camera* GetCamera() { return m_pCamera; }
 
 private:

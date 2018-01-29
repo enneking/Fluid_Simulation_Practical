@@ -35,7 +35,7 @@ public:
         double smoothingLength = 0.2;
 
         bool    useImprovedBoundaryHandling = true;
-        bool    usePressureSolver = true;
+        bool    usePressureSolver = false;
         size_t  numSolverIterations = 5;
     } settings;
 
