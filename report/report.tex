@@ -290,7 +290,34 @@ C_{i}(x_{1}, ..., x_{n}) = max (\frac{\rho_{i}}{\rho_{0}} - 1, 0)
 
 If we let \(p_i = (x^{T}_1, ..., x^{T}_n)^T\) be a vector that contains all positions of a particle \(i\)'s neighborhood (which includes the particle \(i\), then the goal is to compute a displacement vector \(\Delta p_i\) such that we satisfy \(C_i(p_i + \Delta p_i) = 0\).
 To solve this equation, we use Newton iterations. Using the linearized constraint function, for each iteration a projection in gradient direction is computed.
+The final displacement is described by \\
+\\
+\begin{equation}
+\begin{aligned}
+\Delta x_i = \frac{1}{\rho_0} \sum_j m_j(\lambda_i + \lambda_j) \nabla_{x_j}W(||x_i - x_j||)
+\end{aligned}
+\end{equation}\\
+\\
 
+With \\
+\\
+\begin{equation}
+\begin{aligned}
+\lambda_{i} = - \frac{C_{i}}{\sum_{k}||\nabla_{x_{k}}C_{i}||^2 + \epsilon}
+\end{aligned}
+\end{equation}\\
+\\
+\begin{equation}
+\begin{aligned}
+\nabla_{x_{j}} C_{i} = - \frac{m_{j}}{\rho_{0}}\nabla_{x_{j}}W(||x_{i} - x_{j}||, h)
+\end{aligned}
+\end{equation}\\
+\\
+
+The computed displacement is applied to each particles position after integrating external forces like gravity, boundary forces, etc.
+After applying the displacement, the velocity for each particle is updated to reflect the distance travelled in the last timestep.
+Implementing the given equations did not present a lot of trouble, however, after finishing the implementation, we observed highly incorrect behaviour. While in rest configuration, the simulation would behave as expected, however, once particles were pushed into a tighter configuration that caused their densities to exceed the rest density due to boundary force influence, the system exploded. For each particle, the computed displacement was far too high compared to the expected result.
+Inspecting the individual components exposed very high values for \(\lambda\), which was then tracked down to be due to \(\sum_{k}||\nabla_{x_{k}}C_{i}||^2\) evaluating to extremely low values. At the time of this writing, we have not yet found the solution for this problem. The implementation contains the pressure solver, but it exposed the incorrect behaviour described in this paragraph and thus does not deliver any meaningful results.\\
 
 \section{Replay System and Multithreading}
 A property of the SPH technique is that it is not suited for realtime applications out of the box due to the high computation cost. This makes debugging incorrect behaviour especially difficult. \\
