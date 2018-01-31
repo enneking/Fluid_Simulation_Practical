@@ -2103,6 +2103,8 @@
     <bcf:citekey order="4">Liu</bcf:citekey>
     <bcf:citekey order="5">Akinci</bcf:citekey>
     <bcf:citekey order="6">Bridson2016</bcf:citekey>
+    <bcf:citekey order="7">Lorensen</bcf:citekey>
+    <bcf:citekey order="8">Lorensen</bcf:citekey>
   </bcf:section>
   <bcf:sortlist section="0" name="nyt/global/" type="entry" sortscheme="nyt" sortnamekeyscheme="global" labelprefix="">
   <bcf:sorting>

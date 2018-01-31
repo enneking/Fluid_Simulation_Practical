@@ -133,6 +133,36 @@
       \field{pages}{209\bibrangedash 217}
       \range{pages}{9}
     \endentry
+    \entry{Lorensen}{article}{}
+      \name{author}{2}{}{%
+        {{uniquename=0,hash=0bd5a95686246d93704bc70f1b81daa1}{%
+           family={Lorensen},
+           family_i={L\bibinitperiod},
+           given={William},
+           given_i={W\bibinitperiod}}}%
+        {{uniquename=0,hash=91f6748fe3caf2777ff58a21dc877238}{%
+           family={E.\bibnamedelimi Cline},
+           family_i={E\bibinitperiod\bibinitdelim C\bibinitperiod},
+           given={Harvey},
+           given_i={H\bibinitperiod}}}%
+      }
+      \strng{namehash}{9187aa9ec7a10e11750991b7d533d42e}
+      \strng{fullhash}{9187aa9ec7a10e11750991b7d533d42e}
+      \field{sortinit}{L}
+      \field{sortinithash}{872351f18d0f736066eda0bf18bfa4f7}
+      \field{labelyear}{1987}
+      \field{labelmonth}{08}
+      \field{datelabelsource}{}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{ACM SIGGRAPH Computer Graphics}
+      \field{month}{08}
+      \field{title}{Marching Cubes: A High Resolution 3D Surface Construction Algorithm}
+      \field{volume}{21}
+      \field{year}{1987}
+      \field{pages}{163\bibrangedash}
+      \range{pages}{-1}
+    \endentry
     \entry{Bridson2016}{article}{}
       \name{author}{2}{}{%
         {{uniquename=0,hash=f3f5ac5a6f691bfae5a9a04f01386e33}{%

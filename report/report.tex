@@ -13,27 +13,16 @@
 
 \begin{document}
 
-\title{Semi-Lagrangian Approaches for Incompressible Fluid Simulation}
+\title{Smoothed-Particle-Hydrodynamics based Fluid Simulation}
 
-\author{Alexander Enneking}
+\author{Jascha Wedowski, Alexander Enneking}
 
 \maketitle
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Abstract
-
-\begin{abstract}%
-
-\end{abstract}
-
-\keywords{ }
 \tableofcontents
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Introduction
 
 
-
+\newpage
 \section{Introduction}
 The goal of the project was to realize a fluid simulation based on \textit{Smoothed Particle Hydrodynamics} (SPH), a method that approximates a continuous volume as a particle cloud, implementing the \textit{Navier Stokes} equations via density estimation.\\
 \\
@@ -149,8 +138,8 @@ With \(\vec{w} = (0,0,||\vec{w}||)\) (due to billboard-model-space).
 This also yields the surface normal \(\vec{s}_n\) and surface position \(s_p\) and View Matrix \(V\):
 \begin{equation}
 \begin{aligned}
-\vec{s}_n = V^{\text{-}1} \vec{u} \\
-s_p = p + V^{\text{-}1} \vec{w} r
+\vec{s}_n &= V^{\text{-}1} \vec{u} \\
+s_p &= p + V^{\text{-}1} \vec{w} r
 \end{aligned}
 \end{equation}
 These can now be used to calculate the diffuse and specular coefficients \(\Gamma_{diff}, \Gamma_{spec}\) with the light position \(l_{p}\). and the view position \(k_{p}\)
@@ -336,7 +325,6 @@ Inspecting the individual components exposed very high values for \(\lambda\), w
 
 In Assignment 2 and Assignment 4 respectively, two types of friction forces were introduced. 
 The first type is fluid-internal friction between boundary particles, which is equivalent to fluid viscosity. The approach used here is XSPH viscosity:
-
 \\
 \begin{equation}
 \begin{aligned}
@@ -345,10 +333,8 @@ v_i \leftarrow v^*_i
 \end{aligned}
 \end{equation}\\
 \\
-
 Viscosity is applied as a modification of velocity after integration.\\
 The second type is friction between boundary particles and fluid particles. In contrast to viscosity, this friction is implemented as an external force.
-
 \\
 \begin{equation}
 \begin{aligned}
@@ -356,9 +342,7 @@ F^v_{f_i \leftarrow b_j} = -m_{f_i}\Psi_{b_j}(\rho_{0_i})\Pi_{ij}\nabla W_{ij}
 \end{aligned}
 \end{equation}\\
 \\
-
 where
-
 \\
 \begin{equation}
 \begin{aligned}
@@ -366,9 +350,7 @@ where
 \end{aligned}
 \end{equation}\\
 \\
-
 with
-
 \\
 \begin{equation}
 \begin{aligned}
@@ -376,9 +358,8 @@ with
 \end{aligned}
 \end{equation}\\
 \\
-
-Here, \(\alpha > 0\) is a viscosity coefficient and \(\epsilon \approx 0.01\) a regularization parameter. 
-
+Here, \(\alpha > 0\) is a viscosity coefficient and \(\epsilon \approx 0.01\) a regularization parameter. \\
+\\
 The implementation for both types of friction was straightforward. In practice, boundary friction would behave well with \(alpha \approx 0.2\) and cause instable behaviour with higher values.
 Fluid viscosity would behave as expected, high coefficients effectively result in the simulated body acting more like wax than water. 
 
@@ -397,7 +378,7 @@ This allows us to record a simulation and play it back in real time, while being
   \begin{centering}
     \includegraphics[width=8cm]{figures/marching_cubes.png}\par 
   \end{centering}
-  \caption{geometry according to marked vertices.}
+  \caption{geometry according to marked vertices. \cite{Lorensen}}
   \label{fig:surf}
 \end{figure}
 
@@ -460,7 +441,7 @@ Intuitively, it makes sense to choose the radius equal to the smoothing length, 
 \subsection{Behaviour of quintic and quadric smoothing function kernels}
 
 When using the quadric smoothing function or the quintic spline kernel instad of the cubic spline kernel, we observe inconsistent behaviour under non-iterative pressure force integration. Using the same start configuration, it seems like the rest density is exceeded with lower distances between particles, leading to the configuration exploding when starting the simulation. The simulation seems stable afterwards and converges towards a behaviour that seems correct, but the initial behaviour seems largely incorrect. We have not found the cause for this at the point of writing.
-
+\newpage
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
