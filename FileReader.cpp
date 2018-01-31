@@ -72,8 +72,3 @@ void FileReader::printGLSLLinkLog(GLuint progHandle) {
         delete[] pInfo;
     }
 }
-
-
-
-
-

@@ -71,12 +71,6 @@
       \field{year}{2012}
       \field{pages}{62:1\bibrangedash 62:8}
       \range{pages}{-1}
-      \verb{doi}
-      \verb 10.1145/2185520.2185558
-      \endverb
-      \verb{url}
-      \verb http://doi.acm.org/10.1145/2185520.2185558
-      \endverb
       \keyw{fluid simulation,fluid-solid coupling,physically-based animation,smoothed particle hydrodynamics}
     \endentry
     \entry{Liu}{article}{}
@@ -139,8 +133,46 @@
       \field{pages}{209\bibrangedash 217}
       \range{pages}{9}
     \endentry
+    \entry{Bridson2016}{article}{}
+      \name{author}{2}{}{%
+        {{uniquename=0,hash=f3f5ac5a6f691bfae5a9a04f01386e33}{%
+           family={Zhu},
+           family_i={Z\bibinitperiod},
+           given={Yongning},
+           given_i={Y\bibinitperiod}}}%
+        {{uniquename=0,hash=65c851dceea4db6bd4213d41182ae6d3}{%
+           family={Bridson},
+           family_i={B\bibinitperiod},
+           given={Robert},
+           given_i={R\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {New York, NY, USA}%
+      }
+      \list{publisher}{1}{%
+        {ACM}%
+      }
+      \strng{namehash}{ebef631756120dae13b9c3a1edfac756}
+      \strng{fullhash}{ebef631756120dae13b9c3a1edfac756}
+      \field{sortinit}{Z}
+      \field{sortinithash}{fdda4caaa6b5fa63e0c081dcb159543a}
+      \field{labelyear}{2005}
+      \field{labelmonth}{07}
+      \field{datelabelsource}{}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{issn}{0730-0301}
+      \field{journaltitle}{ACM Trans. Graph.}
+      \field{month}{07}
+      \field{number}{3}
+      \field{title}{Animating Sand As a Fluid}
+      \field{volume}{24}
+      \field{year}{2005}
+      \field{pages}{965\bibrangedash 972}
+      \range{pages}{8}
+      \keyw{animation,physical simulation,sand,water}
+    \endentry
   \endsortlist
-  \missing{BRIDSON2016}
 \endrefsection
 \endinput
 

@@ -110,19 +110,31 @@ We implemented the kernel functions off the equations as given in [\cite{Liu}], 
 \\
 After consulting with another group, we plugged in their implementation for the cubic spline kernel gradient (which should be mathematically equivalent) and noticed the values now being in an acceptable range, so we adapted our implementation to their formula. After this, the curves for the kernel functions looked promising:\\
 \\
-PICTURE\\
-\\
 In further development, we mostly used the cubic spline kernel throughout. In hindsight, checking each phase with all kernel functions would have been advisable, as the final implementation shows inconsistent behaviour when switching between kernel functions.\\
 \\
 A sidenote on the actual implementation, initially we simply used free functions for the different kernel functions and their gradients. Later in development, we switched to a more flexible approach, with each kernel being implemented as a subclass to a generic kernel class. The base kernel class defines an interface to query kernel values as well as gradient values that each kernel type implements. Using object instances also allows to perform a few minor optimizations, like precomputing constant function parameters upon construction. The base class interface allows kernel functions to be swapped out in a single place in the code (even at runtime) instead of having to replace all kernel invocations throughout the codebase.\\
 \\
 
+\begin{figure}[b!]
+  \begin{centering}
+    \includegraphics[width=15cm]{figures/particle_shader.png}\par
+  \end{centering}
+  \caption{The black line is the billboard. The red curve is the sphere surface. The radius is set to one.}
+  \label{fig:particle_shader}
+\end{figure}
 \section{Particle Rendering}
 In the second phase of our project we started to implement the actual smoothed particle hydrodynamics method. First we implemented a class which managed the particles and rendered them to the screen. Initially we wanted to use the glviz library for rendering but soon came to the impression that using our own rendering solution would be easier to implement and to maintain and provide more freedom due to a discrepancy between our design philosophy and the design of the library. \\
 \\
 We started off with a simple shader that projected the particles positions into screen space and displayed them as red dots. We did this by using \verb|GL_POINTS| primitives which does not provide visually pleasing results and lacks perspective projection due to it producing unit-sized screen spaced dots. Yet it was sufficient for visualizing the correctness of our functions. \\
 \\
 Later on we switched the \verb|GL_POINTS| solution with instanced billboards and achieved spherical results with our blinn-phong based fragment shader. In order to create a sphere from the billboard we provide our fragment shader with the interpolated world-space position of the billboard \(p\) and the interpolated billboard vertex position which, in the billboard-model-space, is the vector from the origin to the billboard position at the current fragment \(\vec{v}\). Du to the billboard being defined from \([-1, -1]\) to \([1, 1]\), we can create a circle by discarding the fragment if \(||\vec{v}|| > 1\). Creating a sphere from the circle can then be done by calculating the vector from the origin to the sphere surface at the current fragment \(\vec{u}\).
+\begin{figure}[b!]
+  \begin{centering}
+    \includegraphics[width=15cm]{figures/Particles.png}\par
+  \end{centering}
+  \caption{A box of particles.}
+  \label{fig:particle_shader}
+\end{figure}
 \begin{equation} 
 \begin{aligned}
 ||\vec{u}||^2 = 1 = ||\vec{v}||^2 + ||\vec{w}||^2 \Rightarrow ||\vec{w}|| = \sqrt{1 - ||\vec{v}||^2}
@@ -155,13 +167,8 @@ With Colors \(C_{ambient}, C_{diff}, C_{spec}\) The Color \(C\) is:
 C = C_{ambient} + \Gamma_{diff} C_{diff} + \Gamma_{spec} C_{spec}
 \end{aligned}
 \end{equation}
-\begin{figure}[b!]
-  \begin{centering}
-    \includegraphics[width=15cm]{figures/particle_shader.png}\par
-  \end{centering}
-  \caption{The black line is the billboard. The red curve is the sphere surface. The radius is set to one.}
-  \label{fig:particle_shader}
-\end{figure}
+
+
 
 \section{SPH Implementation}
 \subsection{Density Estimation}
@@ -174,7 +181,13 @@ At the first stage of the implementation, the density estimation takes only flui
 \end{equation}
 The density for each particle is equal to the sum of the masses of its neighbours, weighted by the kernel function. Performing the density estimation for each particle and plotting the values results in a graph such as the following:\\
 \\
-FIGURE: Screenshot density plot\\
+\begin{figure}[b!]
+  \begin{centering}
+    \includegraphics[width=9cm]{figures/Kernel.png}\par
+  \end{centering}
+  \caption{Density samples taken at rest configuration}
+  \label{fig:eulerLagrangian}
+\end{figure}
 \\
 The figure shows a plot for particle densities for the initial configuration of a breaking dam scenario.
 Densities are distributed mostly uniformly except for particles close to the edges of the fluid body, which are not completely surrounded by other particles.\\
@@ -195,7 +208,7 @@ P_i = \text{max}(B(\rho_i - \rho_0),0)
 \end{aligned}
 \end{equation}
 Here, \(p_0\) describes the rest density for the medium that is being simulated and \(B\) serves as a stiffness coefficient. Similiarly to a spring constraint, pressure increases when the particle configuration is further from a rest configuration. This is a approximation of incompressability, which later is replaced with a position based pressure solver, removing the need for a stiffness coefficient.
-During our first implementation, we chose \(B\) far too low (about three or four magnitudes too low), resulting in very odd behaviour at boundary collisions. After consulting [~\cite{Becker}] [\cite{Liu}] [\cite{Akinci}] [\cite{BRIDSON2016}] we were able to correct this mistake.\\
+During our first implementation, we chose \(B\) far too low (about three or four magnitudes too low), resulting in very odd behaviour at boundary collisions. After consulting [~\cite{Becker}] [\cite{Liu}] [\cite{Akinci}] [\cite{Bridson2016}] we were able to correct this mistake.\\
 \\
 \label{subsec:Pressure Force}
 \subsection{Pressure Force}
@@ -380,6 +393,13 @@ Currently the implementation naively launches the worker threads every tick and 
 Even with a threaded simulation loop, realtime performance can not be achieved with satisfyingly high particle counts. To allow for debugging and real-time inspection of the simulation nevertheless, we implemented a record+replay system. All the system does is serialize all particle positions into a file for every tick. Existing files can then be read and played back frame by frame. The system also takes care of fixing the replay rate to 60hz, independent of the actual simulation timestep. 
 This allows us to record a simulation and play it back in real time, while being able to view it inside the simulation renderer. Having this functionality available was a great help both for debugging purposes and also allows for high fidelity rendition of the simulation at real time in tandem with the surface reconstruction algorithm that was implemented.\\
 \\
+\begin{figure}[b!] 
+  \begin{centering}
+    \includegraphics[width=8cm]{figures/marching_cubes.png}\par 
+  \end{centering}
+  \caption{geometry according to marked vertices.}
+  \label{fig:surf}
+\end{figure}
 
 \section{Surface Reconstruction}
 The last of our assignments was to reconstruct the surface of the fluid by using the Marching Cubes algorithm. This algorithm constructs geometry for an implicitly defined surface which we defined as:
@@ -399,7 +419,14 @@ i = \lfloor \frac{(x_n)_x - l}{w} \rfloor, j &= \lfloor \frac{(x_n)_y - l}{w} \r
 \end{equation}
 Adding \(\frac{m_j}{\rho_j} W(||x-x_j||, h)\) to the vertices weight then yields \(\Phi(x)\). \\
 \\
-Afterwards we loop through the mesh vertices \((i,j,k)\)  from \((0,0,0)\) to \((i_{max}-1,j_{max}-1,k_{max}-1)\). For Every \((i,j,k)\) we then create a Bitcode. Each bit corresponds to one mesh vertex \(x \in [x_{(i,j,k)}, x_{(i+1,j+1,k+1)}] \) and is \(1\) if \(\Phi(x_{(i,j,k)}) > c\) and \(0\) if \(\Phi(x_{(i,j,k)}) \leq c\). With Eq. ~\ref{eq:implicit_surface} this means that it is \(1\), if the vertex is inside the fluid and \(0\), if the vertex is outside the fluid. The surface vertex positions are then added on the edges depending on the composition of the bits in the corresponding box. Thus we have \(2^8 = 256\) different cases which we represent with an \([256][16]\) array, which maps the bitcode of one box to up to 16 edges where surface vertices have to be added.\\
+\begin{figure}[b!] 
+  \begin{centering}
+    \includegraphics[width=15cm]{figures/Surface.png}\par
+  \end{centering}
+  \caption{The fluid with reconstructed surface and blinn-phong shading.}
+  \label{fig:particle_shader}
+\end{figure}
+Afterwards we loop through the mesh vertices \((i,j,k)\)  from \((0,0,0)\) to \((i_{max}-1,j_{max}-1,k_{max}-1)\). For Every \((i,j,k)\) we then create a Bitcode. Each bit corresponds to one mesh vertex \(x \in [x_{(i,j,k)}, x_{(i+1,j+1,k+1)}] \) and is \(1\) if \(\Phi(x_{(i,j,k)}) > c\) and \(0\) if \(\Phi(x_{(i,j,k)}) \leq c\). With Eq. ~\ref{eq:implicit_surface} this means that it is \(1\), if the vertex is inside the fluid and \(0\), if the vertex is outside the fluid. The surface vertex positions are then added on the edges depending on the composition of the bits in the corresponding box. Thus we have \(2^8 = 256\) different cases which we represent with an \([256][16]\) array, which maps the bitcode of one box to up to 15 edges where surface vertices have to be added. The geometry that is added for the variants of bitcodes is illustrated in Figure: ~\ref{fig:surf}. \\
 \\
 In order to get the exact positions of the surface-vertices we calculate the linearly interpolated position between the mesh-vertices that correspond to the given edge. Since the two mesh-vertices always only differ in respect of one axis we only have to interpolate along that axis. For example if interpolating the surface-position between \(x_{(i,j,k)}\) and \(x_{(i+1,j,k)}\):
 \begin{equation} \label{eq:implicit_surface}
