@@ -319,6 +319,56 @@ After applying the displacement, the velocity for each particle is updated to re
 Implementing the given equations did not present a lot of trouble, however, after finishing the implementation, we observed highly incorrect behaviour. While in rest configuration, the simulation would behave as expected, however, once particles were pushed into a tighter configuration that caused their densities to exceed the rest density due to boundary force influence, the system exploded. For each particle, the computed displacement was far too high compared to the expected result.
 Inspecting the individual components exposed very high values for \(\lambda\), which was then tracked down to be due to \(\sum_{k}||\nabla_{x_{k}}C_{i}||^2\) evaluating to extremely low values. At the time of this writing, we have not yet found the solution for this problem. The implementation contains the pressure solver, but it exposed the incorrect behaviour described in this paragraph and thus does not deliver any meaningful results.\\
 
+\subsection{Viscosity and Boundary Friction}
+
+In Assignment 2 and Assignment 4 respectively, two types of friction forces were introduced. 
+The first type is fluid-internal friction between boundary particles, which is equivalent to fluid viscosity. The approach used here is XSPH viscosity:
+
+\\
+\begin{equation}
+\begin{aligned}
+v^* = v_i + \epsilon \sum_j \frac{m_j}{\rho_j}(v_j - v_i)W(||x_i - x_j||, h)\\
+v_i \leftarrow v^*_i
+\end{aligned}
+\end{equation}\\
+\\
+
+Viscosity is applied as a modification of velocity after integration.\\
+The second type is friction between boundary particles and fluid particles. In contrast to viscosity, this friction is implemented as an external force.
+
+\\
+\begin{equation}
+\begin{aligned}
+F^v_{f_i \leftarrow b_j} = -m_{f_i}\Psi_{b_j}(\rho_{0_i})\Pi_{ij}\nabla W_{ij}
+\end{aligned}
+\end{equation}\\
+\\
+
+where
+
+\\
+\begin{equation}
+\begin{aligned}
+\Pi_{ij} = -\nu(\frac{min(v_{ij} \cdot x_{ij}, 0)}{||x^2_{ij} + \epsilon h^2||})
+\end{aligned}
+\end{equation}\\
+\\
+
+with
+
+\\
+\begin{equation}
+\begin{aligned}
+\nu = \frac{\alpha h}{2\rho_{f_i}}, x_{ij} = x_i - x_j, v_{ij} = v_i - v_j
+\end{aligned}
+\end{equation}\\
+\\
+
+Here, \(\alpha > 0\) is a viscosity coefficient and \(\epsilon \approx 0.01\) a regularization parameter. 
+
+The implementation for both types of friction was straightforward. In practice, boundary friction would behave well with \(alpha \approx 0.2\) and cause instable behaviour with higher values.
+Fluid viscosity would behave as expected, high coefficients effectively result in the simulated body acting more like wax than water. 
+
 \section{Replay System and Multithreading}
 A property of the SPH technique is that it is not suited for realtime applications out of the box due to the high computation cost. This makes debugging incorrect behaviour especially difficult. \\
 A way to migitate this is parallelizing the implementation. Each stage of the algorithm is trivially parallelizable, as each particle is simulated in isolation. Dependencies only exist on values from previous passes, i.e. pressure forces depend on density and pressure values, but there's no interdependencies during pressure force computation.
