@@ -210,6 +210,7 @@ P_i = \text{max}(B(\rho_i - \rho_0),0)
 Here, \(p_0\) describes the rest density for the medium that is being simulated and \(B\) serves as a stiffness coefficient. Similiarly to a spring constraint, pressure increases when the particle configuration is further from a rest configuration. This is a approximation of incompressability, which later is replaced with a position based pressure solver, removing the need for a stiffness coefficient.
 During our first implementation, we chose \(B\) far too low (about three or four magnitudes too low), resulting in very odd behaviour at boundary collisions. After consulting [~\cite{Becker}] [\cite{Liu}] [\cite{Akinci}] [\cite{Bridson2016}] we were able to correct this mistake.\\
 \\
+\label{subsec:Pressure Force}
 \subsection{Pressure Force}
 The first approach towards modeling pressure forces within the fluid given in Assignment 2 was directly computing acceleration values using the following equation:\\
 \begin{equation} 
@@ -287,6 +288,22 @@ F^{p}_{f_{i} \leftarrow b_{j}} = -m_{f_{i}}\Psi_{b_{j}}(\rho_{0})\frac{p_{f_{i}}
 \\
 Again, this takes into account the volume represented of a boundary particle.\\
 It should be noted that there is now no external parameter left, boundary forces are dependent solely on the estimated density and pressure values. The only "arbitary" parameter, the stiffness \(B\) involved in the pressure computation, should vanish in the next step of the implementation.\\
+
+\subsection{Position Based Pressure Solver}
+
+Up to this point, pressure forces were implemented as described in \ref{subsec:Pressure Force}. This has two major drawbacks: The stiffness parameter \(B\), which is non-trivial to find a correct value for, and the lack of incompressiblity. We want to enforce the latter.
+For this purpose, a constraint based solution is introduced. Every fluid particle is subject to a constraint function \(C_{i}\).\\
+\\
+\begin{equation} 
+\begin{aligned}
+C_{i}(x_{1}, ..., x_{n}) = max (\frac{\rho_{i}}{\rho_{0}} - 1, 0)
+\end{aligned}
+\end{equation}\\
+\\
+
+If we let \(p_i = (x^{T}_1, ..., x^{T}_n)^T\) be a vector that contains all positions of a particle \(i\)'s neighborhood (which includes the particle \(i\), then the goal is to compute a displacement vector \(\Delta p_i\) such that we satisfy \(C_i(p_i + \Delta p_i) = 0\).
+To solve this equation, we use Newton iterations. Using the linearized constraint function, for each iteration a projection in gradient direction is computed.
+
 
 \section{Replay System and Multithreading}
 A property of the SPH technique is that it is not suited for realtime applications out of the box due to the high computation cost. This makes debugging incorrect behaviour especially difficult. \\
